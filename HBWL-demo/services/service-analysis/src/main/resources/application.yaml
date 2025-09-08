@@ -1,0 +1,36 @@
+server:
+  port: 9010
+  #避免流式返回乱码
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: CodeAnalysis
+  config:
+    import:
+      - nacos:service-analysis.yaml
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+      config:
+        import-check:
+          enabled: false
+
+  #数据库配置
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/llmdb
+      password: 123456
+      username: root
+    type: com.alibaba.druid.pool.DruidDataSource
+
+#关闭日志打印
+logging:
+  level:
+    com.alibaba.nacos: off
+    com.alibaba.csp.sentinel: off

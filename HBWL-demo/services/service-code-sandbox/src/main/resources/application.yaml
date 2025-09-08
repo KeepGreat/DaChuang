@@ -1,0 +1,18 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: CodeSandbox
+  cloud:
+    nacos:
+      config:
+        import-check:
+          enabled: false
+      server-addr: 127.0.0.1:8848
+
+#关闭日志打印
+logging:
+  level:
+    com.alibaba.nacos: off
+    com.alibaba.csp.sentinel: off
