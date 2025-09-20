@@ -3,11 +3,13 @@ package com.hbwl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@EnableDiscoveryClient //服务发现
+@EnableFeignClients //开启Feign远程调用功能
+@EnableDiscoveryClient
 @SpringBootApplication
-public class CodeSandboxApplication {
+public class TeachingApplication {
     public static void main(String[] args) {
-        SpringApplication.run(CodeSandboxApplication.class, args);
+        SpringApplication.run(TeachingApplication.class, args);
     }
 }

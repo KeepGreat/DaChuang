@@ -1,5 +1,5 @@
 server:
-  port: 9010
+  port: 9020
   #避免流式返回乱码
   servlet:
     encoding:
@@ -9,10 +9,10 @@ server:
 
 spring:
   application:
-    name: service-analysis
+    name: service-teaching
   config:
     import:
-      - nacos:service-analysis.yaml
+      - nacos:service-analysis.yaml #暂时使用analysis模块的llm配置
   cloud:
     nacos:
       server-addr: 127.0.0.1:8848

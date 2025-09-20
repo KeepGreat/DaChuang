@@ -14,6 +14,7 @@
     <modules>
         <module>service-analysis</module>
         <module>service-code-sandbox</module>
+        <module>service-teaching</module>
     </modules>
 
     <properties>

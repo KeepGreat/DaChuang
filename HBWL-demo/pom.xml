@@ -17,6 +17,7 @@
     <modules>
         <module>services</module>
         <module>entities</module>
+        <module>gateway</module>
     </modules>
 
     <properties>

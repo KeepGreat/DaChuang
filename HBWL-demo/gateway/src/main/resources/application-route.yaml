@@ -1,0 +1,13 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: analysis-route
+          uri: lb://service-analysis
+          predicates:
+            - Path=/api/analysis/**
+
+        - id: code-sandbox-route
+          uri: lb://service-code-sandbox
+          predicates:
+            - Path=/api/sandbox/**
