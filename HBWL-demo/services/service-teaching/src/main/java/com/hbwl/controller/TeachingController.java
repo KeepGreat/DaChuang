@@ -20,8 +20,12 @@ public class TeachingController {
     @PostMapping("/teach")
     public Flux<String> teach(@RequestBody TeachingInput teachingInput){
         CodeSandboxInput codeSandboxInput = teachingInput.getCodeSandboxInput();
-        Flux<String> flux = aiTeacherService.teach(teachingInput.getQuestion(),
-                codeSandboxInput.getCode(), codeSandboxInput.getCodeLanguage(), codeSandboxInput.getInput());
-        return flux;
+        Flux<String> result;
+        if (codeSandboxInput.getInput() == null || codeSandboxInput.getInput().isBlank())
+            result = aiTeacherService.teach(teachingInput.getQuestion(), codeSandboxInput.getCode(),
+                    codeSandboxInput.getCodeLanguage(), codeSandboxInput.getInput());
+        else result = aiTeacherService.teach(teachingInput.getQuestion(), codeSandboxInput.getCode(),
+                codeSandboxInput.getCodeLanguage());
+        return result;
     }
 }

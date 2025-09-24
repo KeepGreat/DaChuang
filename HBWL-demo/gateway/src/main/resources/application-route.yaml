@@ -10,4 +10,9 @@ spring:
         - id: code-sandbox-route
           uri: lb://service-code-sandbox
           predicates:
-            - Path=/api/sandbox/**
+            - Path=/api/codesandbox/**
+
+        - id: teaching-route
+          uri: lb://service-teaching
+          predicates:
+            - Path=/api/teaching/**

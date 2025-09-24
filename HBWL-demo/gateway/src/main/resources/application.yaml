@@ -14,5 +14,6 @@ spring:
             allowed-origin-patterns: '*'
             allowed-methods: '*'
             allowed-headers: '*'
+            allowed-origins: '*'
   profiles:
     include: route

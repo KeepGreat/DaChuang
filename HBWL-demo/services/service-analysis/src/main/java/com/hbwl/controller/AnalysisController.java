@@ -19,8 +19,9 @@ public class AnalysisController {
     @PostMapping("/evaluate")
     public Flux<String> evaluate(@RequestBody AnalysisInput analysisInput){
         Flux<String> result;
-        if (analysisInput == null) result = aiCodeEvaluatorService.evaluate(analysisInput.getQuestion(),
-                analysisInput.getOutput(), analysisInput.getCodeLanguage(), analysisInput.getCode());
+        if (analysisInput.getInput() == null || analysisInput.getInput().isBlank())
+            result = aiCodeEvaluatorService.evaluate(analysisInput.getQuestion(), analysisInput.getOutput(),
+                    analysisInput.getCodeLanguage(), analysisInput.getCode());
         else result = aiCodeEvaluatorService.evaluate(analysisInput.getQuestion(), analysisInput.getInput(),
                 analysisInput.getOutput(), analysisInput.getCodeLanguage(), analysisInput.getCode());
         return result;

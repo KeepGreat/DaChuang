@@ -18,7 +18,9 @@ public class CodeSandboxController {
         System.out.println("-------------");
         System.out.println("调用CodeSandbox,使用语言:" + codeSandboxInput.getCodeLanguage());
         System.out.println("-------------");
-        return codeExecutionTool.compileAndExecute(codeSandboxInput.getCodeLanguage(),
+        String result = codeExecutionTool.compileAndExecute(codeSandboxInput.getCodeLanguage(),
                 codeSandboxInput.getCode(), codeSandboxInput.getInput());
+//        System.out.println(result);
+        return result;
     }
 }
