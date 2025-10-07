@@ -24,10 +24,21 @@ spring:
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/llmdb #注意修改数据库地址！
+      url: jdbc:mysql://localhost:3306/hbwl_teaching
       password: 123456
       username: root
     type: com.alibaba.druid.pool.DruidDataSource
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.hbwl.pojo
+
+#文件传输
+file:
+  upload-dir: ./uploads/files/
+  max-size: 10 * 1024 * 1024 #10MB
+
 
 #关闭日志打印
 logging:

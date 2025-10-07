@@ -4,7 +4,7 @@ import com.hbwl.ai.AICodeAnalyzerService;
 import com.hbwl.ai.AICodeEvaluatorService;
 import com.hbwl.ai.listener.CustomChatModelListener;
 import com.hbwl.ai.tool.CodeSandboxTool;
-import com.hbwl.properties.AnalysisProperties;
+import com.hbwl.ai.properties.AnalysisProperties;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
