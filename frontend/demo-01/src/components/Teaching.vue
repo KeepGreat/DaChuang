@@ -319,7 +319,7 @@ async function sendQuestion(){
   
   updateTeachingInput();
   try{
-    const response = await fetch('http://localhost:80/api/teaching/teach', {
+    const response = await fetch('http://localhost:80/api/teaching/ai/teach', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
