@@ -19,7 +19,7 @@ public class TeachingProperties {
 
     private String streamModelName;
 
-//    private String embedBaseURL;
-//
-//    private String embedModelName;
+    private String embedBaseURL;
+
+    private String embedModelName;
 }

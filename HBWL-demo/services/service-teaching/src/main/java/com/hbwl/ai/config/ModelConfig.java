@@ -49,32 +49,32 @@ public class ModelConfig {
                 .build();
     }
 
-//    @Bean
-//    public EmbeddingModel embeddingModel(){
-//        return OpenAiEmbeddingModel.builder()
-//                .apiKey(teachingProperties.getApiKey())
-//                .modelName(teachingProperties.getEmbedModelName())
-//                .baseUrl(teachingProperties.getEmbedBaseURL())
-//                .maxSegmentsPerBatch(8)
-//                .build();
-//    }
-//
-//    //用于存储向量
-//    @Bean
-//    public EmbeddingStore<TextSegment> embeddingStore(EmbeddingModel embeddingModel){
-//        return PgVectorEmbeddingStore.builder()
-//                .host("localhost")
-//                .port(5433)
-//                .database("postgres")
-//                .user("postgres")
-//                .password("123456")
-//                .table("test")
-//                .dimension(embeddingModel.dimension())
-//                .createTable(true)
-//                .build();
-//    }
-//
-//    //向量注入
+    @Bean
+    public EmbeddingModel embeddingModel(){
+        return OpenAiEmbeddingModel.builder()
+                .apiKey(teachingProperties.getApiKey())
+                .modelName(teachingProperties.getEmbedModelName())
+                .baseUrl(teachingProperties.getEmbedBaseURL())
+                .maxSegmentsPerBatch(8)
+                .build();
+    }
+
+    //用于存储向量
+    @Bean
+    public EmbeddingStore<TextSegment> embeddingStore(EmbeddingModel embeddingModel){
+        return PgVectorEmbeddingStore.builder()
+                .host("localhost")
+                .port(5433)
+                .database("postgres")
+                .user("postgres")
+                .password("123456")
+                .table("teaching_material")
+                .dimension(embeddingModel.dimension())
+                .createTable(true)
+                .build();
+    }
+
+    //向量注入
 //    @Bean
 //    public EmbeddingStoreIngestor embeddingStoreIngestor(EmbeddingModel embeddingModel,
 //                                                         EmbeddingStore<TextSegment> embeddingStore){
@@ -84,26 +84,28 @@ public class ModelConfig {
 //                .documentSplitter(new DocumentByParagraphSplitter(1000, 200))
 //                .build();
 //    }
-//
-//    //用于给AI向数据库中查询相关向量
-//    @Bean
-//    public EmbeddingStoreContentRetriever embeddingStoreContentRetriever(EmbeddingStore<TextSegment> embeddingStore,
-//                                                                         EmbeddingModel embeddingModel){
-//        return EmbeddingStoreContentRetriever.builder()
-//                .embeddingModel(embeddingModel)
-//                .embeddingStore(embeddingStore)
-//                .maxResults(5)
-//                .minScore(0.75)
-//                .build();
-//    }
+
+    //用于给AI向数据库中查询相关向量
+    @Bean
+    public EmbeddingStoreContentRetriever embeddingStoreContentRetriever(EmbeddingStore<TextSegment> embeddingStore,
+                                                                         EmbeddingModel embeddingModel){
+        return EmbeddingStoreContentRetriever.builder()
+                .embeddingModel(embeddingModel)
+                .embeddingStore(embeddingStore)
+                .maxResults(5)
+                .minScore(0.75)
+                .build();
+    }
 
     //智能助教
     @Bean
     public AITeacherService aiTeacherService(StreamingChatModel streamingChatModel,
-                                             CodeSandboxTool codeSandboxTool){
+                                             CodeSandboxTool codeSandboxTool,
+                                             EmbeddingStoreContentRetriever embeddingStoreContentRetriever){
         return AiServices.builder(AITeacherService.class)
                 .streamingChatModel(streamingChatModel)
                 .tools(codeSandboxTool)
+                .contentRetriever(embeddingStoreContentRetriever)
                 .build();
     }
 }

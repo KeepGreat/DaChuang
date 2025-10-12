@@ -32,4 +32,10 @@ public interface AITeacherService {
     Flux<String> teach(@V("question") String question,
                        @V("code") String code,
                        @V("codeLanguage") String codeLanguage);
+
+    @SystemMessage(fromResource = "prompt/teacher-system-prompt-test.txt")
+    @UserMessage("""
+            老师你好，我在学习时遇到了如下问题: {{question}}
+            """)
+    Flux<String> answerQuestion(@V("question") String question);
 }

@@ -33,8 +33,8 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const handleClick = (item) => {
   switch (item) {
-    case 'practice' : router.push('/pracindex'); break;
-    case 'teaching' : router.push('/teachindex'); break;
+    case 'practice' : {router.push('/pracindex'); sessionStorage.clear() ; break;}
+    case 'teaching' : {router.push('/coursesection'); sessionStorage.clear(); break;}
   }
 }
 </script>

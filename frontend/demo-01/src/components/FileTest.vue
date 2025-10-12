@@ -14,12 +14,33 @@
         <input v-model="fileContent.size" type="text">
       </div>
       <div>
-        <label>文件对应Id:</label>
+        <label>文件对应的资料ID:</label>
         <input v-model="fileContent.matId" type="text">
       </div>
       <div>
         <label>选择文件:</label>
         <input type="file" @change="handleFileChange" ref="fileInputRef">
+      </div>
+      <div>
+        <p>填写material信息</p>
+        <div>
+          <label>资料种类:</label>
+          <input type="text" v-model="material.type">
+        </div>
+        <div>
+          <label>资料描述:</label>
+          <input type="text" v-model="material.description">
+        </div>
+        <div>
+          <label>资料对应的课程ID:</label>
+          <input type="text" v-model="material.courseId">
+        </div>
+        <div>
+          <p>创建时间: {{ material.createdTime }}</p>
+        </div>
+        <div>
+          <p>更新时间: {{ material.updatedTime }}</p>
+        </div>
       </div>
       <button type="submit" :disabled="uploading">
         {{ uploading ? '上传中...' : '上传文件' }}
@@ -41,6 +62,7 @@
     <div v-if="downloadMessage">{{ downloadMessage }}</div>
   </div>
   <hr>
+  <p>删除文件和相关资料记录</p>
   <div>
     <div>
       <label>文件名称：</label>
@@ -49,6 +71,10 @@
     <div>
       <label>文件记录id：</label>
       <input type="text" v-model="deleteFileId">
+    </div>
+    <div>
+      <label>文件对应的资料ID：</label>
+      <input type="text" v-model="deleteMatId">
     </div>
     <div>
       <button @click="deleteFile">
@@ -109,11 +135,19 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import axios from 'axios'
+import { addMaterial } from '../utils/teaching/MaterialAPI'
 
 const fileInputRef = ref(null) // 用于引用DOM元素
 const selectedFile = ref(null) // 用于存储选中的文件
 const uploading = ref(false)
 const uploadMessage = ref('') // 用于存储上传文件的消息
+const material = ref({
+  type: '',
+  description: '',
+  createdTime: '',
+  updatedTime: '',
+  courseId: null
+})
 
 const downloadMessage = ref('') // 用于存储下载文件的消息
 const downloadFileName = ref('')
@@ -121,6 +155,7 @@ const downloadFileName = ref('')
 const deleteMessage = ref('') // 用于存储删除文件的消息
 const deleteFileName = ref('')
 const deleteFileId = ref('')
+const deleteMatId = ref('')
 
 
 // 文件展示相关的变量 - 独立命名不与其他功能复用
@@ -165,16 +200,14 @@ const uploadFile = async () => {
     // 添加文件
     formData.append('file', selectedFile.value)
 
-    console.log('FormData内容：');
-    // FormData不能直接打印，需要遍历查看其内容
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}:`, key === 'file' ? value.name : value);
-    }
     const response = await axios.post('http://localhost:80/api/teaching/file', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
+    material.value.createdTime = getCurrentTime()
+    material.value.updatedTime = getCurrentTime()
+    await addMaterial(material.value);
 
     uploadMessage.value = response.data
   } catch (error) {
@@ -220,6 +253,7 @@ const deleteFile = async () => {
 
   try {
     const response = await axios.delete('http://localhost:80/api/teaching/file/' + deleteFileId.value + '?fileName=' + deleteFileName.value)
+    await axios.delete('http://localhost:80/api/teaching/material/' + deleteMatId.value)
     deleteMessage.value = response.data
   } catch (error) {
     console.error('删除失败:', error)
@@ -266,6 +300,18 @@ const handlePdfError = () => {
 // 处理PDF加载成功
 const handlePdfLoad = () => {
   pdfLoadError.value = false
+}
+
+const getCurrentTime = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = (now.getMonth() + 1).toString().padStart(2, '0')
+  const day = now.getDate().toString().padStart(2, '0')
+  const hours = now.getHours().toString().padStart(2, '0')
+  const minutes = now.getMinutes().toString().padStart(2, '0')
+  const seconds = now.getSeconds().toString().padStart(2, '0')
+  
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
 }
 
 // 组件卸载时释放URL资源

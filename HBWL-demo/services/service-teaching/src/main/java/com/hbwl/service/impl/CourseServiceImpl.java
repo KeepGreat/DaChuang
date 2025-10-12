@@ -36,6 +36,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public int deleteCourseById(Integer id) {
+        return courseMapper.deleteById(id);
+    }
+
+    @Override
     public int updateCourseById(Course course) {
         if (course == null) return -1;
         UpdateWrapper<Course> updateWrapper = new UpdateWrapper<>();

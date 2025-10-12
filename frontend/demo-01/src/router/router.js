@@ -19,16 +19,22 @@ const router = createRouter({
             component: () => import('../components/PracticeIndex.vue'),
         },{
             path: '/teachindex',
-            component: () => import('../components/TeachingIndex.vue'),
+            component: () => import('../components/teaching/TeachingIndex.vue'),
         },{
             path: '/exp',
             component: () => import('../components/Experiment.vue'),
         },{
             path: '/teach',
-            component: () => import('../components/Teaching.vue'),
+            component: () => import('../components/teaching/Teaching.vue'),
         },{
             path: '/filetest',
             component: () => import('../components/FileTest.vue'),
+        },{
+            path: '/coursesection',
+            component: () => import('../components/teaching/CourseSection.vue'),
+        },{
+            path: '/course',
+            component: () => import('../components/teaching/Course.vue'),
         }]
     }]
 })

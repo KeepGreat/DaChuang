@@ -28,4 +28,9 @@ public class TeachingController {
                 codeSandboxInput.getCodeLanguage());
         return result;
     }
+
+    @PostMapping("/answer")
+    public Flux<String> answer(@RequestBody TeachingInput teachingInput){
+        return aiTeacherService.answerQuestion(teachingInput.getQuestion());
+    }
 }

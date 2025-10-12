@@ -11,6 +11,8 @@ public interface CourseService {
 
     int deleteCourse(Course course);
 
+    int deleteCourseById(Integer id);
+
     int updateCourseById(Course course);
 
     List<Course> getCourses(Course course);

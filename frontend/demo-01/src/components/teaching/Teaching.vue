@@ -3,6 +3,19 @@
     <!-- 导航栏 -->
     <div class="nav-bar">
       <div class="nav-tabs">
+        <div style="padding: 10px;">
+          <!-- 返回按钮 -->
+          <el-button 
+            type="primary" 
+            icon="ArrowLeft" 
+            class="back-button" 
+            @click="goBackToCourse"
+            size="small"
+          >
+            <el-icon><ArrowLeft /></el-icon>
+            返回课程
+          </el-button>
+        </div>
         <div 
           class="nav-tab" 
           :class="{ active: activeTab === 'teaching' }"
@@ -26,51 +39,37 @@
       <div class="content-area">
         <!-- 教学资料部分 -->
         <div v-if="activeTab === 'teaching'" class="teaching-materials">
-          <el-card class="teaching-card">
+          <el-card class="teaching-card" v-for="(material, index) in materials" :key="index">
             <template #header>
               <div class="card-header">
-                <span class="header-title">编程基础教程</span>
+                <span class="header-title">{{ material.description || '教学资料' }}</span>
               </div>
             </template>
             <div class="teaching-content">
-              <h2>欢迎来到编程基础教程</h2>
-              <p>本教程将帮助您掌握编程的基础知识，从变量、数据类型到控制流、函数等核心概念。</p>
-              
-              <h3>第一章：编程概述</h3>
-              <p>编程是指使用编程语言编写代码，让计算机执行特定任务的过程。在这个章节中，我们将介绍编程的基本概念和常见的编程语言。</p>
-              
-              <h4>1.1 什么是编程？</h4>
-              <p>编程是一种将想法转化为计算机可以理解和执行的指令的过程。这些指令被称为代码，由特定的编程语言编写。</p>
-              
-              <h4>1.2 常见的编程语言</h4>
-              <ul>
-                <li><strong>C++</strong>：一种高效的系统编程语言，广泛应用于游戏开发、操作系统等领域。</li>
-                <li><strong>Python</strong>：一种易学易用的高级编程语言，适合数据分析、人工智能等领域。</li>
-                <li><strong>Java</strong>：一种面向对象的编程语言，广泛应用于企业级应用开发。</li>
-              </ul>
-              
-              <h3>第二章：基本语法</h3>
-              <p>在这一章节中，我们将学习编程的基本语法，包括变量、数据类型、运算符等。</p>
-              
-              <h4>2.1 变量和数据类型</h4>
-              <p>变量是用于存储数据的容器，而数据类型则定义了变量可以存储的数据种类。</p>
-              
-              <pre><code>// C++中的变量声明
-int age = 25;
-double salary = 50000.50;
-string name = "John";
-
-// Python中的变量声明
-age = 25
-salary = 50000.50
-name = "John"
-
-// Java中的变量声明
-int age = 25;
-double salary = 50000.50;
-String name = "John";</code></pre>
+              <div v-if="material.type === 'application/pdf' && pdfFile">
+                <!-- 使用vue3-pdf-app组件展示PDF -->
+                <VuePdfApp
+                  :pdf="pdfFile" 
+                  class="pdf-viewer"
+                  :options="{
+                    sidebarViewOnLoad: false,
+                    toolbarOnLoad: true
+                  }"
+                />
+              </div>
+              <div v-else-if="material.description">
+                <p>{{ material.description }}</p>
+              </div>
+              <div v-else>
+                <p>暂无资料内容</p>
+              </div>
             </div>
           </el-card>
+          
+          <!-- 如果没有资料 -->
+          <div v-if="materials.length === 0" class="no-materials">
+            <el-empty description="暂无教学资料"></el-empty>
+          </div>
         </div>
 
         <!-- 代码沙箱部分 -->
@@ -190,9 +189,15 @@ import python from 'highlight.js/lib/languages/python';
 import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/atom-one-light.css';
 import { ElCard, ElSelect, ElOption, ElButton, ElIcon, ElMessage } from 'element-plus';
-import { Flag, User, Compass, Upload } from '@element-plus/icons-vue';
-import { executeCode } from '../utils/ExperimentAPI';
+import { Flag, User, Compass, Upload, ArrowLeft } from '@element-plus/icons-vue';
+import { executeCode } from '../../utils/ExperimentAPI';
 import { marked } from 'marked';
+import { getMaterials } from '../../utils/teaching/MaterialAPI';
+import { getFileContents, downloadFile } from '../../utils/teaching/FileContentAPI';
+import { teach, answer } from '../../utils/teaching/TeachingAPI'
+import { useRouter } from 'vue-router';
+import VuePdfApp from 'vue3-pdf-app';
+import 'vue3-pdf-app/dist/icons/main.css';
 
 // 配置 marked 以支持代码高亮
 marked.setOptions({
@@ -227,6 +232,12 @@ const runOutput = ref('');
 const codeBlock = ref(null);
 const codeEditor = ref(null);
 const codeInput = ref(null);
+
+// 课程资料相关
+const router = useRouter();
+const materials = ref([]);
+const pdfFile = ref(null);
+const selectedCourseId = ref('');
 
 // 代码沙箱输入格式
 const CodeSandboxInput = {
@@ -306,9 +317,6 @@ async function sendQuestion(){
     content: userMessage
   });
   
-  // 清空输入框
-  inputMessage.value = '';
-  
   // 滚动到底部
   nextTick(() => {
     scrollToBottom();
@@ -318,15 +326,16 @@ async function sendQuestion(){
   isSending.value = true;
   
   updateTeachingInput();
+  console.log('发送问题如下');
+  console.log(teachingInput);
+  
+  // 在更新teachingInput和打印后再清空输入框
+  inputMessage.value = '';
   try{
-    const response = await fetch('http://localhost:80/api/teaching/ai/teach', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(teachingInput)
-    });
-    
+    let response;
+    if (activeTab.value === 'teaching'){response = await answer(teachingInput)}
+    else if (activeTab.value === 'code'){response = await teach(teachingInput);}
+  
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -510,6 +519,75 @@ function handleKeyDown(event) {
   }
 }
 
+// 获取课程资料
+async function fetchMaterials() {
+  try {
+    // 从sessionStorage中读取selectedCourseId
+    selectedCourseId.value = sessionStorage.getItem('selectedCourseId');
+    if (!selectedCourseId.value) {
+      ElMessage.error('未找到课程信息');
+      return;
+    }
+    
+    // 获取相关资料信息
+    const response = await getMaterials(null, null, null, null, selectedCourseId.value);
+    if (response && response.status === 200) {
+      materials.value = response.data || [];
+      
+      // 查找PDF类型的资料
+      const pdfMaterial = materials.value.find(mat => mat.type === 'application/pdf');
+      if (pdfMaterial) {
+        // 获取文件信息
+        const fileContentResponse = await getFileContents(null, null, null, null, pdfMaterial.id);
+        if (fileContentResponse && fileContentResponse.status === 200 && fileContentResponse.data && fileContentResponse.data.length > 0) {
+          const fileContent = fileContentResponse.data[0];
+          // 下载文件数据，确保使用正确的响应类型
+          try {
+            const fileResponse = await downloadFile(fileContent.name);
+            if (fileResponse && fileResponse.status === 200) {
+              // 确保响应是Blob对象
+              let blob;
+              if (fileResponse.data instanceof Blob) {
+                blob = fileResponse.data;
+              } else if (fileResponse.data instanceof ArrayBuffer) {
+                blob = new Blob([fileResponse.data], { type: 'application/pdf' });
+              } else if (typeof fileResponse.data === 'string') {
+                // 处理base64编码的字符串
+                const byteCharacters = atob(fileResponse.data.split(',')[1]);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                  byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                blob = new Blob([byteArray], { type: 'application/pdf' });
+              } else {
+                blob = new Blob([JSON.stringify(fileResponse.data)], { type: 'application/pdf' });
+              }
+              
+              // 创建URL并确保vue3-pdf-app能正确处理
+              pdfFile.value = URL.createObjectURL(blob);
+            }
+          } catch (pdfError) {
+            console.error('处理PDF文件失败:', pdfError);
+            ElMessage.error('PDF文件加载失败');
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('获取课程资料失败:', error);
+    ElMessage.error('获取课程资料失败');
+  }
+}
+
+// 返回课程页面
+function goBackToCourse() {
+  // 从sessionStorage删除selectCourseId信息
+  sessionStorage.removeItem('selectedCourseId');
+  // 跳转到课程页面
+  router.push('/course');
+}
+
 // 解析 Markdown 文本为 HTML
 function parseMarkdown(text) {
   if (!text) return '';
@@ -560,6 +638,9 @@ onMounted(() => {
   
   // 加载聊天历史
   loadChatHistory();
+  
+  // 获取课程资料
+  fetchMaterials();
 });
 </script>
 
@@ -582,6 +663,12 @@ onMounted(() => {
   align-items: center;
   padding: 0 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 20px;
+}
+
+/* 返回按钮样式 */
+.back-button {
+  margin-right: auto;
 }
 
 .nav-tabs {
@@ -1007,6 +1094,15 @@ onMounted(() => {
 font-size: 14px;
 line-height: 1.6;
 color: #333;
+}
+
+/* PDF查看器样式 */
+.pdf-viewer {
+  width: 100%;
+  height: 80vh;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .markdown-content h1, 
