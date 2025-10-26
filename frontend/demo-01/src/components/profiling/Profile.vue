@@ -66,6 +66,26 @@
     <div class="card">
       <NotificationCenter />
     </div>
+
+    <!-- 📅 新增模块：课程提醒 + 学习计划 -->
+    <div class="charts-row">
+      <div class="card chart-large">
+        <CourseReminder />
+      </div>
+      <div class="card chart-small">
+        <StudyPlan />
+      </div>
+    </div>
+
+    <!-- 🧑‍🏫 教师反馈 + 📚 学习资料推荐 -->
+    <div class="charts-row">
+      <div class="card chart-large">
+        <TeacherFeedback />
+      </div>
+      <div class="card chart-small">
+        <ResourceRecommend />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -86,6 +106,12 @@ import AchievementList from "./AchievementList.vue";
 import LearningGoals from "./LearningGoals.vue";
 import StudyEfficiency from "./StudyEfficiency.vue";
 import NotificationCenter from "./NotificationCenter.vue";
+
+// ✅ 新增教学扩展组件
+import CourseReminder from "./CourseReminder.vue";
+import StudyPlan from "./StudyPlan.vue";
+import TeacherFeedback from "./TeacherFeedback.vue";
+import ResourceRecommend from "./ResourceRecommend.vue";
 
 // ✅ 编辑资料弹窗控制
 const editorRef = ref(null);
