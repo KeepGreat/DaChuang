@@ -34,7 +34,8 @@ const router = useRouter();
 const handleClick = (item) => {
   switch (item) {
     case 'practice' : {router.push('/pracindex'); sessionStorage.clear() ; break;}
-    case 'teaching' : {router.push('/coursesection'); sessionStorage.clear(); break;}
+    case 'teaching': { router.push('/coursesection'); sessionStorage.clear(); break; }
+    case 'profile' : {router.push('/profile'); sessionStorage.clear() ; break;}
   }
 }
 </script>

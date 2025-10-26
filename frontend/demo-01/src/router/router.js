@@ -15,6 +15,9 @@ const router = createRouter({
             path: '/prac',
             component: () => import('../components/Practice.vue'),
         },{
+            path: '/profile',
+            component: () => import('../components/profiling/Profile.vue'),
+        },{
             path: '/pracindex',
             component: () => import('../components/PracticeIndex.vue'),
         },{
