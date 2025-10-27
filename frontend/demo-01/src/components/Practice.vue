@@ -1,7 +1,7 @@
 <template>
   <div class="practice-container">
     <h1 class="page-title">编程练习</h1>
-    
+
     <!-- 编程问题文本卡片 -->
     <el-card class="exercise-card" shadow="hover">
       <template #header>
@@ -22,8 +22,10 @@
         </div>
       </template>
       <div class="note-content">
-        <p>输入: {{ input }}</p> <br>
-        <p>输出: {{ output }}</p> <br>
+        <p>输入: {{ input }}</p>
+        <br />
+        <p>输出: {{ output }}</p>
+        <br />
         <p>注意: {{ note }}</p>
       </div>
     </el-card>
@@ -34,41 +36,61 @@
         <div class="card-header">
           <span class="card-title">编写代码</span>
           <div class="code-actions">
-            <el-select v-model="language" placeholder="选择语言" size="medium" style="width: 100px;">
+            <el-select
+              v-model="language"
+              placeholder="选择语言"
+              size="medium"
+              style="width: 100px"
+            >
               <el-option label="Python" value="python"></el-option>
               <el-option label="Java" value="java"></el-option>
               <el-option label="C++" value="cpp"></el-option>
             </el-select>
-            <el-button type="primary" size="medium" style="margin-left: 10px;" @click="submitCode">提交</el-button>
-            <el-button v-if="hasPreviousEvaluation" size="medium" style="margin-left: 10px;" @click="showPreviousEvaluation">查看上一次评测</el-button>
+            <el-button
+              type="primary"
+              size="medium"
+              style="margin-left: 10px"
+              @click="submitCode"
+              >提交</el-button
+            >
+            <el-button
+              v-if="hasPreviousEvaluation"
+              size="medium"
+              style="margin-left: 10px"
+              @click="showPreviousEvaluation"
+              >查看上一次评测</el-button
+            >
           </div>
         </div>
       </template>
       <div class="code-content">
-        <textarea v-model="code" class="code-input" placeholder="在此输入代码..."></textarea>
+        <textarea
+          v-model="code"
+          class="code-input"
+          placeholder="在此输入代码..."
+        ></textarea>
       </div>
     </el-card>
 
     <!-- 评估结果对话框 -->
-    <el-dialog 
-      v-model="dialogVisible"
-      width="80%"
-      :before-close="handleClose"
-    >
+    <el-dialog v-model="dialogVisible" width="80%" :before-close="handleClose">
       <div class="evaluation-container">
         <h3 class="dialog-inner-title">代码评测结果</h3>
-        
+
         <div class="evaluation-content" v-loading="evaluationLoading">
-          <div v-if="evaluationText && !evaluationLoading" class="evaluation-item markdown-content">
+          <div
+            v-if="evaluationText && !evaluationLoading"
+            class="evaluation-item markdown-content"
+          >
             <div v-html="parseMarkdown(evaluationText)"></div>
           </div>
-          
+
           <div v-else-if="!evaluationLoading" class="empty-state">
             <p>暂无评估结果</p>
           </div>
         </div>
       </div>
-      
+
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">关闭</el-button>
@@ -79,12 +101,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
-import { ElMessage } from 'element-plus';
-import { marked } from 'marked';
+import { ref, onMounted, nextTick, watch } from "vue";
+import { ElMessage } from "element-plus";
+import { marked } from "marked";
+import { useRoute } from "vue-router";
 
 // 响应式数据
-const language = ref('cpp');
+const language = ref("cpp");
 const code = ref(`// 示例代码 - 计算斐波那契数列的第n项
 #include <iostream>
 using namespace std;
@@ -105,25 +128,31 @@ int main() {
     cout << fibonacci(n) << endl;
     return 0;
 }`);
-const problem = ref('计算斐波那契数列的第n项, 斐波那契数列的定义为F(1)=1, F(2)=1, F(n)=F(n-1)+F(n-2)（n≥3）');
-const input = ref('10'); // 严格规范内容，与程序输入输出一致
-const output = ref('55'); // 严格规范内容，与程序输入输出一致
-const note = ref('斐波那契数列的定义为F(1)=1, F(2)=1, F(n)=F(n-1)+F(n-2)（n≥3）');
+const problem = ref(
+  "计算斐波那契数列的第n项, 斐波那契数列的定义为F(1)=1, F(2)=1, F(n)=F(n-1)+F(n-2)（n≥3）"
+);
+const input = ref("10"); // 严格规范内容，与程序输入输出一致
+const output = ref("55"); // 严格规范内容，与程序输入输出一致
+const note = ref("斐波那契数列的定义为F(1)=1, F(2)=1, F(n)=F(n-1)+F(n-2)（n≥3）");
 
 const submission = ref({
   question: problem.value,
   codeLanguage: language.value,
   code: code.value,
   input: input.value,
-  output: output.value
+  output: output.value,
 });
 
 // dialog相关状态
 const dialogVisible = ref(false);
-const evaluationText = ref(''); // 使用单个字符串来存储完整的评估文本
+const evaluationText = ref(""); // 使用单个字符串来存储完整的评估文本
 const evaluation = ref([]); // 保留用于存储完整响应的数组
 const evaluationLoading = ref(false);
 const hasPreviousEvaluation = ref(false);
+
+// 动态路由
+const currentPracticeId = ref("");
+const route = useRoute();
 
 // 初始化检查是否有上一次评估结果
 onMounted(() => {
@@ -132,7 +161,7 @@ onMounted(() => {
 
 // 检查是否有上一次评估结果
 function checkPreviousEvaluation() {
-  const savedEvaluation = sessionStorage.getItem('previousEvaluation');
+  const savedEvaluation = sessionStorage.getItem("previousEvaluation");
   hasPreviousEvaluation.value = !!savedEvaluation;
 }
 
@@ -143,14 +172,14 @@ function updateSubmission() {
     codeLanguage: language.value,
     code: code.value,
     input: input.value,
-    output: output.value
+    output: output.value,
   };
 }
 
 // 提交代码并处理flux响应
 async function submitCode() {
   if (!code.value.trim()) {
-    ElMessage.error('请输入代码');
+    ElMessage.error("请输入代码");
     return;
   }
 
@@ -158,20 +187,20 @@ async function submitCode() {
   updateSubmission();
 
   // 重置评估结果
-  evaluationText.value = '';
+  evaluationText.value = "";
   evaluation.value = [];
   evaluationLoading.value = true;
   dialogVisible.value = true;
 
   try {
     //发送请求并处理Flux响应
-    const response = await fetch('http://localhost:80/api/analysis/evaluate', {
-      method: 'POST',
+    const response = await fetch("http://localhost:80/api/analysis/evaluate", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(submission.value)
-    }); 
+      body: JSON.stringify(submission.value),
+    });
     //为什么这个不行呢 -- axios不支持流式处理
     // const response = await evaluate(submission.value);
 
@@ -182,32 +211,31 @@ async function submitCode() {
     // 处理Flux响应流 - 参考Teaching.vue的实现方式
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let accumulatedText = '';
+    let accumulatedText = "";
 
     // 读取流数据并实现流式展示
     while (true) {
       const { done, value } = await reader.read();
-      
+
       if (done) {
         break;
       }
-      
+
       // 解码接收到的数据
       const chunk = decoder.decode(value, { stream: true });
       accumulatedText += chunk;
-      
+
       // 使用nextTick确保UI能够正确更新，实现流式显示效果
       await nextTick();
       evaluationText.value = accumulatedText;
     }
 
     // 保存完整结果到sessionStorage - 不使用JSON.stringify，因为我们需要保存原始文本
-    sessionStorage.setItem('previousEvaluation', accumulatedText);
+    sessionStorage.setItem("previousEvaluation", accumulatedText);
     hasPreviousEvaluation.value = true;
-
   } catch (error) {
-    console.error('Submit code error:', error);
-    evaluation.value.push(`提交失败: ${error.message || '未知错误'}`);
+    console.error("Submit code error:", error);
+    evaluation.value.push(`提交失败: ${error.message || "未知错误"}`);
   } finally {
     evaluationLoading.value = false;
   }
@@ -215,7 +243,7 @@ async function submitCode() {
 
 // 显示上一次评测结果 - 修复Markdown解析问题
 function showPreviousEvaluation() {
-  const savedEvaluation = sessionStorage.getItem('previousEvaluation');
+  const savedEvaluation = sessionStorage.getItem("previousEvaluation");
   if (savedEvaluation) {
     try {
       // 首先尝试解析JSON（向后兼容）
@@ -240,10 +268,23 @@ function parseMarkdown(text) {
   try {
     return marked.parse(text);
   } catch (error) {
-    console.error('Markdown解析错误:', error);
+    console.error("Markdown解析错误:", error);
     return text; // 解析失败时返回原始文本
   }
 }
+
+// TODO 需要处理不同内容的id和路由
+function loadPracticeContent() {
+  const practiceId = route.params.id || "1";
+  currentPracticeId.value = practiceId;
+}
+
+watch(
+  () => route.params.id,
+  (newId) => {
+    loadPracticeContent();
+  }
+);
 </script>
 
 <style scoped>
@@ -309,7 +350,7 @@ function parseMarkdown(text) {
   border-radius: 4px;
   outline: none;
   resize: none;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   font-size: 14px;
   line-height: 1.5;
   color: #333;
@@ -336,7 +377,7 @@ function parseMarkdown(text) {
 }
 
 .evaluation-content {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -393,9 +434,15 @@ function parseMarkdown(text) {
   font-weight: 600;
 }
 
-.markdown-content h1 { font-size: 24px; }
-.markdown-content h2 { font-size: 20px; }
-.markdown-content h3 { font-size: 18px; }
+.markdown-content h1 {
+  font-size: 24px;
+}
+.markdown-content h2 {
+  font-size: 20px;
+}
+.markdown-content h3 {
+  font-size: 18px;
+}
 
 .markdown-content p {
   margin-bottom: 12px;
@@ -434,7 +481,7 @@ function parseMarkdown(text) {
   background-color: #f5f5f5;
   padding: 2px 4px;
   border-radius: 3px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-size: 13px;
 }
 

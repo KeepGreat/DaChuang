@@ -5,8 +5,12 @@
       <h2 class="section-title">练习任务</h2>
       <div class="practice-grid">
         <!-- 注意click事件应针对每项练习 -->
-        <el-card v-for="(practice, index) in paginatedPractices" :key="index" class="practice-card"
-                 @click="handleClick('practice')">
+        <el-card
+          v-for="(practice, index) in paginatedPractices"
+          :key="index"
+          class="practice-card"
+          @click="handlePracticeItemClick(practice.id)"
+        >
           <div class="practice-card-content">
             <el-icon class="practice-icon"><Cpu /></el-icon>
             <h3 class="practice-name">{{ practice.name }}</h3>
@@ -30,7 +34,7 @@
     <div class="section lab-section">
       <h2 class="section-title">实践实验室</h2>
       <div class="lab-container">
-        <el-card class="lab-card" @click="handleClick('experiment')">
+        <el-card class="lab-card" @click="handleExperimentClick()">
           <div class="lab-card-content">
             <el-icon class="lab-icon"><Compass /></el-icon>
             <div class="lab-info">
@@ -45,29 +49,29 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { Cpu, Compass } from '@element-plus/icons-vue';
-import { ElCard, ElPagination, ElIcon } from 'element-plus';
-import { useRouter } from 'vue-router';
+import { ref, computed } from "vue";
+import { Cpu, Compass } from "@element-plus/icons-vue";
+import { ElCard, ElPagination, ElIcon } from "element-plus";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 // 练习任务模拟数据
 const practices = ref([
-  { id: 1, name: '基础算法练习' },
-  { id: 2, name: '数据结构入门' },
-  { id: 3, name: '排序算法实现' },
-  { id: 4, name: '查找算法练习' },
-  { id: 5, name: '递归思维训练' },
-  { id: 6, name: '动态规划初步' },
-  { id: 7, name: '贪心算法应用' },
-  { id: 8, name: '图论基础' },
-  { id: 9, name: '树结构练习' },
-  { id: 10, name: '哈希表实现' },
-  { id: 11, name: '字符串处理' },
-  { id: 12, name: '位运算技巧' },
-  { id: 13, name: '复杂度分析' },
-  { id: 14, name: '算法优化实践' },
-  { id: 15, name: '综合算法题' },
+  { id: 1, name: "基础算法练习" },
+  { id: 2, name: "数据结构入门" },
+  { id: 3, name: "排序算法实现" },
+  { id: 4, name: "查找算法练习" },
+  { id: 5, name: "递归思维训练" },
+  { id: 6, name: "动态规划初步" },
+  { id: 7, name: "贪心算法应用" },
+  { id: 8, name: "图论基础" },
+  { id: 9, name: "树结构练习" },
+  { id: 10, name: "哈希表实现" },
+  { id: 11, name: "字符串处理" },
+  { id: 12, name: "位运算技巧" },
+  { id: 13, name: "复杂度分析" },
+  { id: 14, name: "算法优化实践" },
+  { id: 15, name: "综合算法题" },
 ]);
 
 // 分页相关
@@ -91,18 +95,19 @@ const handleCurrentChange = (val) => {
 // 实验室数据
 const lab = ref({
   id: 1,
-  description: ''
+  description: "",
 });
 
-const handleClick = (item) => {
-    switch (item) {
-        case 'practice':
-            router.push('/prac');
-            break;
-        case 'experiment':
-            router.push('/exp');
-            break;
-    }
+function handlePracticeItemClick(practiceId = null) {
+  // 默认跳转
+  if (practiceId === null) {
+    router.push("/prac");
+  }
+  router.push(`/prac/${practiceId}`);
+}
+
+function handleExperimentClick() {
+  router.push(`/exp`);
 }
 </script>
 
@@ -136,10 +141,11 @@ const handleClick = (item) => {
 .practice-card {
   height: 100%;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
 
 .practice-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-10px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
@@ -177,10 +183,11 @@ const handleClick = (item) => {
 .lab-card {
   width: 100%;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
 
 .lab-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-10px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
