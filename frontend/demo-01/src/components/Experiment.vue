@@ -71,7 +71,7 @@ import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/atom-one-light.css';
 import { ElCard, ElSelect, ElOption, ElButton, ElIcon } from 'element-plus';
 import { Flag } from '@element-plus/icons-vue';
-import { executeCode } from '../utils/ExperimentAPI';
+import { executeCode } from '@/api';
 
 // 注册语言
 hljs.registerLanguage('cpp', cpp);

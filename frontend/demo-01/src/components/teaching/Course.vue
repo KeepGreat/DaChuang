@@ -69,8 +69,8 @@ import { ref, computed, onMounted } from 'vue';
 import { Document } from '@element-plus/icons-vue';
 import { ElCard, ElPagination, ElIcon, ElButton } from 'element-plus';
 import { useRouter } from 'vue-router';
-import { getCourseSections } from '../../utils/teaching/CourseSectionAPI';
-import { getCoursesPage } from '../../utils/teaching/CourseAPI';
+import { getCourseSections } from '@/api';
+import { getCoursesPage } from '@/api';
 
 // 创建router实例
 const router = useRouter();

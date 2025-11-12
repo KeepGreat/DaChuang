@@ -135,7 +135,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import axios from 'axios'
-import { addMaterial } from '../utils/teaching/MaterialAPI'
+import { addMaterial } from '@/api'
 
 const fileInputRef = ref(null) // 用于引用DOM元素
 const selectedFile = ref(null) // 用于存储选中的文件

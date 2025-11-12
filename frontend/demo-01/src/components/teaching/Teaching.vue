@@ -190,11 +190,11 @@ import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/atom-one-light.css';
 import { ElCard, ElSelect, ElOption, ElButton, ElIcon, ElMessage } from 'element-plus';
 import { Flag, User, Compass, Upload, ArrowLeft } from '@element-plus/icons-vue';
-import { executeCode } from '../../utils/ExperimentAPI';
+import { executeCode } from '@/api';
 import { marked } from 'marked';
-import { getMaterials } from '../../utils/teaching/MaterialAPI';
-import { getFileContents, downloadFile } from '../../utils/teaching/FileContentAPI';
-import { teach, answer } from '../../utils/teaching/TeachingAPI'
+import { getMaterials } from '@/api';
+import { getFileContents, downloadFile } from '@/api';
+import { teach, answer } from '@/api'
 import { useRouter } from 'vue-router';
 import VuePdfApp from 'vue3-pdf-app';
 import 'vue3-pdf-app/dist/icons/main.css';

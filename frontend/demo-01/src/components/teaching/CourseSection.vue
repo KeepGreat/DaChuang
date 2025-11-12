@@ -45,7 +45,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { Document } from '@element-plus/icons-vue';
 import { ElCard, ElPagination, ElIcon } from 'element-plus';
-import { getCourseSectionsPage } from '../../utils/teaching/CourseSectionAPI';
+import { getCourseSectionsPage } from '@/api';
 import {useRouter} from 'vue-router'
 
 // 每页显示的课程数量
