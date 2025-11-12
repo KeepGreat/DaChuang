@@ -1,4 +1,4 @@
-import request from "../request";
+import request from "@/utils/request";
 
 export let addMaterial = (Material) => {
     return request.post('api/teaching/material', Material)

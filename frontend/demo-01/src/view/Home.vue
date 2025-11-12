@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import SiderBar from './SiderBar.vue';
+import SiderBar from "@/components/Siderbar.vue";
 </script>
 
 <style scoped>

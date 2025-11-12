@@ -1,4 +1,4 @@
-import request from "../../../utils/request";
+import request from "@/utils/request";
 
 export let teach = (teachingInput) => {
     return fetch('http://localhost:80/api/teaching/ai/teach', {

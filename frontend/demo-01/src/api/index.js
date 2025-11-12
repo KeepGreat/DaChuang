@@ -1,8 +1,8 @@
-export * from './models/teaching/CourseAPI'
-export * from './models/auth/CourseSectionAPI'
-export * from './models/teaching/FileContentAPI'
-export * from './models/teaching/MaterialAPI'
-export * from './models/teaching/TeachingPlanAPI'
+export * from "./modules/teaching/CourseAPI";
+export * from "./modules/teaching/CourseSectionAPI";
+export * from "./modules/teaching/FileContentAPI";
+export * from "./modules/teaching/MaterialAPI";
+export * from "./modules/teaching/TeachingAPI";
 
-export * from './models/ExperimentAPI'
-export * from './models/PracticeAPI'
+export * from "./modules/ExperimentAPI";
+export * from "./modules/PracticeAPI";
