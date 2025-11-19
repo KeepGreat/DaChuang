@@ -3,3 +3,9 @@ mvn spring-boot:run
 git add .
 git commit -m "第二次提交"
 git push origin 郭俊余前端
+UserHeader.vue（头像 + 名称 + 证书区 + 编辑按钮）
+QuickStatus.vue（进行中课程、已完成课程、学习时间）
+CourseInProgress.vue（课程卡片大区）
+CourseShort.vue（短课程区）
+Achievements.vue（证书 & 成就展示）
+ProfilePage.vue（主页面，组合以上组件）
