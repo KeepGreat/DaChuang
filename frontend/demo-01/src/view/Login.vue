@@ -2,8 +2,6 @@
   <h1>登录页</h1>
 </template>
 
-<script setup>
-</script>
+<script setup></script>
 
-<style scoped>
-</style>
+<style scoped></style>

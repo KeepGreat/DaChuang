@@ -5,7 +5,11 @@
       <template #header>
         <div class="card-header">
           <span class="header-title">代码编辑区</span>
-          <el-select v-model="selectedLanguage" class="language-select" placeholder="选择语言">
+          <el-select
+            v-model="selectedLanguage"
+            class="language-select"
+            placeholder="选择语言"
+          >
             <el-option label="C++" value="cpp"></el-option>
             <el-option label="Python" value="python"></el-option>
             <el-option label="Java" value="java"></el-option>
@@ -13,7 +17,10 @@
         </div>
       </template>
       <div class="code-editor-wrapper">
-        <pre ref="codeEditor" class="code-editor"><code ref="codeBlock" :class="`language-${selectedLanguage}`">{{ codeContent }}</code></pre>
+        <pre
+          ref="codeEditor"
+          class="code-editor"
+        ><code ref="codeBlock" :class="`language-${selectedLanguage}`">{{ codeContent }}</code></pre>
         <textarea
           ref="codeInput"
           v-model="codeContent"
@@ -48,7 +55,7 @@
             <span class="header-title">运行结果</span>
           </div>
         </template>
-        <pre class="output-display">{{ runOutput || '运行程序后显示结果...' }}</pre>
+        <pre class="output-display">{{ runOutput || "运行程序后显示结果..." }}</pre>
       </el-card>
     </div>
 
@@ -63,55 +70,55 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue';
-import hljs from 'highlight.js/lib/core';
-import cpp from 'highlight.js/lib/languages/cpp';
-import python from 'highlight.js/lib/languages/python';
-import java from 'highlight.js/lib/languages/java';
-import 'highlight.js/styles/atom-one-light.css';
-import { ElCard, ElSelect, ElOption, ElButton, ElIcon } from 'element-plus';
-import { Flag } from '@element-plus/icons-vue';
-import { executeCode } from '@/api';
+import { executeCode } from "@/api";
+import { Flag } from "@element-plus/icons-vue";
+import { ElButton, ElCard, ElIcon, ElOption, ElSelect } from "element-plus";
+import hljs from "highlight.js/lib/core";
+import cpp from "highlight.js/lib/languages/cpp";
+import java from "highlight.js/lib/languages/java";
+import python from "highlight.js/lib/languages/python";
+import "highlight.js/styles/atom-one-light.css";
+import { nextTick, onMounted, ref, watch } from "vue";
 
 // 注册语言
-hljs.registerLanguage('cpp', cpp);
-hljs.registerLanguage('python', python);
-hljs.registerLanguage('java', java);
+hljs.registerLanguage("cpp", cpp);
+hljs.registerLanguage("python", python);
+hljs.registerLanguage("java", java);
 
 // 响应式数据
-const selectedLanguage = ref('cpp');
-const codeContent = ref(getDefaultCode('cpp'));
-const programInput = ref('');
-const runOutput = ref('');
+const selectedLanguage = ref("cpp");
+const codeContent = ref(getDefaultCode("cpp"));
+const programInput = ref("");
+const runOutput = ref("");
 const codeBlock = ref(null);
 const codeEditor = ref(null);
 const codeInput = ref(null);
 
 // 代码沙箱输入格式
 const CodeSandboxInput = {
-  codeLanguage: '',
-  code: '',
-  input: ''
+  codeLanguage: "",
+  code: "",
+  input: "",
 };
 
 // 语言映射表
 const languageMap = {
-  cpp: 'C++',
-  python: 'Python',
-  java: 'Java'
+  cpp: "C++",
+  python: "Python",
+  java: "Java",
 };
 
 // 获取默认代码
 function getDefaultCode(language) {
-  switch(language) {
-    case 'cpp':
+  switch (language) {
+    case "cpp":
       return '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}';
-    case 'python':
+    case "python":
       return 'print("Hello, World!")';
-    case 'java':
+    case "java":
       return 'public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}';
     default:
-      return '';
+      return "";
   }
 }
 
@@ -142,13 +149,15 @@ function runProgram() {
   CodeSandboxInput.codeLanguage = selectedLanguage.value;
   CodeSandboxInput.code = codeContent.value;
   CodeSandboxInput.input = programInput.value;
-  executeCode(CodeSandboxInput).then(res => {
-    if (res.status === 200) {
-      runOutput.value = res.data;
-    }
-  }).catch(err => {
-    console.error('运行代码失败:', err);
-  })
+  executeCode(CodeSandboxInput)
+    .then((res) => {
+      if (res.status === 200) {
+        runOutput.value = res.data;
+      }
+    })
+    .catch((err) => {
+      console.error("运行代码失败:", err);
+    });
 }
 
 // 监听语言变化
@@ -170,58 +179,63 @@ watch(codeContent, () => {
 // 处理按键事件，实现括号自动补齐和Tab转换为空格
 function handleKeyDown(event) {
   // 处理Tab键，替换为4个空格
-  if (event.key === 'Tab') {
+  if (event.key === "Tab") {
     event.preventDefault();
-    
+
     const textarea = event.target;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const spaces = '    '; // 4个空格
-    
+    const spaces = "    "; // 4个空格
+
     // 在光标位置插入4个空格
-    codeContent.value = codeContent.value.substring(0, start) + spaces + codeContent.value.substring(end);
-    
+    codeContent.value =
+      codeContent.value.substring(0, start) + spaces + codeContent.value.substring(end);
+
     // 移动光标到插入空格之后
     nextTick(() => {
       textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
     });
   }
-  
+
   // 处理括号自动补齐
   const brackets = {
-    '(': ')',
-    '[': ']',
-    '{': '}'
+    "(": ")",
+    "[": "]",
+    "{": "}",
   };
-  
+
   if (brackets[event.key]) {
     event.preventDefault();
-    
+
     const textarea = event.target;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const openBracket = event.key;
     const closeBracket = brackets[openBracket];
-    
+
     // 在光标位置插入括号对
-    codeContent.value = codeContent.value.substring(0, start) + openBracket + closeBracket + codeContent.value.substring(end);
-    
+    codeContent.value =
+      codeContent.value.substring(0, start) +
+      openBracket +
+      closeBracket +
+      codeContent.value.substring(end);
+
     // 移动光标到括号中间
     nextTick(() => {
       textarea.selectionStart = textarea.selectionEnd = start + 1;
     });
   }
-  
+
   // 处理右括号自动跳过
-  const closingBrackets = [')', ']', '}'];
+  const closingBrackets = [")", "]", "}"];
   if (closingBrackets.includes(event.key)) {
     const textarea = event.target;
     const start = textarea.selectionStart;
-    
+
     // 如果光标后已经是对应的右括号，则跳过
     if (codeContent.value[start] === event.key) {
       event.preventDefault();
-      
+
       // 移动光标到右括号之后
       nextTick(() => {
         textarea.selectionStart = textarea.selectionEnd = start + 1;
@@ -233,10 +247,10 @@ function handleKeyDown(event) {
 // 组件挂载时初始化
 onMounted(() => {
   highlightCode();
-  
+
   // 添加滚动同步事件监听
   if (codeInput.value && codeEditor.value) {
-    codeInput.value.addEventListener('scroll', () => {
+    codeInput.value.addEventListener("scroll", () => {
       syncScroll(codeInput.value, codeEditor.value);
     });
   }
@@ -295,7 +309,7 @@ onMounted(() => {
   height: 100%;
   margin: 0;
   padding: 15px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.5;
   letter-spacing: 0;
@@ -368,7 +382,7 @@ onMounted(() => {
   width: 95%;
   min-height: 200px;
   padding: 15px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.5;
   border: 1px solid #ddd;
@@ -389,7 +403,7 @@ onMounted(() => {
   margin: 0;
   padding: 15px;
   background-color: #f5f5f5;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.5;
   border: 1px solid #ddd;
@@ -417,11 +431,11 @@ onMounted(() => {
   .experiment-container {
     padding: 10px;
   }
-  
+
   .input-output-container {
     flex-direction: column;
   }
-  
+
   .code-editor-wrapper,
   .text-input,
   .output-display {
