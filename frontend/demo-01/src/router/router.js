@@ -9,7 +9,7 @@ const router = createRouter({
     },
     {
       path: "/login",
-      component: () => import("@/components/Login.vue"),
+      component: () => import("@/view/Login.vue"),
     },
     {
       path: "/",
@@ -17,35 +17,35 @@ const router = createRouter({
       children: [
         {
           path: "/prac",
-          component: () => import("@/components/Practice.vue"),
+          component: () => import("@/view/Practice.vue"),
         },
         {
           path: "/pracindex",
-          component: () => import("@/components/PracticeIndex.vue"),
+          component: () => import("@/view/PracticeIndex.vue"),
         },
         {
           path: "/teachindex",
-          component: () => import("@/components/teaching/TeachingIndex.vue"),
+          component: () => import("@/view/teaching/TeachingIndex.vue"),
         },
         {
           path: "/exp",
-          component: () => import("@/components/Experiment.vue"),
+          component: () => import("@/view/Experiment.vue"),
         },
         {
           path: "/teach",
-          component: () => import("@/components/teaching/Teaching.vue"),
+          component: () => import("@/view/teaching/Teaching.vue"),
         },
         {
           path: "/filetest",
-          component: () => import("@/components/FileTest.vue"),
+          component: () => import("@/view/FileTest.vue"),
         },
         {
           path: "/coursesection",
-          component: () => import("@/components/teaching/CourseSection.vue"),
+          component: () => import("@/view/teaching/CourseSection.vue"),
         },
         {
           path: "/course",
-          component: () => import("@/components/teaching/Course.vue"),
+          component: () => import("@/view/teaching/Course.vue"),
         },
       ],
     },
