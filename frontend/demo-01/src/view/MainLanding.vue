@@ -1,8 +1,5 @@
 <template>
   <div class="landing-page">
-    <!-- 顶部导航 -->
-    <TopNav />
-
     <!-- Hero -->
     <main class="hero">
       <div class="hero-inner">

@@ -6,3 +6,5 @@ export * from "./modules/teaching/TeachingAPI";
 
 export * from "./modules/ExperimentAPI";
 export * from "./modules/PracticeAPI";
+export * from "./modules/profiling/api";
+

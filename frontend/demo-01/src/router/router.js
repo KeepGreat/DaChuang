@@ -4,14 +4,15 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     // 主界面，没有左侧栏
-    { path: "/", name: "MainLanding", component: () => import("@/components/MainLanding.vue") },
+    /*{ path: "/", name: "MainLanding", component: () => import("@/components/MainLanding.vue") },*/
 
     // 所有有左侧栏的页面都用 Layout 包裹
     {
       path: "/",
-      component: () => import("@/layout/Layout.vue"),
+      component: () => import("@/layout/main/index.vue"),
       children: [
         // Profiling 页面
+        { path: "/", name: "MainLanding", component: () => import("@/view/MainLanding.vue") },
         {
           path: "profile",
           name: "Profile",

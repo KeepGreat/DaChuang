@@ -3,9 +3,6 @@
   <div class="layout-root">
     <TopNav />
     <div class="main-container">
-      <div class="sidebar">
-        <SiderBar />
-      </div>
       <div class="content-container">
         <RouterView v-slot="{Component, route}">
           <transition name="fade" mode="out-in">
@@ -18,8 +15,8 @@
 </template>
 
 <script setup>
-import TopNav from './TopNav.vue';
-import SiderBar from './Siderbar.vue';
+import TopNav from '@/components/TopNav.vue';
+
 </script>
 
 <style>
