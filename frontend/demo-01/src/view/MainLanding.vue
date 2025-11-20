@@ -57,7 +57,7 @@
 </template>
 
 <script setup>
-import TopNav from './TopNav.vue';
+import TopNav from '@/components/TopNav.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import image1 from '@/assets/mainimage1.png';

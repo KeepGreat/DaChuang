@@ -1,30 +1,62 @@
+<!-- src/components/Layout.vue -->
 <template>
-  <div class="main-container">
-    <div class="siderbar">
-      <SiderBar></SiderBar>
-    </div>
-    <div class="content-container">
-      <router-view></router-view>
+  <div class="layout-root">
+    <TopNav />
+    <div class="main-container">
+      <div class="sidebar">
+        <SiderBar />
+      </div>
+      <div class="content-container">
+        <RouterView v-slot="{Component, route}">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" :key="route.fullPath" />
+          </transition>
+        </RouterView>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import SiderBar from "@/components/Siderbar.vue";
+import TopNav from './TopNav.vue';
+import SiderBar from './Siderbar.vue';
 </script>
 
+<style>
+/* 进入/离开的过渡状态 */
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0; /* 示例：透明度从0→1 */
+}
+
+/* 过渡的时长/曲线 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+</style>
+
 <style scoped>
-.main-container {
-  height: 100vh;
-  width: 100%;
+.layout-root {
   display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
-.siderbar {
-  height: 100%;
+
+.main-container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+}
+
+.sidebar {
   width: 220px;
+  height: calc(100vh - 64px); /* 顶部导航高度 */
 }
+
 .content-container {
-  width: calc(100% - 220px);
+  flex: 1;
   overflow-y: auto;
+  height: calc(100vh - 64px);
 }
 </style>
