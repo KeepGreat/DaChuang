@@ -1,126 +1,121 @@
 <template>
-  <div class="sidebar-container">
-    <!-- Logo和名称部分 -->
-    <div class="logo-section">
-      <div class="logo-circle"></div>
-      <span class="logo-name">慧编未来</span>
-    </div>
+  <div class="sidebar" :class="{ collapsed }">
+    <!-- Logo -->
     
-    <!-- 导航菜单部分 -->
-    <div class="nav-menu">
-      <div class="nav-item" @click="handleClick('teaching')">
-        <el-icon class="nav-icon"><Document /></el-icon>
-        <span class="nav-text">编程教学</span>
+
+    <!-- Menu -->
+    <div class="menu">
+      <div class="menu-item" @click="go('teaching')">
+        📘 <span v-if="!collapsed">编程教学</span>
       </div>
-      
-      <div class="nav-item" @click="handleClick('practice')">
-        <el-icon class="nav-icon"><Edit /></el-icon>
-        <span class="nav-text">练习实践</span>
+
+      <div class="menu-item" @click="go('practice')">
+        🧪 <span v-if="!collapsed">练习实践</span>
       </div>
-      
-      <div class="nav-item" @click="handleClick('profile')">
-        <el-icon class="nav-icon"><User /></el-icon>
-        <span class="nav-text">个人中心</span>
+
+      <div class="menu-item" @click="go('profile')">
+        👤 <span v-if="!collapsed">个人中心</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { Document, Edit, User } from '@element-plus/icons-vue';
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
+defineProps({ collapsed: Boolean });
 
 const router = useRouter();
-const handleClick = (item) => {
-  switch (item) {
-    case 'practice' : {router.push('/pracindex'); sessionStorage.clear() ; break;}
-    case 'teaching' : {router.push('/coursesection'); sessionStorage.clear(); break;}
+const go = (page) => {
+  sessionStorage.clear();
+  switch(page) {
+    case 'profile': router.push('/profile'); break;
+    case 'practice': router.push('/pracindex'); break;
+    case 'teaching': router.push('/coursesection'); break;
   }
-}
+};
+
 </script>
 
 <style scoped>
-.sidebar-container {
-  height: 100vh;
+/* --- 侧栏容器 --- */
+.sidebar {
+  height: 100%;
   width: 220px;
-  background-color: #1890ff;
   display: flex;
   flex-direction: column;
-  padding: 20px 0;
-  box-sizing: border-box;
+  padding: 22px 14px;
+  transition: all 0.3s ease;
+
+  /* 柔和粉白渐变 */
+  background: linear-gradient(180deg, #ffeef4, #ffffff);
+  
+  /* 与右侧连接自然：柔边阴影，不突兀 */
+  border-right: 1px solid #f3d7e5;
+  box-shadow: 2px 0 10px rgba(255, 182, 193, 0.15);
+
+  /* 圆角（更现代，像AI课程平台） */
+  border-top-right-radius: 18px;
+  border-bottom-right-radius: 18px;
 }
 
-/* Logo部分样式 */
+/* 折叠效果 */
+.sidebar.collapsed {
+  width: 70px;
+  padding: 22px 10px;
+}
+
+/* --- Logo --- */
 .logo-section {
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding-left: 6px;
   margin-bottom: 40px;
-  padding: 0 20px;
 }
 
 .logo-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffffff 0%, #1890ff 100%);
-  margin-right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffb6d9, #ffd6e8);
+  box-shadow: 0 2px 6px rgba(255, 105, 180, 0.25);
 }
 
 .logo-name {
-  font-size: 20px;
+  margin-left: 12px;
+  font-size: 18px;
   font-weight: bold;
-  color: transparent;
-  background-clip: text;
-  -webkit-background-clip: text;
-  background-image: linear-gradient(to right, #ffffff, #ffffff);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: #d63384;
 }
 
-/* 导航菜单样式 */
-.nav-menu {
-  flex: 1;
+/* --- Menu --- */
+.menu {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
-.nav-item {
+.menu-item {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #b2246e;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 20px 30px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  flex: 1;
+  gap: 12px;
+  transition: 0.22s ease;
+}
+
+/* 鼠标悬停 — 柔和粉白光 */
+.menu-item:hover {
+  background: #ffe6f1;
+  box-shadow: inset 0 0 8px rgba(255, 182, 193, 0.3);
+  transform: translateX(4px);
+}
+
+/* 折叠状态图标居中 */
+.sidebar.collapsed .menu-item {
   justify-content: center;
-  position: relative;
-}
-
-.nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.nav-item:active {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.nav-item.selected {
-  background-color: #1677ff;
-  border-right: 3px solid #ffffff;
-}
-
-.nav-icon {
-  font-size: 24px;
-  margin-right: 12px;
-  color: #ffffff;
-}
-
-.nav-text {
-  font-size: 16px;
-  font-weight: bold;
-  color: transparent;
-  background-clip: text;
-  -webkit-background-clip: text;
-  background-image: linear-gradient(to right, #ffffff, #ffffff);
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  padding: 12px 0;
 }
 </style>
