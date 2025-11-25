@@ -16,7 +16,7 @@ public class CourseController {
     private CourseService courseService;
 
     @PostMapping
-    public String addCourse(Course course){
+    public String addCourse(@RequestBody Course course){
         int row = courseService.addCourse(course);
         if (row == -1) return "参数不能为空";
         if (row == 0) return "增加课程失败";
@@ -31,7 +31,7 @@ public class CourseController {
     }
 
     @PutMapping
-    public String updateCourse(Course course){
+    public String updateCourse(@RequestBody Course course){
         int row = courseService.updateCourseById(course);
         if (row == -1) return "参数不能为空";
         if (row == 0) return "更新课程失败";

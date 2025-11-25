@@ -17,3 +17,22 @@ spring:
             allowed-origins: '*'
   profiles:
     include: route
+  #数据库配置
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/hbwl_user
+      password: 123456
+      username: root
+    type: com.alibaba.druid.pool.DruidDataSource
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.hbwl.pojo
+
+gateway:
+  jwt:
+    secret-key: SentierDeGloireSentierDeGloireSentierDeGloireSentierDeGloireSentierDeGloireSentierDeGloireSentierDeGloire
+    expiration: 3600000 #1h
+    header-name: JwtToken

@@ -1,5 +1,5 @@
 server:
-  port: 9020
+  port: 9040
   #避免流式返回乱码
   servlet:
     encoding:
@@ -9,38 +9,26 @@ server:
 
 spring:
   application:
-    name: service-teaching
-  config:
-    import:
-      - nacos:service-analysis.yaml #暂时使用analysis模块的llm配置
+    name: service-user
   cloud:
     nacos:
       server-addr: 127.0.0.1:8848
       config:
         import-check:
           enabled: false
-
   #数据库配置
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/hbwl_teaching
+      url: jdbc:mysql://localhost:3306/hbwl_user
       password: 123456
       username: root
     type: com.alibaba.druid.pool.DruidDataSource
-  servlet:
-    multipart:
-      max-file-size: 20MB
 
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   type-aliases-package: com.hbwl.pojo
-
-#文件传输
-file:
-  upload-dir: ./uploads/files/
-  max-size: 20 * 1024 * 1024 #20MB
 
 #关闭日志打印
 logging:

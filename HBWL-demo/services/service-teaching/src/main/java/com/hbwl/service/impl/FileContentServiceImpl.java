@@ -60,7 +60,7 @@ public class FileContentServiceImpl implements FileContentService {
 
     @Override
     public int addFileContent(FileContent fileContent, MultipartFile file) {
-        if (fileContent == null || file == null || fileContent.getName() == null) return -1;
+        if (fileContent == null || file == null) return -1;
         String fileName = storeFile(file);
         fileContent.setName(fileName);
         embedVector(fileContent, file);
@@ -95,6 +95,8 @@ public class FileContentServiceImpl implements FileContentService {
         if (fileContent == null || file == null || fileContent.getId() == null ||
                 fileContent.getName() == null) return -1;
         removeVector(fileContent);
+        String oldFileName = fileContentMapper.selectById(fileContent.getId()).getName();
+        removeFile(oldFileName);
         String fileName = storeFile(file);
         fileContent.setName(fileName);
         embedVector(fileContent, file);
@@ -112,7 +114,7 @@ public class FileContentServiceImpl implements FileContentService {
         if (fileContent == null) return fileContentMapper.selectList(null);
         QueryWrapper<FileContent> queryWrapper = new QueryWrapper<>();
         if (fileContent.getId() != null) queryWrapper.eq("id", fileContent.getId());
-        if (fileContent.getName() != null) queryWrapper.like("name", fileContent.getName());
+        if (fileContent.getName() != null) queryWrapper.eq("name", fileContent.getName());
         if (fileContent.getType() != null) queryWrapper.eq("type", fileContent.getType());
         if (fileContent.getMatId() != null) queryWrapper.eq("mat_id", fileContent.getMatId());
         if (fileContent.getSize() != null) queryWrapper.le("size", fileContent.getSize());
@@ -125,7 +127,7 @@ public class FileContentServiceImpl implements FileContentService {
         if (fileContent == null) return fileContentMapper.selectPage(page, null);
         QueryWrapper<FileContent> queryWrapper = new QueryWrapper<>();
         if (fileContent.getId() != null) queryWrapper.eq("id", fileContent.getId());
-        if (fileContent.getName() != null) queryWrapper.like("name", fileContent.getName());
+        if (fileContent.getName() != null) queryWrapper.eq("name", fileContent.getName());
         if (fileContent.getType() != null) queryWrapper.eq("type", fileContent.getType());
         if (fileContent.getMatId() != null) queryWrapper.eq("mat_id", fileContent.getMatId());
         if (fileContent.getSize() != null) queryWrapper.le("size", fileContent.getSize());

@@ -5,11 +5,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-@EnableDiscoveryClient
 @SpringBootApplication
-@MapperScan("com.hbwl.jwt.mapper")
-public class GatewayApplication {
+@MapperScan("com.hbwl.mapper")
+@EnableDiscoveryClient
+public class UserApplication {
     public static void main(String[] args) {
-        SpringApplication.run(GatewayApplication.class, args);
+        SpringApplication.run(UserApplication.class, args);
     }
 }
