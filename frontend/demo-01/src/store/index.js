@@ -1,15 +1,14 @@
 import { createPinia } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
-import { useCounterStore } from "./modules/testCountStore";
 import { testClassifm } from "./modules/testClassifm";
-import { userStore } from "./modules/user";
+import { useCounterStore } from "./modules/testCountStore";
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
-export {
-  pinia,
-  useCounterStore,
-  testClassifm,
-  userStore
-}
+// 统一导出store
+export * from "./modules/user";
+
+export { pinia, testClassifm, useCounterStore, userStore };
+
+
