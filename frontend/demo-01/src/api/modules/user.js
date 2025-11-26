@@ -1,9 +1,10 @@
 import request from "@/utils/request";
 
-export function deleteUser(id) {
+export function getAllUsers(params = {}) {
   return request({
-    url: `/user/${id}`,
-    method: "DELETE",
+    url: "/user",
+    method: "GET",
+    params: params,
   });
 }
 
@@ -15,10 +16,9 @@ export function updateUser(data) {
   });
 }
 
-export function getAllUsers(params = {}) {
+export function deleteUser(id) {
   return request({
-    url: "/user",
-    method: "GET",
-    params: params,
+    url: `/user/${id}`,
+    method: "DELETE",
   });
 }
