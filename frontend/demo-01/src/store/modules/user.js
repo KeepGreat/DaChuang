@@ -14,7 +14,7 @@ export const useUserStore = defineStore(
     const role = ref("");
 
     // 认证头信息
-    const authHeader = computed(() => (token.value ? `Bearer ${token.value}` : ""));
+    const authHeader = computed(() => token.value || "");
 
     // 设置令牌
     const setToken = (newToken) => {

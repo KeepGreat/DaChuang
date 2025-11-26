@@ -6,7 +6,7 @@ export function register(data) {
     method: "POST",
     data: data,
     headers: {
-      Authorization: "no-auth",
+      JwtToken: "no-auth",
     },
   });
 }
@@ -17,7 +17,7 @@ export function login(data) {
     method: "POST",
     data: data,
     headers: {
-      Authorization: "no-auth",
+      JwtToken: "no-auth",
     },
   });
 }
@@ -28,7 +28,7 @@ export function refreshToken(data) {
     method: "POST",
     data: data,
     headers: {
-      Authorization: "no-auth",
+      JwtToken: "no-auth",
     },
   });
 }

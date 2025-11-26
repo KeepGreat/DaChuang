@@ -9,16 +9,16 @@ const request = axios.create({
   // 后端接口地址
   baseURL: "http://localhost:80/",
   // Mock 接口地址
-  // baseURL: "https://localhost:5173/api",
+  // baseURL: "https://localhost:5173/",
   timeout: 50000,
 });
 
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    // 如果 Authorization 设置为 no-auth，则不携带 Token
-    if (config.headers.Authorization === "no-auth") {
-      delete config.headers.Authorization;
+    // 如果接口方法定义的 JwtToken 设置为 no-auth，则不携带 Token，例如register, login等
+    if (config.headers.JwtToken === "no-auth") {
+      delete config.headers.JwtToken;
       return config;
     }
 
@@ -27,8 +27,8 @@ request.interceptors.request.use(
       return Promise.reject(new Error("用户未登录"));
     }
 
-    // 添加认证头
-    config.headers.Authorization = userStore.authHeader;
+    // 在Headers携带token，key是JwtToken，value是实际的token
+    config.headers.JwtToken = userStore.authHeader;
 
     return config;
   },
@@ -61,7 +61,7 @@ request.interceptors.response.use(
     // 业务错误处理
     const businessError = new BusinessError(
       res.code,
-      res?.message || res?.msg || "BusinessError default message",
+      res?.message || "BusinessError default message",
       res?.data
     );
     return Promise.reject(businessError);
