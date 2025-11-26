@@ -80,7 +80,8 @@ const router = createRouter({
     },
 
     // 登录页面
-    { path: "/login", name: "Login", component: () => import("@/view/Login.vue") },
+    { path: "/login", name: "Login", component: () => import("@/view/Login/Login.vue") },
+    { path: "/register", name: "register", component: () => import("@/view/Login/Register.vue") },
   ],
 });
 
