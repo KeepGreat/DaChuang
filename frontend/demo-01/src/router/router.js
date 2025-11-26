@@ -80,7 +80,8 @@ const router = createRouter({
     },
 
     {
-      path: "/courses/",
+      path: "/courses/:id",
+      props: true,
       component: () => import("@/layout/course/index.vue"),
       children: [
         {

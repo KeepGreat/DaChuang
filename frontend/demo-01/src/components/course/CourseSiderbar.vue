@@ -5,7 +5,7 @@
     <el-menu default-active="1" class="sidebar-menu" background-color="#f5f7fa" text-color="#333"
       active-text-color="#409eff" @select="handleMenuSelect">
       <!-- 菜单项：对应截图中的功能 -->
-      <el-menu-item index="1">
+      <el-menu-item index="">
         <el-icon>
           <VideoPlay />
         </el-icon>
