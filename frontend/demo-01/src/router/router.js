@@ -60,7 +60,7 @@ const router = createRouter({
         // Practice 页面
         {
           path: "pracindex",
-          name: "PracticeIndex",
+          name: "Pracindex",
           component: () => import("@/view/PracticeIndex.vue"),
         },
         { path: "prac", name: "Practice", component: () => import("@/view/Practice.vue") },
@@ -91,7 +91,7 @@ const router = createRouter({
         {
           path: "pracindex",
           name: "PracticeIndex",
-          component: () => import("@/view//practice/PracticeIndex.vue")
+          component: () => import("@/view/practice/PracticeIndex.vue")
         }
       ]
     },
