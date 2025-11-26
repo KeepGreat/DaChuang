@@ -12,7 +12,11 @@ const router = createRouter({
       component: () => import("@/layout/main/index.vue"),
       children: [
         // Profiling 页面
-        { path: "/", name: "MainLanding", component: () => import("@/view/MainLanding.vue") },
+        {
+          path: "/",
+          name: "MainLanding",
+          component: () => import("@/view/MainLanding.vue"),
+        },
         {
           path: "profile",
           name: "Profile",
@@ -26,13 +30,15 @@ const router = createRouter({
         {
           path: "course/:id",
           name: "CourseView",
-          component: () => import("@/components/profiling/image/CourseDetail.vue"),
+          component: () =>
+            import("@/components/profiling/image/CourseDetail.vue"),
           props: true,
         },
         {
           path: "CoursePlaceholder",
           name: "CoursePlaceholder",
-          component: () => import("@/components/profiling/image/CoursePlaceholder.vue"),
+          component: () =>
+            import("@/components/profiling/image/CoursePlaceholder.vue"),
         },
 
         // Teaching 页面
@@ -42,7 +48,7 @@ const router = createRouter({
           component: () => import("@/view/teaching/CourseSection.vue"),
         },
         {
-          path: "course",
+          path: "courselist/:id",
           name: "Course",
           component: () => import("@/view/teaching/Course.vue"),
         },
@@ -63,7 +69,11 @@ const router = createRouter({
           name: "PracticeIndex",
           component: () => import("@/view/PracticeIndex.vue"),
         },
-        { path: "prac", name: "Practice", component: () => import("@/view/Practice.vue") },
+        {
+          path: "prac",
+          name: "Practice",
+          component: () => import("@/view/Practice.vue"),
+        },
 
         // 其他页面
         {
@@ -80,7 +90,11 @@ const router = createRouter({
     },
 
     // 登录页面
-    { path: "/login", name: "Login", component: () => import("@/view/Login.vue") },
+    {
+      path: "/login",
+      name: "Login",
+      component: () => import("@/view/Login.vue"),
+    },
   ],
 });
 

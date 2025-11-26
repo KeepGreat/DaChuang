@@ -5,13 +5,8 @@
     <!-- 标题 + 搜索框 -->
     <div class="header-container">
       <h2 class="section-title">课程系列</h2>
-      <el-input
-        v-model="searchName"
-        placeholder="输入课程系列名称搜索..."
-        class="search-input"
-        clearable
-        @keyup.enter="handleSearch"
-      >
+      <el-input v-model="searchName" placeholder="输入课程系列名称搜索..." class="search-input" clearable
+        @keyup.enter="handleSearch">
         <template #append>
           <el-button @click="handleSearch" :icon="Search">搜索</el-button>
         </template>
@@ -20,20 +15,19 @@
 
     <!-- 其余部分（卡片、分页等）保持不变 -->
     <div v-if="!loading && courses.length === 0" class="empty-state">
-      <el-icon size="60" class="empty-icon"><Document /></el-icon>
+      <el-icon size="60" class="empty-icon">
+        <Document />
+      </el-icon>
       <p class="empty-text">{{ isSearching ? '未找到匹配的课程系列' : '当前没有课程系列' }}</p>
     </div>
 
     <div v-else class="course-grid">
-      <el-card
-        v-for="course in courses"
-        :key="course.id"
-        class="course-card"
-        :body-style="{ padding: '0' }"
-        @click="handleCardClick(course)"
-      >
+      <el-card v-for="course in courses" :key="course.id" class="course-card" :body-style="{ padding: '0' }"
+        @click="handleCardClick(course)">
         <div class="course-image">
-          <el-icon size="60" class="image-placeholder"><Document /></el-icon>
+          <el-icon size="60" class="image-placeholder">
+            <Document />
+          </el-icon>
         </div>
         <div class="course-info">
           <h3 class="course-title">{{ course.name }}</h3>
@@ -44,13 +38,8 @@
 
     <!-- 分页只在非搜索状态下显示 -->
     <div v-if="!loading && !isSearching && total > pageSize" class="pagination-container">
-      <el-pagination
-        v-model:current-page="currentPage"
-        :page-size="pageSize"
-        layout="total, prev, pager, next, jumper"
-        :total="total"
-        @current-change="handleCurrentChange"
-      />
+      <el-pagination v-model:current-page="currentPage" :page-size="pageSize" layout="total, prev, pager, next, jumper"
+        :total="total" @current-change="handleCurrentChange" />
     </div>
 
     <el-skeleton v-if="loading" :rows="4" animated />
@@ -79,7 +68,7 @@ const classifm = testClassifm()
 
 // 跳转
 const handleCardClick = (course) => {
-  router.push(`/coursesection/course/${course.id}`);
+  router.push(`/courselist/${course.id}`);
 };
 
 // 获取分页数据（初始/浏览）
@@ -167,6 +156,7 @@ onMounted(() => {
   background: linear-gradient(160deg, #f8fafc 0%, #ffffff 100%);
   min-height: 100vh;
 }
+
 .section-title {
   color: #0d47a1;
   font-size: 22px;
@@ -175,6 +165,7 @@ onMounted(() => {
   text-align: left;
   position: relative;
 }
+
 .section-title::after {
   content: '';
   display: block;
@@ -184,6 +175,7 @@ onMounted(() => {
   border-radius: 2px;
   margin-top: 8px;
 }
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -194,21 +186,25 @@ onMounted(() => {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
+
 .empty-icon {
   color: #b3d9ff;
   margin-bottom: 16px;
 }
+
 .empty-text {
   color: #8c8c8c;
   font-size: 16px;
   font-weight: 500;
 }
+
 .course-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   margin-bottom: 30px;
 }
+
 .course-card {
   height: 280px;
   display: flex;
@@ -221,11 +217,13 @@ onMounted(() => {
   cursor: pointer;
   border: 1px solid #e6f4ff;
 }
+
 .course-card:hover {
   box-shadow: 0 6px 20px rgba(24, 144, 255, 0.18);
   transform: translateY(-3px);
   border-color: #cce6ff;
 }
+
 .course-image {
   height: 140px;
   background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
@@ -234,15 +232,18 @@ onMounted(() => {
   justify-content: center;
   color: #1890ff;
 }
+
 .image-placeholder {
   opacity: 0.7;
 }
+
 .course-info {
   flex: 1;
   padding: 20px;
   display: flex;
   flex-direction: column;
 }
+
 .course-title {
   font-size: 16px;
   font-weight: 600;
@@ -256,6 +257,7 @@ onMounted(() => {
   -webkit-box-orient: vertical;
   white-space: normal;
 }
+
 .course-description {
   font-size: 14px;
   color: #666666;
@@ -268,23 +270,43 @@ onMounted(() => {
   flex: 1;
   margin: 0;
 }
+
 .pagination-container {
   display: flex;
   justify-content: center;
   margin-top: 24px;
 }
+
 @media (max-width: 1200px) {
-  .course-grid { grid-template-columns: repeat(3, 1fr); }
+  .course-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
+
 @media (max-width: 992px) {
-  .course-grid { grid-template-columns: repeat(2, 1fr); }
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
+
 @media (max-width: 768px) {
-  .course-grid { grid-template-columns: 1fr; }
-  .course-card { height: auto; min-height: 240px; }
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .course-card {
+    height: auto;
+    min-height: 240px;
+  }
 }
+
 @media (max-width: 576px) {
-  .course-section { padding: 16px; }
-  .section-title { font-size: 20px; }
+  .course-section {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
 }
 </style>
