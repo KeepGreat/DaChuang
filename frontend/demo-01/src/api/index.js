@@ -4,7 +4,9 @@ export * from "./modules/teaching/FileContentAPI";
 export * from "./modules/teaching/MaterialAPI";
 export * from "./modules/teaching/TeachingAPI";
 
+export * from "./modules/auth";
 export * from "./modules/ExperimentAPI";
 export * from "./modules/PracticeAPI";
 export * from "./modules/profiling/api";
+export * from "./modules/user";
 
