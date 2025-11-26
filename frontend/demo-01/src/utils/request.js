@@ -22,10 +22,13 @@ request.interceptors.request.use(
       return config;
     }
 
+    // TODO: 暂时注释登录和token检查，后续功能完善后再处理
+    /* 
     if (!userStore.token) {
       console.warn("用户未登录");
       return Promise.reject(new Error("用户未登录"));
     }
+		*/
 
     // 在Headers携带token，key是JwtToken，value是实际的token
     config.headers.JwtToken = userStore.authHeader;
