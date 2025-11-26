@@ -1,8 +1,8 @@
 <template>
   <div class="layout-root">
-    <LessonNavbar />
+    <CourseNavbar />
     <div class="main-container">
-      <LessonSiderbar />
+      <CourseSiderbar />
       <div class="content-container">
         <RouterView v-slot="{Component, route}">
           <transition name="fade" mode="out-in">
@@ -15,7 +15,9 @@
 </template>
 
 <script setup>
-import LessonSiderbar from '';
+import CourseSiderbar from '@/components/course/CourseSiderbar.vue';
+import CourseNavbar from '@/components/course/CourseNavbar.vue';
+
 
 </script>
 
