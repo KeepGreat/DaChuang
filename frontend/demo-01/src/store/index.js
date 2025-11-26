@@ -9,6 +9,5 @@ pinia.use(piniaPluginPersistedstate);
 // 统一导出store
 export * from "./modules/user";
 
-export { pinia, testClassifm, useCounterStore, userStore };
-
+export { pinia, testClassifm, useCounterStore };
 
