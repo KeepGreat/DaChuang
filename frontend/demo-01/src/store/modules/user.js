@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
-const userStore = defineStore(
+export const useUserStore = defineStore(
   "user",
   () => {
     // 登录状态
@@ -13,9 +13,13 @@ const userStore = defineStore(
     // 用户信息
     const role = ref("");
 
+    // 认证头信息
+    const authHeader = computed(() => (token.value ? `Bearer ${token.value}` : ""));
+
     // 设置令牌
     const setToken = (newToken) => {
       token.value = newToken;
+      isLoggedIn.value = newToken ? true : false;
     };
 
     // 登出，清空用户信息
@@ -29,6 +33,7 @@ const userStore = defineStore(
       role,
       isLoggedIn,
       token,
+      authHeader,
       setToken,
       logout,
     };
@@ -45,5 +50,3 @@ const userStore = defineStore(
     },
   }
 );
-
-export { userStore };
