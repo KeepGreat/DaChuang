@@ -15,7 +15,9 @@
 </template>
 
 <script setup>
-import CourseSiderbar from '';
+import CourseSiderbar from '@/components/course/CourseSiderbar.vue';
+import CourseNavbar from '@/components/course/CourseNavbar.vue';
+
 
 </script>
 
