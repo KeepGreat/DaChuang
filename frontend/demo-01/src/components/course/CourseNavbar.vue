@@ -1,6 +1,9 @@
 <template>
   <header class="topbar">
     <div class="left">
+      <button class="back-btn" @click="goBack">
+        <el-icon class="back-icon"><ArrowLeft /></el-icon>
+      </button>
       <div class="brand" @click="goHome">
         <div class="logo-dot">慧</div>
         <div class="brand-name">慧编未来</div>
@@ -20,6 +23,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { ArrowLeft } from '@element-plus/icons-vue';
 const router = useRouter();
 
 function go(target) {
@@ -30,6 +34,8 @@ function go(target) {
 }
 
 function goHome() { router.push("/"); }
+
+function goBack() { router.back(); }
 </script>
 
 <style scoped>
@@ -44,6 +50,37 @@ function goHome() { router.push("/"); }
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-right: 1px solid #ffd6e7;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #a43b69;
+  transition: all .18s ease;
+  padding-right: 16px;
+}
+
+.back-btn:hover {
+  background: rgba(214, 51, 132, 0.08);
+  transform: translateX(-2px);
+}
+
+.back-icon {
+  font-size: 20px;
 }
 
 .brand {
