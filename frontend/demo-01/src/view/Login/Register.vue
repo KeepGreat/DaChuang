@@ -100,6 +100,7 @@
 
 <script setup>
 import { register } from "@/api";
+import { useFormValidation } from "@/hooks";
 import { Lock, Message, User } from "@element-plus/icons-vue";
 import {
 	ElButton,
@@ -160,7 +161,9 @@ const handleRegister = async () => {
   try {
     loading.value = true;
     // 表单验证
-    await registerFormRef.value.validate();
+    const { validateForm } = useFormValidation();
+    const isValid = await validateForm(registerFormRef.value);
+    if (!isValid) return;
 
     const res = await register({
       username: registerForm.username,

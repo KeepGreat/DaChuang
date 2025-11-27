@@ -58,6 +58,7 @@
 
 <script setup>
 import { login } from "@/api";
+import { useFormValidation } from "@/hooks";
 import { useUserStore } from "@/store";
 import { Lock, User } from "@element-plus/icons-vue";
 import {
@@ -97,7 +98,9 @@ const handleLogin = async () => {
   try {
     loading.value = true;
     // 表单验证
-    await loginFormRef.value.validate();
+    const { validateForm } = useFormValidation();
+    const isValid = await validateForm(loginFormRef.value);
+    if (!isValid) return;
 
     const res = await login(loginForm);
 
