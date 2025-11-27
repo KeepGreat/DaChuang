@@ -14,6 +14,15 @@
       <div class="intro-info">
         <h1 class="section-main-title">{{ courseSection.name || '课程系列' }}</h1>
         <p class="section-description">{{ courseSection.description || '加载中...' }}</p>
+        <div class="intro-actions">
+          <el-button 
+            type="primary" 
+            class="courses-btn"
+            @click="goToCourses"
+          >
+            查看全部课程
+          </el-button>
+        </div>
       </div>
     </div>
 
@@ -77,6 +86,14 @@ const handleCardClick = (course) => {
   // 如果后续 /teach 也需要 course.id，建议也改为 /teach/:id
   sessionStorage.setItem('selectedCourseId', course.id); // 保留，因 teach 页面可能仍需
   router.push('/teach');
+};
+
+// 跳转到/courses/:id
+const goToCourses = () => {
+  const sectionId = route.params.id;
+  if (sectionId) {
+    router.push(`/courses/${sectionId}`);
+  }
 };
 
 const fetchCourseSection = async () => {
@@ -258,7 +275,21 @@ onMounted(() => {
   font-size: 16px;
   color: #595959;
   line-height: 1.6;
-  margin: 0;
+  margin: 0 0 16px 0;
+}
+
+.intro-actions {
+  margin-top: 16px;
+}
+
+.courses-btn {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.courses-btn:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
 }
 
 .course-cards-container {

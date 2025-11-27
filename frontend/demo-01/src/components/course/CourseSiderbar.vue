@@ -51,15 +51,22 @@ import { ref } from 'vue';
 import { VideoPlay, MagicStick, Goblet, Timer, Document, Folder } from '@element-plus/icons-vue';
 import router from '@/router/router.js';
 
+// 接收父组件传递的courseId
+const props = defineProps({
+  courseId: {
+    type: [String, Number],
+    required: true
+  }
+});
 
 // 菜单选择事件
 const handleMenuSelect = (index) => {
   try {
-    router.push(`/courses/${index}`)
-  } finally {
-
+    const routePath = `/courses/${props.courseId}/${index}`
+    router.push(routePath)
+  } catch (error) {
+    console.error('路由跳转失败:', error)
   }
-  // 可在这里添加路由跳转等逻辑
 };
 </script>
 
