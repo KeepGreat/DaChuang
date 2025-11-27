@@ -4,9 +4,9 @@ import { BusinessError } from "./error.js";
 
 const request = axios.create({
   // 后端接口地址
-  baseURL: "http://localhost:80/",
+  // baseURL: "http://localhost:80",
   // Mock 接口地址
-  // baseURL: "https://localhost:5173/",
+  baseURL: "http://localhost:5173/api",
   timeout: 50000,
 });
 
