@@ -431,6 +431,16 @@ const goLogin = () => {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* 用deep修改Element Plus组件的样式，使得和上方的输入框UI更一致 */
+.register-form :deep(.el-select__wrapper) {
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.register-form :deep(.el-select__wrapper):hover {
+  border-color: #cbd5e1;
+}
+
 /* 动画效果 */
 @keyframes fadeInUp {
   from {
