@@ -2,9 +2,6 @@ import { useUserStore } from "@/store";
 import axios from "axios";
 import { BusinessError } from "./error.js";
 
-// 创建 userStore 实例
-const userStore = useUserStore();
-
 const request = axios.create({
   // 后端接口地址
   baseURL: "http://localhost:80/",
@@ -22,16 +19,24 @@ request.interceptors.request.use(
       return config;
     }
 
-    // TODO: 暂时注释登录和token检查，后续功能完善后再处理
-    /* 
+    // 创建userStore实例
+    const userStore = useUserStore();
+
+		// TODO 暂时注释登录和token检查，后续功能完善后再处理，这里需要检查token是否存在
+		/* 
     if (!userStore.token) {
-      console.warn("用户未登录");
+			console.warn("用户未登录");
       return Promise.reject(new Error("用户未登录"));
     }
 		*/
 
     // 在Headers携带token，key是JwtToken，value是实际的token
-    config.headers.JwtToken = userStore.authHeader;
+    // TODO 暂时这样处理，避免传undefined
+    if (userStore.authHeader) {
+      config.headers.JwtToken = userStore.authHeader;
+    } else {
+      console.warn("authHeader 为空，未携带 JwtToken 请求头");
+    }
 
     return config;
   },
