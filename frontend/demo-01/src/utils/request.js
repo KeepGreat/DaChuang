@@ -72,6 +72,10 @@ request.interceptors.response.use(
       res?.message || "BusinessError default message",
       res?.data
     );
+    console.error(
+      `${new Date().toLocaleTimeString()} BusinessError [${res.code}]:`,
+      businessError.message
+    );
     return Promise.reject(businessError);
   },
   (error) => {

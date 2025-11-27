@@ -101,6 +101,7 @@
 <script setup>
 import { register } from "@/api";
 import { useFormValidation } from "@/hooks";
+import { BusinessError } from "@/utils/error";
 import { Lock, Message, User } from "@element-plus/icons-vue";
 import {
 	ElButton,
@@ -157,7 +158,7 @@ const registerRules = reactive({
   role: [{ required: true, message: "请选择角色", trigger: "change" }],
 });
 
-const handleRegister = async () => {
+async function handleRegister() {
   try {
     loading.value = true;
     // 表单验证
@@ -179,11 +180,19 @@ const handleRegister = async () => {
     }
   } catch (error) {
     console.error("注册失败:", error);
-    ElMessage.error("注册失败");
+    if (error instanceof BusinessError) {
+      if (error.code === 400) {
+        ElMessage.error("用户名已存在");
+      } else {
+        ElMessage.error("注册失败，请稍后重试");
+      }
+    } else {
+      ElMessage.error("网络错误，请稍后重试");
+    }
   } finally {
     loading.value = false;
   }
-};
+}
 
 const goLogin = () => {
   router.push("/login"); // 跳转到登录页面

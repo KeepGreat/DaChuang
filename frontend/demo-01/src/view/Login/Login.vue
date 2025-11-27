@@ -60,6 +60,7 @@
 import { login } from "@/api";
 import { useFormValidation } from "@/hooks";
 import { useUserStore } from "@/store";
+import { BusinessError } from "@/utils/error";
 import { Lock, User } from "@element-plus/icons-vue";
 import {
 	ElButton,
@@ -94,7 +95,7 @@ const loginRules = reactive({
   ],
 });
 
-const handleLogin = async () => {
+async function handleLogin() {
   try {
     loading.value = true;
     // 表单验证
@@ -118,11 +119,21 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error("登录失败:", error);
-    ElMessage.error("登录失败");
+    if (error instanceof BusinessError) {
+      if (error.code === 401) {
+        ElMessage.error("密码错误");
+      } else if (error.code === 404) {
+        ElMessage.error("用户不存在");
+      } else {
+        ElMessage.error("登录失败，请稍后重试");
+      }
+    } else {
+      ElMessage.error("网络错误，请稍后重试");
+    }
   } finally {
     loading.value = false;
   }
-};
+}
 
 const goRegister = () => {
   router.push("/register"); // 跳转到注册页面
