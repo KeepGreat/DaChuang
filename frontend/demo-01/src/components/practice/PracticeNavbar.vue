@@ -1,36 +1,24 @@
 <template>
-  <div class="practice-container">
-    <!-- 顶栏 -->
-    <header class="practice-topbar">
-      <div class="left">
-        <button class="back-btn" @click="goBack">
-          <el-icon class="back-icon"><ArrowLeft /></el-icon>
-        </button>
-        <div class="practice-info">
-          <h1 class="practice-name">{{ practiceName }}</h1>
-        </div>
+  <!-- 顶栏 -->
+  <header class="practice-topbar">
+    <div class="left">
+      <button class="back-btn" @click="goBack">
+        <el-icon class="back-icon"><ArrowLeft /></el-icon>
+      </button>
+      <div class="practice-info">
+        <h1 class="practice-name">{{ practiceName }}</h1>
       </div>
-      <div class="right">
-        <div class="timer" v-if="showTimer">
-          <el-icon class="timer-icon"><Timer /></el-icon>
-          <span class="timer-text">{{ remainingTime }}</span>
-        </div>
-        <button class="user-btn" @click="goToProfile">
-          <el-icon class="user-icon"><User /></el-icon>
-        </button>
+    </div>
+    <div class="right">
+      <div class="timer" v-if="showTimer">
+        <el-icon class="timer-icon"><Timer /></el-icon>
+        <span class="timer-text">{{ remainingTime }}</span>
       </div>
-    </header>
-    
-    <!-- 练习内容区域 -->
-    <main class="practice-content">
-      <!-- 练习内容将在这里展示 -->
-      <div class="placeholder">
-        <h2>练习内容区域</h2>
-        <p>练习名称：{{ practiceName }}</p>
-        <p>剩余时间：{{ remainingTime }}</p>
-      </div>
-    </main>
-  </div>
+      <button class="user-btn" @click="goToProfile">
+        <el-icon class="user-icon"><User /></el-icon>
+      </button>
+    </div>
+  </header>
 </template>
 
 <script setup>
@@ -41,7 +29,7 @@ import { ArrowLeft, Timer, User } from '@element-plus/icons-vue';
 const router = useRouter();
 
 // 练习名称（可根据实际情况从路由参数或API获取）
-const practiceName = ref('编程练习：数组操作');
+const practiceName = ref('基础算法练习');
 
 // 截止时间（示例：当前时间 + 30分钟，实际项目中可从API获取）
 const deadline = ref(new Date(Date.now() + 30 * 60 * 1000)); // 示例：当前时间后30分钟
@@ -119,15 +107,8 @@ function goToProfile() {
 </script>
 
 <style scoped>
-.practice-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #fafafa;
-}
-
 .practice-topbar {
-  height: 64px;
+  height: 56px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -228,30 +209,6 @@ function goToProfile() {
 
 .user-icon {
   font-size: 20px;
-}
-
-.practice-content {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-}
-
-.placeholder {
-  background: white;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  text-align: center;
-}
-
-.placeholder h2 {
-  color: #d63384;
-  margin-bottom: 20px;
-}
-
-.placeholder p {
-  color: #606266;
-  margin: 10px 0;
 }
 
 /* 响应式设计 */

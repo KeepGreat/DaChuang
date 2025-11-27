@@ -4,13 +4,16 @@
       <h3 class="sidebar-title">题型导航</h3>
     </div>
     <div class="sidebar-content">
-      <ul class="question-type-list">
+      <div class="background-box" :style="{ top: backgroundBoxTop + 'px', height: backgroundBoxHeight + 'px' }"></div>
+      <ul class="question-type-list" @mouseleave="resetBackgroundBox">
         <li 
           v-for="type in questionTypes" 
           :key="type.id"
           class="question-type-item"
           :class="{ active: activeTypeId === type.id }"
           @click="switchQuestionType(type.id)"
+          @mouseenter="updateBackgroundBox($event)"
+          ref="questionTypeItems"
         >
           <div class="type-info">
             <span class="type-name">{{ type.name }}</span>
@@ -24,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { ArrowRight } from '@element-plus/icons-vue';
 
 // 定义题型数据（实际项目中可从API获取）
@@ -40,29 +43,88 @@ const questionTypes = ref([
 // 当前激活的题型ID
 const activeTypeId = ref('single_choice');
 
+// 背景框位置和高度
+const backgroundBoxTop = ref(0);
+const backgroundBoxHeight = ref(0);
+
+// 题型项引用
+const questionTypeItems = ref([]);
+
 // 切换题型的方法
 const switchQuestionType = (typeId) => {
   activeTypeId.value = typeId;
+  // 更新背景框位置
+  nextTick(() => {
+    const activeItem = questionTypeItems.value.find(item => 
+      item.classList.contains('active')
+    );
+    if (activeItem) {
+      updateBackgroundBoxFromElement(activeItem);
+    }
+  });
   // 此处可以添加切换题型的逻辑，如触发事件或调用API获取对应题型的题目
   console.log('切换到题型：', typeId);
 };
+
+// 从元素更新背景框位置
+const updateBackgroundBoxFromElement = (element) => {
+  if (element) {
+    const rect = element.getBoundingClientRect();
+    const containerRect = element.parentElement.parentElement.getBoundingClientRect();
+    backgroundBoxTop.value = rect.top - containerRect.top;
+    backgroundBoxHeight.value = rect.height;
+  }
+};
+
+// 更新背景框位置
+const updateBackgroundBox = (event) => {
+  updateBackgroundBoxFromElement(event.currentTarget);
+};
+
+// 重置背景框到active项
+const resetBackgroundBox = () => {
+  const activeItem = questionTypeItems.value.find(item => 
+    item.classList.contains('active')
+  );
+  if (activeItem) {
+    updateBackgroundBoxFromElement(activeItem);
+  }
+};
+
+// 初始化背景框位置
+onMounted(() => {
+  nextTick(() => {
+    const activeItem = questionTypeItems.value.find(item => 
+      item.classList.contains('active')
+    );
+    if (activeItem) {
+      updateBackgroundBoxFromElement(activeItem);
+    } else if (questionTypeItems.value.length > 0) {
+      // 默认选中第一个
+      updateBackgroundBoxFromElement(questionTypeItems.value[0]);
+    }
+  });
+});
 </script>
 
 <style scoped>
 .practice-sidebar {
-  width: 260px;
-  height: 100%;
+  width: 240px;
+  height: calc(100vh - 56px);
   background-color: #ffffff;
   border-right: 1px solid #f5dbe7;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .sidebar-header {
-  padding: 20px 24px;
+  padding: 16px 20px;
   border-bottom: 1px solid #f5dbe7;
   background-color: #fff5f8;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .sidebar-title {
@@ -75,34 +137,58 @@ const switchQuestionType = (typeId) => {
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 0;
+  padding: 8px 0;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* 背景框样式 */
+.background-box {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: rgba(214, 51, 132, 0.12);
+  transition: top 0.25s ease, height 0.25s ease;
+  z-index: 0;
+  border-left: 3px solid #d63384;
 }
 
 .question-type-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .question-type-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 12px 20px;
   cursor: pointer;
   transition: all 0.18s ease;
   border-left: 3px solid transparent;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
 }
 
 .question-type-item:hover {
-  background-color: rgba(214, 51, 132, 0.08);
-  transform: translateX(2px);
+  background-color: transparent;
 }
 
 .question-type-item.active {
-  background-color: rgba(214, 51, 132, 0.12);
-  border-left-color: #d63384;
+  background-color: transparent;
   font-weight: 600;
+  /* 移除active状态的左侧边框，由background-box显示 */
+}
+
+.type-info,
+.type-icon {
+  position: relative;
+  z-index: 1;
 }
 
 .type-info {

@@ -8,7 +8,7 @@
           v-for="(practice, index) in paginatedPractices"
           :key="index"
           class="practice-card"
-          @click="handleClick('practice')"
+          @click="handleClick(index)"
         >
           <div class="practice-card-content">
             <el-icon class="practice-icon"><Cpu /></el-icon>
@@ -25,6 +25,13 @@ import { Compass, Cpu } from "@element-plus/icons-vue";
 import { ElCard, ElIcon } from "element-plus";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+
+const props = defineProps({
+  id: {
+    type: String,
+    required: true,
+  },
+});
 
 const router = useRouter();
 // 练习任务模拟数据
@@ -58,14 +65,7 @@ const lab = ref({
 });
 
 const handleClick = (item) => {
-  switch (item) {
-    case "practice":
-      router.push("/prac");
-      break;
-    case "experiment":
-      router.push("/exp");
-      break;
-  }
+  router.push(`practice/${item + 1}`);
 };
 </script>
 

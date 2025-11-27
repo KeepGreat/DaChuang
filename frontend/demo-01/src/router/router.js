@@ -90,6 +90,12 @@ const router = createRouter({
     },
 
     {
+      path: "/courses/:id/practice/:examId",
+      name: "Practices",
+      component: () => import("@/view/practice/Practice.vue"),
+    },
+
+    {
       path: "/courses/:id",
       props: true,
       component: () => import("@/layout/course/index.vue"),
@@ -102,6 +108,7 @@ const router = createRouter({
         {
           path: "pracindex",
           name: "PracticeIndex",
+          props: true,
           component: () => import("@/view/practice/PracticeIndex.vue")
         }
       ]
