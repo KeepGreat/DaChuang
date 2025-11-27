@@ -37,7 +37,12 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" class="login-btn" native-type="submit" :loading="loading">
+          <el-button
+            type="primary"
+            class="login-btn"
+            native-type="submit"
+            :loading="loading"
+          >
             登录
           </el-button>
         </el-form-item>
@@ -52,12 +57,23 @@
 </template>
 
 <script setup>
+import { login } from "@/api";
+import { useUserStore } from "@/store";
 import { Lock, User } from "@element-plus/icons-vue";
-import { ElButton, ElForm, ElFormItem, ElIcon, ElInput, ElLink, ElMessage } from "element-plus";
+import {
+	ElButton,
+	ElForm,
+	ElFormItem,
+	ElIcon,
+	ElInput,
+	ElLink,
+	ElMessage,
+} from "element-plus";
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const userStore = useUserStore();
 const loading = ref(false);
 const loginFormRef = ref(null);
 
@@ -83,14 +99,23 @@ const handleLogin = async () => {
     // 表单验证
     await loginFormRef.value.validate();
 
-    // 模拟登录请求
-    setTimeout(() => {
-      // 实际项目中这里会调用登录API
+    const res = await login(loginForm);
+
+    // 登录成功
+    if (res.data) {
+      // 保存token
+      userStore.setToken(res.data);
+
       ElMessage.success("登录成功");
-      router.push("/"); // 登录成功跳转到首页
-    }, 1000);
+
+      // TODO 处理role的逻辑，存储role到store，push到不同页面，但是目前还没有接口
+
+      // 跳转到首页
+      router.push("/");
+    }
   } catch (error) {
-    console.error("表单验证失败:", error);
+    console.error("登录失败:", error);
+    ElMessage.error("登录失败");
   } finally {
     loading.value = false;
   }
@@ -121,7 +146,11 @@ const goRegister = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+  background-image: radial-gradient(
+      circle at 20% 80%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    ),
     radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
   pointer-events: none;
 }

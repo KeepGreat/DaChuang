@@ -16,7 +16,11 @@
         @submit.prevent="handleRegister"
       >
         <el-form-item prop="username" label="用户名">
-          <el-input v-model="registerForm.username" placeholder="请输入用户名" size="large">
+          <el-input
+            v-model="registerForm.username"
+            placeholder="请输入用户名"
+            size="large"
+          >
             <template #prefix>
               <el-icon class="el-input__icon"><User /></el-icon>
             </template>
@@ -24,7 +28,12 @@
         </el-form-item>
 
         <el-form-item prop="email" label="邮箱">
-          <el-input v-model="registerForm.email" type="email" placeholder="请输入邮箱" size="large">
+          <el-input
+            v-model="registerForm.email"
+            type="email"
+            placeholder="请输入邮箱"
+            size="large"
+          >
             <template #prefix>
               <el-icon class="el-input__icon"><Message /></el-icon>
             </template>
@@ -59,6 +68,14 @@
           </el-input>
         </el-form-item>
 
+        <el-form-item prop="role" label="角色">
+          <el-select v-model="registerForm.role" placeholder="请选择角色" size="large">
+            <el-option label="学生" value="student" />
+            <el-option label="教师" value="teacher" />
+            <el-option label="管理员" value="admin" />
+          </el-select>
+        </el-form-item>
+
         <el-form-item>
           <el-button
             type="primary"
@@ -82,8 +99,19 @@
 </template>
 
 <script setup>
+import { register } from "@/api";
 import { Lock, Message, User } from "@element-plus/icons-vue";
-import { ElButton, ElForm, ElFormItem, ElIcon, ElInput, ElLink, ElMessage } from "element-plus";
+import {
+	ElButton,
+	ElForm,
+	ElFormItem,
+	ElIcon,
+	ElInput,
+	ElLink,
+	ElMessage,
+	ElOption,
+	ElSelect,
+} from "element-plus";
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -96,6 +124,7 @@ const registerForm = reactive({
   email: "",
   password: "",
   confirmPassword: "",
+  role: "",
 });
 
 const registerRules = reactive({
@@ -124,6 +153,7 @@ const registerRules = reactive({
       trigger: "blur",
     },
   ],
+  role: [{ required: true, message: "请选择角色", trigger: "change" }],
 });
 
 const handleRegister = async () => {
@@ -132,14 +162,21 @@ const handleRegister = async () => {
     // 表单验证
     await registerFormRef.value.validate();
 
-    // 模拟注册请求
-    setTimeout(() => {
-      // 实际项目中这里会调用注册API
+    const res = await register({
+      username: registerForm.username,
+      password: registerForm.password,
+      role: registerForm.role,
+    });
+
+    // 注册成功
+    if (res) {
       ElMessage.success("注册成功，请登录");
-      router.push("/login"); // 注册成功跳转到登录页
-    }, 1000);
+      // 注册成功跳转到登录页
+      router.push("/login");
+    }
   } catch (error) {
-    console.error("表单验证失败:", error);
+    console.error("注册失败:", error);
+    ElMessage.error("注册失败");
   } finally {
     loading.value = false;
   }
@@ -170,7 +207,11 @@ const goLogin = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+  background-image: radial-gradient(
+      circle at 20% 80%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    ),
     radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
   pointer-events: none;
 }
