@@ -114,7 +114,7 @@ function goToProfile() {
   align-items: center;
   padding: 0 36px;
   background: rgba(255, 255, 255, 0.9);
-  border-bottom: 1px solid #f5dbe7;
+  border-bottom: 1px solid #dbeafe;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -137,12 +137,12 @@ function goToProfile() {
   background: transparent;
   border-radius: 8px;
   cursor: pointer;
-  color: #a43b69;
+  color: #2563eb;
   transition: all .18s ease;
 }
 
 .back-btn:hover {
-  background: rgba(214, 51, 132, 0.08);
+  background: rgba(37, 99, 235, 0.08);
   transform: translateX(-2px);
 }
 
@@ -158,8 +158,11 @@ function goToProfile() {
 .practice-name {
   font-size: 18px;
   font-weight: 700;
-  color: #d63384;
   margin: 0;
+  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .right {
@@ -173,11 +176,11 @@ function goToProfile() {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: linear-gradient(180deg, #fff, #fff0f4);
-  border: 1px solid #ffd6e7;
+  background: linear-gradient(180deg, #fff, #f0f9ff);
+  border: 1px solid #bfdbfe;
   border-radius: 10px;
   font-weight: 600;
-  color: #a43b69;
+  color: #2563eb;
 }
 
 .timer-icon {
@@ -198,12 +201,12 @@ function goToProfile() {
   background: transparent;
   border-radius: 8px;
   cursor: pointer;
-  color: #a43b69;
+  color: #2563eb;
   transition: all .18s ease;
 }
 
 .user-btn:hover {
-  background: rgba(214, 51, 132, 0.08);
+  background: rgba(37, 99, 235, 0.08);
   transform: translateY(-2px);
 }
 

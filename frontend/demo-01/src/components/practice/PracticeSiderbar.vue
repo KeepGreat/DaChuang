@@ -112,7 +112,7 @@ onMounted(() => {
   width: 240px;
   height: calc(100vh - 56px);
   background-color: #ffffff;
-  border-right: 1px solid #f5dbe7;
+  border-right: 1px solid #dbeafe;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
@@ -121,8 +121,8 @@ onMounted(() => {
 
 .sidebar-header {
   padding: 16px 20px;
-  border-bottom: 1px solid #f5dbe7;
-  background-color: #fff5f8;
+  border-bottom: 1px solid #dbeafe;
+  background-color: #f0f9ff;
   width: 100%;
   box-sizing: border-box;
 }
@@ -130,8 +130,11 @@ onMounted(() => {
 .sidebar-title {
   font-size: 18px;
   font-weight: 700;
-  color: #d63384;
   margin: 0;
+  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .sidebar-content {
@@ -147,10 +150,10 @@ onMounted(() => {
   position: absolute;
   left: 0;
   width: 100%;
-  background-color: rgba(214, 51, 132, 0.12);
+  background-color: rgba(37, 99, 235, 0.12);
   transition: top 0.25s ease, height 0.25s ease;
   z-index: 0;
-  border-left: 3px solid #d63384;
+  border-left: 3px solid #2563eb;
 }
 
 .question-type-list {
@@ -204,7 +207,11 @@ onMounted(() => {
 }
 
 .question-type-item.active .type-name {
-  color: #d63384;
+  color: #2563eb;
+  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .type-count {
@@ -224,7 +231,7 @@ onMounted(() => {
 
 .question-type-item:hover .type-icon,
 .question-type-item.active .type-icon {
-  color: #d63384;
+  color: #2563eb;
   transform: translateX(2px);
 }
 
