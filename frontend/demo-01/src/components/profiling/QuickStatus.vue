@@ -35,12 +35,12 @@ defineProps({
 })
 
 // 点击跳转函数
-function goToProgress() {
-  router.push('/progress')
-}
-function goToFinished() {
-  router.push('/finished')
-}
+// function goToProgress() {
+//   router.push('/progress')
+// }
+// function goToFinished() {
+//   router.push('/finished')
+// }
 function goToHours() {
   router.push('/LearningTime')
 }

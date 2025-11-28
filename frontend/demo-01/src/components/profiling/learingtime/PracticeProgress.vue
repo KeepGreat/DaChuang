@@ -17,7 +17,7 @@ onMounted(() => {
     backgroundColor: "transparent",
 
     title: {
-      text: "练习完成进度",
+      text: "练习完成进度（单位：百分比）",
       left: "center",
       top: 10,
       textStyle: {
@@ -28,6 +28,7 @@ onMounted(() => {
 
     tooltip: {
       trigger: "axis",
+       formatter: "{b}：{c}%",
       backgroundColor: "rgba(0,0,0,0.75)",
       borderWidth: 0,
       padding: 12,
@@ -55,6 +56,7 @@ onMounted(() => {
 
     yAxis: {
       type: "value",
+      name: "完成度 (%)",
       max: 100,
       axisLine: { show: false },
       axisTick: { show: false },
