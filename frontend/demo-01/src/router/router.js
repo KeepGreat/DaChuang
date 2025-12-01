@@ -48,9 +48,41 @@ const router = createRouter({
           component: () => import("@/view/teaching/CourseSection.vue"),
         },
         {
-          path: "courselist/:id",
-          name: "Course",
+          path: "teaching/course/:id",
+          name: "TeachingCourse",
           component: () => import("@/view/teaching/Course.vue"),
+          children: [
+            {
+              path: "learn",
+              name: "CourseContent",
+              component: () => import("@/view/teaching/CourseContent.vue"),
+            },
+            {
+              path: "assignment",
+              name: "AssignmentList",
+              component: () => import("@/view/teaching/AssignmentList.vue"),
+            },
+            {
+              path: "assignment/:assignmentId",
+              name: "AssignmentDetail",
+              component: () => import("@/view/teaching/AssignmentDetail.vue"),
+            },
+            {
+              path: "knowledge",
+              name: "KnowledgeGraph",
+              component: () => import("@/view/teaching/KnowledgeGraph.vue"),
+            },
+            {
+              path: "exam",
+              name: "ExamList",
+              component: () => import("@/view/teaching/ExamList.vue"),
+            },
+            {
+              path: "resource",
+              name: "ResourceList",
+              component: () => import("@/view/teaching/ResourceList.vue"),
+            },
+          ],
         },
         {
           path: "teach",

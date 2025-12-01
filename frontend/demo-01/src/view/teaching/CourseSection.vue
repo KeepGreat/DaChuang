@@ -47,83 +47,59 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import { Document, Search } from '@element-plus/icons-vue';
 import { ElCard, ElPagination, ElIcon, ElSkeleton, ElInput, ElButton } from 'element-plus';
-import { getCourseSections, getCourseSectionsPage } from '@/api';
 import { useRouter } from 'vue-router';
+import { useCourseStore } from '@/store';
 import { testClassifm } from '@/store';
 
 const router = useRouter();
 
-// 响应式数据
-const pageSize = ref(12);
-const currentPage = ref(1);
-const courses = ref([]);
-const total = ref(0);
-const loading = ref(true);
-const searchName = ref('');
-const isSearching = ref(false); // 标记是否处于搜索模式
-const classifm = testClassifm()
+// 使用Pinia store
+const courseStore = useCourseStore();
+const classifm = testClassifm();
+
+// 计算属性
+const courses = computed(() => courseStore.courses);
+const total = computed(() => courseStore.pagination.total);
+const loading = computed(() => courseStore.loading);
+const searchName = computed({
+  get: () => courseStore.searchName,
+  set: (value) => courseStore.searchName = value
+});
+const isSearching = computed(() => courseStore.isSearching);
+const currentPage = computed({
+  get: () => courseStore.pagination.current,
+  set: (value) => courseStore.pagination.current = value
+});
+const pageSize = computed(() => courseStore.pagination.pageSize);
 
 // 跳转
 const handleCardClick = (course) => {
-  router.push(`/courselist/${course.id}`);
+  courseStore.setCurrentCourse(course);
+  router.push(`/teaching/course/${course.id}`);
 };
 
-// 获取分页数据（初始/浏览）
-const fetchPageData = async (page = 1) => {
-  loading.value = true;
-  try {
-    const response = await getCourseSectionsPage(page, pageSize.value, null, null);
-    courses.value = response.data.records || [];
-    total.value = response.data.total || 0;
-  } catch (error) {
-    console.error('获取分页数据失败:', error);
-    courses.value = classifm.class_data;
-    total.value = courses.value.length;
-  } finally {
-    loading.value = false;
-    isSearching.value = false;
-  }
-};
-
-// 搜索：调用不分页的 getCourseSections
+// 搜索
 const handleSearch = async () => {
-  const name = searchName.value?.trim();
-  loading.value = true;
-  isSearching.value = true;
-
-  try {
-    if (!name) {
-      // 如果搜索框为空，恢复分页列表
-      await fetchPageData(currentPage.value);
-      return;
-    }
-
-    const response = await getCourseSections(null, name); // 只传 name
-    courses.value = Array.isArray(response.data) ? response.data : [];
-    total.value = courses.value.length;
-  } catch (error) {
-    console.error('搜索失败:', error);
-    courses.value = [];
-    total.value = 0;
-  } finally {
-    loading.value = false;
-  }
+  await courseStore.searchCourses(searchName.value);
 };
 
-// 分页切换（仅在非搜索状态有效）
-const handleCurrentChange = (page) => {
-  if (!isSearching.value) {
-    currentPage.value = page;
-    fetchPageData(page);
-  }
+// 分页切换
+const handleCurrentChange = async (page) => {
+  await courseStore.fetchCoursePage(page, pageSize.value);
 };
 
 // 初始化：加载第一页
-onMounted(() => {
-  fetchPageData();
+onMounted(async () => {
+  try {
+    await courseStore.fetchCoursePage(1, 12);
+  } catch (error) {
+    // 使用默认数据
+    courses.value = classifm.class_data || [];
+    console.log('使用默认课程数据');
+  }
 });
 </script>
 
@@ -139,9 +115,9 @@ onMounted(() => {
 }
 
 .section-title {
-  color: #0d47a1;
+  color: #d63384;
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
 }
 
@@ -153,14 +129,15 @@ onMounted(() => {
 /* 其余样式（.empty-state, .course-grid 等）保持不变 */
 .course-section {
   padding: 24px;
-  background: linear-gradient(160deg, #f8fafc 0%, #ffffff 100%);
+  background: #fff6fb;
   min-height: 100vh;
+  font-family: "Inter", Arial, sans-serif;
 }
 
 .section-title {
-  color: #0d47a1;
+  color: #d63384;
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 24px;
   text-align: left;
   position: relative;
@@ -171,7 +148,7 @@ onMounted(() => {
   display: block;
   width: 40px;
   height: 3px;
-  background: linear-gradient(to right, #1890ff, #59bfff);
+  background: linear-gradient(to right, #ff7ab1, #d63384);
   border-radius: 2px;
   margin-top: 8px;
 }
@@ -182,13 +159,13 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
 }
 
 .empty-icon {
-  color: #b3d9ff;
+  color: #ffb6d9;
   margin-bottom: 16px;
 }
 
@@ -211,26 +188,26 @@ onMounted(() => {
   flex-direction: column;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  border: 1px solid #e6f4ff;
+  border: 1px solid #ffd6e7;
 }
 
 .course-card:hover {
-  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.18);
-  transform: translateY(-3px);
-  border-color: #cce6ff;
+  box-shadow: 0 12px 28px rgba(214, 51, 132, 0.08);
+  transform: translateY(-6px);
+  border-color: #ffb6d9;
 }
 
 .course-image {
   height: 140px;
-  background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
+  background: linear-gradient(135deg, #ffd6e8 0%, #fff0f4 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1890ff;
+  color: #d63384;
 }
 
 .image-placeholder {
@@ -246,8 +223,8 @@ onMounted(() => {
 
 .course-title {
   font-size: 16px;
-  font-weight: 600;
-  color: #1a365d;
+  font-weight: 700;
+  color: #7b2a53;
   margin: 0 0 10px 0;
   line-height: 1.4;
   overflow: hidden;
@@ -260,7 +237,7 @@ onMounted(() => {
 
 .course-description {
   font-size: 14px;
-  color: #666666;
+  color: #9b7a88;
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
