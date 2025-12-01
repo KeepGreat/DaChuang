@@ -1,4 +1,4 @@
-import { users } from "../user/mock-data";
+import { users } from "../user/mockData";
 
 /**
  * 生成可读的日期时间格式:
