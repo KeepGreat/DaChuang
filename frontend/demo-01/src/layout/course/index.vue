@@ -2,7 +2,7 @@
   <div class="layout-root">
     <CourseNavbar />
     <div class="main-container">
-      <CourseSiderbar />
+      <CourseSiderbar :courseId="props.id" />
       <div class="content-container">
         <RouterView v-slot="{Component, route}">
           <transition name="fade" mode="out-in">
@@ -18,7 +18,13 @@
 import CourseSiderbar from '@/components/course/CourseSiderbar.vue';
 import CourseNavbar from '@/components/course/CourseNavbar.vue';
 
-
+// 获取路由参数
+const props = defineProps({
+  id: {
+    type: String, // 路由参数默认是字符串类型，若需数字可转类型
+    required: true
+  }
+});
 </script>
 
 <style>

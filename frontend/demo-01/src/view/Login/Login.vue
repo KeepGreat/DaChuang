@@ -5,47 +5,48 @@
         <div class="platform-name">慧编未来 · AI 教学平台</div>
         <h2>账号登录</h2>
       </div>
-      
-      <el-form 
-        :model="loginForm" 
-        :rules="loginRules" 
-        ref="loginFormRef" 
+
+      <!-- 用 label-position="left" 来设置label左对齐 -->
+      <el-form
+        :model="loginForm"
+        :rules="loginRules"
+        ref="loginFormRef"
         class="login-form"
+        label-position="left"
         @submit.prevent="handleLogin"
       >
         <el-form-item prop="username" label="用户名">
-          <el-input 
-            v-model="loginForm.username" 
-            placeholder="请输入用户名"
-            prefix-icon="User"
-          ></el-input>
+          <el-input v-model="loginForm.username" placeholder="请输入用户名">
+            <template #prefix>
+              <el-icon><User /></el-icon>
+            </template>
+          </el-input>
         </el-form-item>
-        
+
         <el-form-item prop="password" label="密码">
-          <el-input 
-            v-model="loginForm.password" 
-            type="password" 
+          <el-input
+            v-model="loginForm.password"
+            type="password"
             placeholder="请输入密码"
-            prefix-icon="Lock"
             show-password
-          ></el-input>
+          >
+            <template #prefix>
+              <el-icon><Lock /></el-icon>
+            </template>
+          </el-input>
         </el-form-item>
-        
-        <el-form-item class="form-actions">
-          <el-link @click.prevent="goRegister" class="forgot-link">忘记密码？</el-link>
-        </el-form-item>
-        
+
         <el-form-item>
-          <el-button 
-            type="primary" 
-            class="login-btn" 
+          <el-button
+            type="primary"
+            class="login-btn"
             native-type="submit"
             :loading="loading"
           >
             登录
           </el-button>
         </el-form-item>
-        
+
         <div class="register-section">
           还没有账号？
           <el-link @click.prevent="goRegister" class="register-link">立即注册</el-link>
@@ -56,51 +57,86 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
-import { ElForm, ElFormItem, ElInput, ElButton, ElLink, ElMessage } from 'element-plus';
+import { login } from "@/api";
+import { useFormValidation } from "@/hooks";
+import { useUserStore } from "@/store";
+import { BusinessError } from "@/utils/error";
+import { Lock, User } from "@element-plus/icons-vue";
+import {
+	ElButton,
+	ElForm,
+	ElFormItem,
+	ElIcon,
+	ElInput,
+	ElLink,
+	ElMessage,
+} from "element-plus";
+import { reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
+const userStore = useUserStore();
 const loading = ref(false);
 const loginFormRef = ref(null);
 
 const loginForm = reactive({
-  username: '',
-  password: ''
+  username: "",
+  password: "",
 });
 
 const loginRules = reactive({
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度在 3 到 20 个字符', trigger: 'blur' }
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 3, max: 20, message: "用户名长度在 3 到 20 个字符", trigger: "blur" },
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于 6 个字符', trigger: 'blur' }
-  ]
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 6, message: "密码长度不能少于 6 个字符", trigger: "blur" },
+  ],
 });
 
-const handleLogin = async () => {
+async function handleLogin() {
   try {
     loading.value = true;
     // 表单验证
-    await loginFormRef.value.validate();
-    
-    // 模拟登录请求
-    setTimeout(() => {
-      // 实际项目中这里会调用登录API
-      ElMessage.success('登录成功');
-      router.push('/'); // 登录成功跳转到首页
-    }, 1000);
+    const { validateForm } = useFormValidation();
+    const isValid = await validateForm(loginFormRef.value);
+    if (!isValid) return;
+
+    const res = await login(loginForm);
+
+    // 登录成功
+    if (res.data) {
+      // 保存token
+      userStore.setToken(res.data);
+
+      ElMessage.success("登录成功");
+
+      // TODO 处理role的逻辑，存储role到store，push到不同页面，但是目前还没有接口
+
+      // 跳转到首页
+      router.push("/");
+    }
   } catch (error) {
-    console.error('表单验证失败:', error);
+    console.error("登录失败:", error);
+    if (error instanceof BusinessError) {
+      if (error.code === 401) {
+        ElMessage.error("密码错误");
+      } else if (error.code === 404) {
+        ElMessage.error("用户不存在");
+      } else {
+        ElMessage.error("登录失败，请稍后重试");
+      }
+    } else {
+      ElMessage.error("网络错误，请稍后重试");
+    }
   } finally {
     loading.value = false;
   }
-};
+}
 
 const goRegister = () => {
-  router.push('/register'); // 跳转到注册页面
+  router.push("/register"); // 跳转到注册页面
 };
 </script>
 
@@ -110,150 +146,282 @@ const goRegister = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f0f4ff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   font-family: "Segoe UI", Helvetica, Arial;
   padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(
+      circle at 20% 80%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .login-card {
   width: 100%;
-  max-width: 400px;
-  background: #ffffffcc;
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 36px;
-  box-shadow: 0 6px 24px rgba(106, 90, 205, 0.2);
-  border: 1px solid #e6e6fa;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 1;
+  transform: translateY(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .platform-name {
-  font-size: 20px;
-  font-weight: bold;
-  color: #6a5acd; /* 蓝紫色主色 */
-  margin-bottom: 12px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .login-header h2 {
-  color: #483d8b; /* 深一点的蓝紫色 */
+  color: #1e293b;
   margin: 0;
-  font-size: 24px;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
 }
 
 .form-actions {
   text-align: right;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .forgot-link {
-  color: #6a5acd; /* 蓝紫色链接 */
+  color: #2563eb;
   font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 .forgot-link:hover {
-  color: #483d8b; /* 深一点的蓝紫色 */
+  color: #1d4ed8;
 }
 
 .login-btn {
   width: 100%;
-  background-color: #6a5acd; /* 蓝紫色按钮 */
-  border-color: #6a5acd;
-  padding: 12px 0;
+  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 0;
   font-size: 16px;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.login-btn:hover, .login-btn:focus {
-  background-color: #483d8b; /* 深一点的蓝紫色 */
-  border-color: #483d8b;
+.login-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.login-btn:hover::before {
+  left: 100%;
+}
+
+.login-btn:hover,
+.login-btn:focus {
+  background: linear-gradient(45deg, #1d4ed8, #1e40af);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.login-btn:active {
+  transform: translateY(0);
 }
 
 .register-section {
   text-align: center;
-  margin-top: 24px;
-  color: #666;
+  margin-top: 32px;
+  color: #64748b;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .register-link {
-  color: #6a5acd; /* 蓝紫色链接 */
-  font-weight: 500;
+  color: #2563eb;
+  font-weight: 600;
   margin-left: 4px;
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.register-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #2563eb;
+  transition: width 0.3s ease;
+}
+
+.register-link:hover::after {
+  width: 100%;
 }
 
 .register-link:hover {
-  color: #483d8b;
+  color: #1d4ed8;
 }
 
 /* 适配Element Plus组件样式 - 修复标签对齐和输入框间距问题 */
 .login-form {
-  /* 确保表单容器的样式正确 */
   width: 100%;
 }
 
 .login-form :deep(.el-form-item) {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   display: flex;
   align-items: center;
   width: 100%;
-  /* 确保整个表单项对齐 */
 }
 
 /* 修复标签对齐问题 */
 .login-form :deep(.el-form-item__label) {
-  width: 80px; /* 固定标签宽度 */
-  min-width: 80px; /* 确保标签宽度固定 */
-  text-align: center; 
-  padding-right: 16px; /* 标签与输入框之间的间距 */
-  padding-left: 0; /* 移除左侧内边距 */
-  margin-right: 0; /* 移除右侧外边距 */
-  margin-left: 0; /* 确保左侧无额外间距 */
-  margin-bottom: 0; /* 移除底部外边距 */
-  color: #555;
-  font-weight: 500;
+  width: 80px;
+  min-width: 80px;
+  padding-right: 10px;
+  padding-left: 0;
+  margin-right: 0;
+  margin-left: 0;
+  margin-bottom: 0;
+  color: #475569;
+  font-weight: 600;
+  font-size: 14px;
 }
+
 /* 修复输入框内容区对齐 */
 .login-form :deep(.el-form-item__content) {
   flex: 1;
-  margin-left: 0; /* 移除内容区左侧间距 */
+  margin-left: 0;
   width: auto;
 }
 
-/* 修复输入框左侧距离太宽问题 */
+/* 修复输入框样式 */
 .login-form :deep(.el-input__wrapper) {
-  border-radius: 8px;
-  padding-left: 4px; /* 减少左侧内边距 */
+  border-radius: 10px;
+  padding-left: 12px;
   box-sizing: border-box;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.login-form :deep(.el-input__wrapper:hover) {
+  border-color: #cbd5e1;
+  background: #ffffff;
 }
 
 /* 调整图标位置 */
 .login-form :deep(.el-input__prefix) {
-  margin-right: 2px; /* 调整图标与文字的距离 */
-  margin-left: 0; /* 移除左侧额外间距 */
+  margin-right: 8px;
+  margin-left: 0;
   padding-right: 0;
+  color: #94a3b8;
 }
 
 .login-form :deep(.el-input__prefix-inner) {
-  display: none;
+  color: #94a3b8;
 }
 
 /* 修复输入框内部输入区域 */
 .login-form :deep(.el-input__inner) {
-  padding-left: 2px; /* 调整输入框内部左侧内边距 */
-  padding-right: 2px;
+  padding-left: 8px;
+  padding-right: 8px;
   box-sizing: border-box;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.login-form :deep(.el-input__inner::placeholder) {
+  color: #94a3b8;
+  font-weight: 400;
 }
 
 /* 确保密码框的显示密码按钮不影响布局 */
 .login-form :deep(.el-input__suffix) {
   margin-left: 0;
+  color: #94a3b8;
 }
 
 .login-form :deep(.el-input__wrapper:focus-within) {
-  box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
-  border-color: #b19cd9;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+
+  .platform-name {
+    font-size: 20px;
+  }
+
+  .login-header h2 {
+    font-size: 24px;
+  }
 }
 </style>

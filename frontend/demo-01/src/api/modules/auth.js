@@ -1,5 +1,16 @@
 import request from "@/utils/request";
 
+/**
+ * @import { ApiResponse } from "@/utils/types"
+ */
+
+/**
+ * @param {Object} data
+ * @param {string} data.username - 用户名
+ * @param {string} data.password - 密码
+ * @param {string} data.role - 用户角色，枚举值："admin"、"student"、"teacher"
+ * @returns {Promise<ApiResponse<null>>} null
+ */
 export function register(data) {
   return request({
     url: "/user/register",
@@ -11,6 +22,12 @@ export function register(data) {
   });
 }
 
+/**
+ * @param {Object} data
+ * @param {string} data.username - 用户名
+ * @param {string} data.password - 密码
+ * @returns {Promise<ApiResponse<string>>} JWT token
+ */
 export function login(data) {
   return request({
     url: "/authenticate",
@@ -22,6 +39,12 @@ export function login(data) {
   });
 }
 
+/**
+ * @param {Object} data
+ * @param {string} data.token - 当前有效的token
+ * @param {string} data.userId - 用户ID
+ * @returns {Promise<ApiResponse<string>>} 新的JWT token
+ */
 export function refreshToken(data) {
   return request({
     url: "/refreshtoken",

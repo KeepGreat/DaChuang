@@ -27,7 +27,7 @@ function generateToken(user) {
 export default [
   // register
   {
-    url: "/user/register",
+    url: "/api/user/register",
     method: "post",
     response: (req) => {
       try {
@@ -73,7 +73,7 @@ export default [
   },
   // login
   {
-    url: "/authenticate",
+    url: "/api/authenticate",
     method: "post",
     response: (req) => {
       try {
@@ -122,7 +122,7 @@ export default [
 
   // refreshToken
   {
-    url: "/refreshtoken",
+    url: "/api/refreshtoken",
     method: "post",
     response: (req) => {
       try {
