@@ -14,6 +14,9 @@ import { useExamStore } from "./modules/examStore";
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
+// 统一导出store
+export * from "./modules/user";
+
 export {
   pinia,
   // 原有的store

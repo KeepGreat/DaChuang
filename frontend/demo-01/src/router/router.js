@@ -128,7 +128,7 @@ const router = createRouter({
         // Practice 页面
         {
           path: "pracindex",
-          name: "PracticeIndex",
+          name: "Pracindex",
           component: () => import("@/view/PracticeIndex.vue"),
         },
         {
@@ -151,12 +151,34 @@ const router = createRouter({
       ],
     },
 
-    // 登录页面
     {
-      path: "/login",
-      name: "Login",
-      component: () => import("@/view/Login.vue"),
+      path: "/courses/:id/practice/:examId",
+      name: "Practices",
+      component: () => import("@/view/practice/Practice.vue"),
     },
+
+    {
+      path: "/courses/:id",
+      props: true,
+      component: () => import("@/layout/course/index.vue"),
+      children: [
+        {
+          path: "",
+          name: "t",
+          component: () => import("@/view/teaching/Teaching.vue"),
+        },
+        {
+          path: "pracindex",
+          name: "PracticeIndex",
+          props: true,
+          component: () => import("@/view/practice/PracticeIndex.vue")
+        }
+      ]
+    },
+
+    // 登录页面
+    { path: "/login", name: "Login", component: () => import("@/view/Login/Login.vue") },
+    { path: "/register", name: "register", component: () => import("@/view/Login/Register.vue") },
   ],
 });
 
