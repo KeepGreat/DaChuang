@@ -6,7 +6,7 @@
     <div class="header-container">
       <h2 class="section-title">课程系列</h2>
       <el-input v-model="searchName" placeholder="输入课程系列名称搜索..." class="search-input" clearable
-        @keyup.enter="handleSearch">
+        @input="handleInputSearch" @keyup.enter="handleSearch" @clear="handleClearSearch">
         <template #append>
           <el-button @click="handleSearch" :icon="Search">搜索</el-button>
         </template>
@@ -83,12 +83,52 @@ const handleCardClick = (course) => {
 
 // 搜索
 const handleSearch = async () => {
-  await courseStore.searchCourses(searchName.value);
+  const searchTerm = searchName.value?.trim();
+
+  // if (!searchTerm) {
+  //   // 如果搜索内容为空，加载所有课程
+  //   await courseStore.fetchCoursePage(1, 12);
+  //   currentPage.value = 1;
+  // } else {
+  //   // 有搜索内容时执行搜索
+  await courseStore.searchCourses(searchTerm);
+  // }
+};
+
+// 实时搜索（输入时触发）
+const handleInputSearch = async () => {
+  const searchTerm = searchName.value?.trim();
+
+  // 使用防抖，避免频繁请求
+  clearTimeout(handleInputSearch.debounceTimer);
+  handleInputSearch.debounceTimer = setTimeout(async () => {
+    if (!searchTerm) {
+      // 搜索内容为空时，加载所有课程
+      await courseStore.fetchCoursePage(1, 12);
+      currentPage.value = 1;
+    } else {
+      // 有内容时搜索
+      await courseStore.searchCourses(searchTerm);
+    }
+  }, 300);
+};
+
+// 清空搜索
+const handleClearSearch = async () => {
+  searchName.value = '';
+  await courseStore.fetchCoursePage(1, 12);
+  currentPage.value = 1;
 };
 
 // 分页切换
 const handleCurrentChange = async (page) => {
-  await courseStore.fetchCoursePage(page, pageSize.value);
+  const searchTerm = searchName.value?.trim();
+
+  if (!searchTerm) {
+    // 非搜索状态下的分页
+    await courseStore.fetchCoursePage(page, pageSize.value);
+  }
+  // 搜索状态下不显示分页，所以不需要处理
 };
 
 // 初始化：加载第一页

@@ -24,12 +24,12 @@
         </div>
         <div
           class="nav-item"
-          :class="{ active: activeModule === 'knowledge' }"
-          @click="switchModule('knowledge')"
-          :title="'知识图谱'"
+          :class="{ active: activeModule === 'task' }"
+          @click="switchModule('task')"
+          :title="'任务'"
         >
-          <el-icon><Share /></el-icon>
-          <span class="nav-tooltip">知识图谱</span>
+          <el-icon><Bell /></el-icon>
+          <span class="nav-tooltip">任务</span>
         </div>
         <div
           class="nav-item"
@@ -53,10 +53,28 @@
           class="nav-item"
           :class="{ active: activeModule === 'resource' }"
           @click="switchModule('resource')"
-          :title="'资源'"
+          :title="'资料'"
         >
-          <el-icon><Folder /></el-icon>
-          <span class="nav-tooltip">资源</span>
+          <el-icon><FolderOpened /></el-icon>
+          <span class="nav-tooltip">资料</span>
+        </div>
+        <div
+          class="nav-item"
+          :class="{ active: activeModule === 'discussion' }"
+          @click="switchModule('discussion')"
+          :title="'讨论'"
+        >
+          <el-icon><ChatDotRound /></el-icon>
+          <span class="nav-tooltip">讨论</span>
+        </div>
+        <div
+          class="nav-item"
+          :class="{ active: activeModule === 'knowledge' }"
+          @click="switchModule('knowledge')"
+          :title="'知识图谱'"
+        >
+          <el-icon><Share /></el-icon>
+          <span class="nav-tooltip">知识图谱</span>
         </div>
       </div>
     </div>
@@ -76,7 +94,8 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import {
-  ArrowLeft, VideoPlay, Share, Edit, Document, Folder
+  ArrowLeft, VideoPlay, Share, Edit, Document, Folder, FolderOpened,
+  Bell, ChatDotRound
 } from '@element-plus/icons-vue';
 
 const router = useRouter();
@@ -95,17 +114,23 @@ const switchModule = (module) => {
     case 'course':
       router.push(`/teaching/course/${courseId}/learn`);
       break;
+    case 'task':
+      router.push(`/teaching/course/${courseId}/task`);
+      break;
     case 'assignment':
       router.push(`/teaching/course/${courseId}/assignment`);
-      break;
-    case 'knowledge':
-      router.push(`/teaching/course/${courseId}/knowledge`);
       break;
     case 'exam':
       router.push(`/teaching/course/${courseId}/exam`);
       break;
     case 'resource':
       router.push(`/teaching/course/${courseId}/resource`);
+      break;
+    case 'discussion':
+      router.push(`/teaching/course/${courseId}/discussion`);
+      break;
+    case 'knowledge':
+      router.push(`/teaching/course/${courseId}/knowledge`);
       break;
   }
 };
@@ -120,14 +145,18 @@ const initModule = () => {
   const path = route.path;
   if (path.includes('/learn')) {
     activeModule.value = 'course';
+  } else if (path.includes('/task')) {
+    activeModule.value = 'task';
   } else if (path.includes('/assignment')) {
     activeModule.value = 'assignment';
-  } else if (path.includes('/knowledge')) {
-    activeModule.value = 'knowledge';
   } else if (path.includes('/exam')) {
     activeModule.value = 'exam';
   } else if (path.includes('/resource')) {
     activeModule.value = 'resource';
+  } else if (path.includes('/discussion')) {
+    activeModule.value = 'discussion';
+  } else if (path.includes('/knowledge')) {
+    activeModule.value = 'knowledge';
   }
 };
 
