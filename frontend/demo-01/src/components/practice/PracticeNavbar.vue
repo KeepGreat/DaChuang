@@ -6,11 +6,11 @@
         <el-icon class="back-icon"><ArrowLeft /></el-icon>
       </button>
       <div class="practice-info">
-        <h1 class="practice-name">{{ practiceName }}</h1>
+        <h1 class="practice-name">{{ practiceTitle }}</h1>
       </div>
     </div>
     <div class="right">
-      <div class="timer" v-if="showTimer">
+      <div class="timer" v-if="remainingTime">
         <el-icon class="timer-icon"><Timer /></el-icon>
         <span class="timer-text">{{ remainingTime }}</span>
       </div>
@@ -22,76 +22,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ArrowLeft, Timer, User } from '@element-plus/icons-vue';
 
 const router = useRouter();
 
-// 练习名称（可根据实际情况从路由参数或API获取）
-const practiceName = ref('基础算法练习');
-
-// 截止时间（示例：当前时间 + 30分钟，实际项目中可从API获取）
-const deadline = ref(new Date(Date.now() + 30 * 60 * 1000)); // 示例：当前时间后30分钟
-const remainingTime = ref('30:00');
-const showTimer = ref(true);
-let timerInterval = null;
-
-// 计算剩余秒数
-const calculateRemainingSeconds = () => {
-  const now = Date.now();
-  const diff = deadline.value - now;
-  return Math.max(0, Math.floor(diff / 1000));
-};
-
-// 格式化时间显示
-const formatTime = (seconds) => {
-  if (seconds <= 0) {
-    return '00:00';
-  }
-  const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const secs = (seconds % 60).toString().padStart(2, '0');
-  return `${mins}:${secs}`;
-};
-
-// 更新剩余时间
-const updateRemainingTime = () => {
-  const seconds = calculateRemainingSeconds();
-  remainingTime.value = formatTime(seconds);
-  return seconds;
-};
-
-// 倒计时函数
-const startTimer = () => {
-  // 初始化剩余时间
-  const initialSeconds = updateRemainingTime();
-  
-  if (initialSeconds <= 0) {
-    console.log('练习时间已结束');
-    return;
-  }
-  
-  timerInterval = setInterval(() => {
-    const seconds = updateRemainingTime();
-    if (seconds <= 0) {
-      // 时间结束，停止计时器
-      clearInterval(timerInterval);
-      timerInterval = null;
-      // 可以添加时间结束的处理逻辑
-      console.log('练习时间结束');
-    }
-  }, 1000);
-};
-
-// 组件挂载时开始计时
-onMounted(() => {
-  startTimer();
-});
-
-// 组件卸载时清除计时器
-onUnmounted(() => {
-  if (timerInterval) {
-    clearInterval(timerInterval);
+// Props 定义
+const props = defineProps({
+  practiceTitle: {
+    type: String,
+    default: '基础算法练习'
+  },
+  remainingTime: {
+    type: String,
+    default: '00:00'
+  },
+  userInfo: {
+    type: Object,
+    default: () => ({})
   }
 });
 
