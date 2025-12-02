@@ -5,121 +5,166 @@
       <el-empty description="当前题型下暂无题目"></el-empty>
     </div>
     
-    <!-- 显示问题内容 -->
-    <div v-else class="question-content-wrapper">
-      <div class="question-header">
-        <div class="question-info">
-          <span class="question-type">{{ getQuestionTypeText(question.type) }}</span>
-          <span class="question-number">第 {{ questionNumber }} 题</span>
-        </div>
-        <div class="question-status" v-if="question.status">
-          <el-tag :type="getStatusType(question.status)">{{ getStatusText(question.status) }}</el-tag>
-        </div>
-      </div>
+    <template v-else>
+      <!-- 编程题使用专门的左右并排组件 -->
+      <ProgrammingQuestion
+        v-if="question.type === 3"
+        ref="programmingQuestionRef"
+        :question="question"
+        :show-correctness="showCorrectness"
+        :user-answer="currentUserAnswer"
+        @answer-submitted="handleProgrammingAnswerSubmitted"
+        @answer-changed="handleAnswerChanged"
+      />
       
-      <div class="question-content">
-        <h3 class="question-title">{{ question.title }}</h3>
+      <!-- 非编程题 -->
+      <template v-else>
+        <!-- 单题模式：只显示当前题目 -->
+        <div v-if="singleQuestionMode" class="single-question-wrapper">
+          <!-- 所有题型共用的题目信息 -->
+          <div class="question-content-wrapper">
+            <div class="question-header">
+              <div class="question-info">
+                <span class="question-type">{{ getQuestionTypeText(question.type) }}</span>
+                <span class="question-number">第 {{ questionNumber }} 题</span>
+              </div>
+              <div class="question-status" v-if="question.status">
+                <el-tag :type="getStatusType(question.status)">{{ getStatusText(question.status) }}</el-tag>
+              </div>
+            </div>
+          </div>
+          
+          <div class="question-content-wrapper">
+            <div class="question-content">
+              <h3 class="question-title">{{ question.title }}</h3>
+              
+              <!-- 选择题选项区域 - 判断题、单选题和多选题共用 -->
+              <div v-if="hasOptions()" class="question-options">
+                <div 
+                  v-for="(option, index) in question.options" 
+                  :key="index"
+                  class="option-item"
+                  :class="{ 
+                    'selected': isSelected(option.value),
+                    'correct': isCorrect(option.value) && (showCorrectness || question.status === 'correct' || question.status === 'incorrect'),
+                    'incorrect': isIncorrect(option.value) && (showCorrectness || question.status === 'incorrect'),
+                    'missed': isMissed(option.value) && (showCorrectness || question.status === 'incorrect')
+                  }"
+                  @click="toggleOption(option.value)"
+                >
+                  <div class="option-label">{{ option.label }}</div>
+                  <div class="option-content">{{ option.text }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 简答题答题区域 -->
+            <div v-if="question.type === 2" class="answer-section">
+              <el-input
+                v-model="userAnswer"
+                type="textarea"
+                :rows="6"
+                placeholder="请输入您的答案..."
+                :disabled="showCorrectness"
+                class="short-answer-input"
+              ></el-input>
+              
+              <!-- 正确答案展示 -->
+              <div v-if="showCorrectness" class="correct-answer">
+                <h4>参考答案：</h4>
+                <div class="answer-content" v-html="question.answer"></div>
+              </div>
+            </div>
+          </div>
+        </div>
         
-        <!-- 选择题选项区域 - 判断题、单选题和多选题共用 -->
-        <div v-if="hasOptions()" class="question-options">
+        <!-- 多题模式：显示所有同类型题目 -->
+        <div v-else class="all-questions-wrapper">
           <div 
-            v-for="(option, index) in question.options" 
-            :key="index"
-            class="option-item"
-            :class="{ 
-              'selected': isSelected(option.value),
-              'correct': isCorrect(option.value) && (showCorrectness || question.status === 'correct' || question.status === 'incorrect'),
-              'incorrect': isIncorrect(option.value) && (showCorrectness || question.status === 'incorrect'),
-              'missed': isMissed(option.value) && (showCorrectness || question.status === 'incorrect')
-            }"
-            @click="toggleOption(option.value)"
+            v-for="(q, index) in sameTypeQuestions" 
+            :key="q.id"
+            class="single-question-container"
           >
-            <div class="option-label">{{ option.label }}</div>
-            <div class="option-content">{{ option.text }}</div>
+            <div class="question-header">
+              <div class="question-info">
+                <span class="question-type">{{ getQuestionTypeText(q.type) }}</span>
+                <span class="question-number">第 {{ index + 1 }} 题</span>
+              </div>
+              <div class="question-status" v-if="q.status">
+                <el-tag :type="getStatusType(q.status)">{{ getStatusText(q.status) }}</el-tag>
+              </div>
+            </div>
+            
+            <div class="question-content">
+              <h3 class="question-title">{{ q.title }}</h3>
+              
+              <!-- 选择题选项区域 - 判断题、单选题和多选题共用 -->
+              <div v-if="hasOptions(q)" class="question-options">
+                <div 
+                  v-for="(option, optIndex) in q.options" 
+                  :key="optIndex"
+                  class="option-item"
+                  :class="{ 
+                    'selected': isSelected(option.value, q.id),
+                    'correct': isCorrect(option.value, q) && (showCorrectness || q.status === 'correct' || q.status === 'incorrect'),
+                    'incorrect': isIncorrect(option.value, q) && (showCorrectness || q.status === 'incorrect'),
+                    'missed': isMissed(option.value, q) && (showCorrectness || q.status === 'incorrect')
+                  }"
+                  @click="toggleOption(option.value, q.id)"
+                >
+                  <div class="option-label">{{ option.label }}</div>
+                  <div class="option-content">{{ option.text }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 简答题答题区域 -->
+            <div v-if="q.type === 2" class="answer-section">
+              <el-input
+                v-model="userAnswers[q.id]"
+                type="textarea"
+                :rows="4"
+                placeholder="请输入您的答案..."
+                :disabled="showCorrectness"
+                class="short-answer-input"
+                @input="handleAnswerChanged(q.id, userAnswers[q.id])"
+              ></el-input>
+              
+              <!-- 正确答案展示 -->
+              <div v-if="showCorrectness" class="correct-answer">
+                <h4>参考答案：</h4>
+                <div class="answer-content" v-html="q.answer"></div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
       
-      <!-- 简答题答题区域 -->
-      <div v-if="question.type === 2" class="answer-section">
-        <el-input
-          v-model="userAnswer"
-          type="textarea"
-          :rows="6"
-          placeholder="请输入您的答案..."
-          :disabled="showCorrectness"
-          class="short-answer-input"
-        ></el-input>
-        
-        <!-- 正确答案展示 -->
-        <div v-if="showCorrectness" class="correct-answer">
-          <h4>参考答案：</h4>
-          <div class="answer-content" v-html="question.answer"></div>
-        </div>
-      </div>
-      
-      <!-- 编程题答题区域 -->
-      <div v-if="question.type === 3" class="answer-section">
-        <div class="programming-header">
-          <div class="language-selector">
-            <el-select v-model="selectedLanguage" placeholder="选择编程语言">
-              <el-option 
-                v-for="lang in supportedLanguages" 
-                :key="lang.value" 
-                :label="lang.label" 
-                :value="lang.value"
-              ></el-option>
-            </el-select>
-          </div>
-          <div class="code-actions">
-            <el-button type="primary" size="small" @click="runCode">运行代码</el-button>
-            <el-button size="small" @click="resetCode">重置</el-button>
-          </div>
-        </div>
-        
-        <!-- 代码编辑区域 -->
-        <div class="code-editor">
-          <textarea
-            v-model="userAnswer"
-            placeholder="请在此编写代码..."
-            class="code-input"
-            :disabled="showCorrectness"
-          ></textarea>
-        </div>
-        
-        <!-- 运行结果 -->
-        <div v-if="codeResult" class="code-result">
-          <h4>运行结果：</h4>
-          <pre>{{ codeResult }}</pre>
-        </div>
-        
-        <!-- 正确答案展示 -->
-        <div v-if="showCorrectness" class="correct-answer">
-          <h4>参考答案：</h4>
-          <div class="code-editor">
-            <pre>{{ question.answer }}</pre>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 答题操作按钮 -->
+      <!-- 答题操作按钮 - 所有题型共用 -->
       <div class="question-actions">
         <el-button @click="previousQuestion">上一题</el-button>
         <div class="right-buttons">
-          <el-button type="info" @click="toggleCorrectness" :disabled="!question.status">
+          <el-button type="info" @click="toggleCorrectness" :disabled="false">
             {{ showCorrectness ? '隐藏答案' : '查看答案' }}
           </el-button>
-          <el-button type="primary" @click="submitAnswer" :disabled="showCorrectness">提交答案</el-button>
+          <el-button 
+            type="primary" 
+            @click="submitAnswer" 
+            :disabled="showCorrectness"
+          >
+            提交答案
+          </el-button>
           <el-button type="success" @click="nextQuestion">下一题</el-button>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { ElMessage, ElEmpty } from 'element-plus';
+import ProgrammingQuestion from './ProgrammingQuestion.vue';
 
 // Props 定义
 const props = defineProps({
@@ -147,25 +192,35 @@ const props = defineProps({
   userAnswer: {
     type: [Number, Array],
     default: () => []
+  },
+  singleQuestionMode: {
+    type: Boolean,
+    default: false
+  },
+  sameTypeQuestions: {
+    type: Array,
+    default: () => []
   }
 });
 // Emits 定义
 const emit = defineEmits(['set-show-correctness', 'answer-submitted', 'answer-changed', 'previous', 'next']);
 
-// 用户答案 - 统一使用数组存储
+// 用户答案 - 单题模式使用单个数组，多题模式使用对象存储
 const userAnswer = ref([]);
+const userAnswers = ref({});
 
-// 编程语言选择
-const selectedLanguage = ref('javascript');
-const supportedLanguages = ref([
-  { label: 'JavaScript', value: 'javascript' },
-  { label: 'Python', value: 'python' },
-  { label: 'Java', value: 'java' },
-  { label: 'C++', value: 'cpp' }
-]);
+// 编程题组件引用
+const programmingQuestionRef = ref(null);
 
-// 代码运行结果
-const codeResult = ref('');
+// 计算属性：根据题目类型返回合适的用户答案格式
+const currentUserAnswer = computed(() => {
+  if (props.question && props.question.type === 3) {
+    // 编程题需要字符串格式
+    return Array.isArray(props.userAnswer) ? props.userAnswer.join('') : props.userAnswer;
+  }
+  // 其他题型保持原格式
+  return props.userAnswer;
+});
 
 // 当props.question变化时，更新本地答案
 watch(() => props.question, (newQuestion, oldQuestion) => {
@@ -174,7 +229,18 @@ watch(() => props.question, (newQuestion, oldQuestion) => {
     const initialAnswer = Array.isArray(props.userAnswer) ? [...props.userAnswer] : [props.userAnswer];
     userAnswer.value = initialAnswer;
   }
-  codeResult.value = '';
+}, { immediate: true, deep: true });
+
+// 当props.sameTypeQuestions变化时，初始化所有题目的答案
+watch(() => props.sameTypeQuestions, (newQuestions) => {
+  if (newQuestions) {
+    // 初始化所有题目的答案
+    const initialAnswers = {};
+    newQuestions.forEach(q => {
+      initialAnswers[q.id] = Array.isArray(props.userAnswer) ? [...props.userAnswer] : [props.userAnswer];
+    });
+    userAnswers.value = initialAnswers;
+  }
 }, { immediate: true, deep: true });
 
 // 监听本地答案变化，触发事件
@@ -182,6 +248,12 @@ watch(userAnswer, (newAnswer) => {
   if (props.question) {
     emit('answer-changed', props.question.id, newAnswer);
   }
+}, { deep: true });
+
+// 监听userAnswers变化，触发事件
+watch(userAnswers, (newAnswers) => {
+  // 多题模式下，当任何题目答案变化时，触发事件
+  // 这里可以根据需要调整触发逻辑
 }, { deep: true });
 
 // 获取问题类型文本
@@ -216,113 +288,186 @@ const getStatusType = (status) => {
 };
 
 // 判断是否有选项
-const hasOptions = () => {
-  return [0, 1].includes(props.question.type);
+const hasOptions = (q = props.question) => {
+  return [0, 1].includes(q.type);
 };
 
 // 判断是否为单选类型
-const isSingleType = () => {
-  return  props.question.type === 1 && props.question.answer.length === 1;
+const isSingleType = (q = props.question) => {
+  return q.type === 1 && q.answer.length === 1;
 };
 
 // 判断选项是否被选中
-const isSelected = (value) => {
-  return userAnswer.value.includes(value);
+const isSelected = (value, questionId = props.question?.id) => {
+  if (props.singleQuestionMode) {
+    return userAnswer.value.includes(value);
+  } else {
+    return userAnswers.value[questionId]?.includes(value) || false;
+  }
 };
 
 // 判断选项是否正确（根据题目答案）
-const isCorrect = (value) => {
-  const answer = Array.isArray(props.question.answer) ? props.question.answer : [props.question.answer];
+const isCorrect = (value, q = props.question) => {
+  const answer = Array.isArray(q.answer) ? q.answer : [q.answer];
   return answer.includes(value);
 };
 
 // 判断选项是否错误（用户选择了但不是正确答案）
-const isIncorrect = (value) => {
-  return userAnswer.value.includes(value) && !isCorrect(value);
+const isIncorrect = (value, q = props.question, questionId = props.question?.id) => {
+  return isSelected(value, questionId) && !isCorrect(value, q);
 };
 
 // 判断选项是否被遗漏（只用于多选题，正确答案但用户没选）
-const isMissed = (value) => {
-  return !isSingleType() && !userAnswer.value.includes(value) && isCorrect(value);
+const isMissed = (value, q = props.question, questionId = props.question?.id) => {
+  return !isSingleType(q) && !isSelected(value, questionId) && isCorrect(value, q);
 };
 
 // 切换选项
-const toggleOption = (value) => {
+const toggleOption = (value, questionId = props.question?.id) => {
   if (props.showCorrectness) return;
   
-  if (isSingleType()) {
-    // 单选题和判断题：只能选择一个选项，替换当前选择
-    userAnswer.value = [value];
-  } else {
-    // 多选题：可选择多个选项，切换当前选项的选中状态
-    const index = userAnswer.value.indexOf(value);
-    if (index === -1) {
-      userAnswer.value.push(value);
+  const q = props.singleQuestionMode ? props.question : props.sameTypeQuestions.find(item => item.id === questionId);
+  if (!q) return;
+  
+  if (props.singleQuestionMode) {
+    if (isSingleType(q)) {
+      // 单选题和判断题：只能选择一个选项，替换当前选择
+      userAnswer.value = [value];
     } else {
-      userAnswer.value.splice(index, 1);
+      // 多选题：可选择多个选项，切换当前选项的选中状态
+      const index = userAnswer.value.indexOf(value);
+      if (index === -1) {
+        userAnswer.value.push(value);
+      } else {
+        userAnswer.value.splice(index, 1);
+      }
     }
+  } else {
+    // 多题模式
+    if (!userAnswers.value[questionId]) {
+      userAnswers.value[questionId] = [];
+    }
+    
+    if (isSingleType(q)) {
+      // 单选题和判断题：只能选择一个选项，替换当前选择
+      userAnswers.value[questionId] = [value];
+    } else {
+      // 多选题：可选择多个选项，切换当前选项的选中状态
+      const index = userAnswers.value[questionId].indexOf(value);
+      if (index === -1) {
+        userAnswers.value[questionId].push(value);
+      } else {
+        userAnswers.value[questionId].splice(index, 1);
+      }
+    }
+    
+    // 触发答案变化事件
+    emit('answer-changed', questionId, userAnswers.value[questionId]);
   }
 };
 
 // 提交答案
 const submitAnswer = () => {
-  // 检查答案是否为空
-  let isEmpty = false;
-  if (Array.isArray(userAnswer.value)) {
-    // 选择题、判断题：检查数组是否为空
-    isEmpty = userAnswer.value.length === 0;
-  } else {
-    // 简答题、编程题：检查字符串是否为空
-    isEmpty = !userAnswer.value || userAnswer.value.trim() === '';
-  }
-  
-  if (isEmpty) {
-    // 答案为空时，发出提交事件但标记为空答案
+  if (props.question.type === 3) {
+    // 编程题：调用子组件的提交方法
+    if (programmingQuestionRef.value) {
+      programmingQuestionRef.value.submitCode();
+    }
+  } else if (props.singleQuestionMode) {
+    // 单题模式：提交当前题目
+    // 检查答案是否为空
+    let isEmpty = false;
+    if (Array.isArray(userAnswer.value)) {
+      // 选择题、判断题：检查数组是否为空
+      isEmpty = userAnswer.value.length === 0;
+    } else {
+      // 简答题：检查字符串是否为空
+      isEmpty = !userAnswer.value || userAnswer.value.trim() === '';
+    }
+    
+    if (isEmpty) {
+      // 答案为空时，发出提交事件但标记为空答案
+      emit('answer-submitted', {
+        questionId: props.question.id,
+        answer: userAnswer.value,
+        isEmpty: true
+      });
+      
+      ElMessage({
+        message: '请先填写答案！',
+        type: 'warning'
+      });
+      return;
+    }
+    
+    // 答案不为空时，发出提交事件
     emit('answer-submitted', {
       questionId: props.question.id,
       answer: userAnswer.value,
-      isEmpty: true
+      isEmpty: false
     });
     
     ElMessage({
-      message: '请先填写答案！',
-      type: 'warning'
+      message: '答案已提交！',
+      type: 'success'
     });
-    return;
+  } else {
+    // 多题模式：提交所有同类型题目
+    let hasEmptyAnswers = false;
+    const submittedAnswers = [];
+    
+    // 遍历所有题目，检查答案是否为空
+    props.sameTypeQuestions.forEach(q => {
+      const answer = userAnswers.value[q.id];
+      let isEmpty = false;
+      
+      if (Array.isArray(answer)) {
+        // 选择题、判断题：检查数组是否为空
+        isEmpty = answer.length === 0;
+      } else {
+        // 简答题：检查字符串是否为空
+        isEmpty = !answer || answer.trim() === '';
+      }
+      
+      if (isEmpty) {
+        hasEmptyAnswers = true;
+      }
+      
+      submittedAnswers.push({
+        questionId: q.id,
+        answer: answer,
+        isEmpty: isEmpty
+      });
+    });
+    
+    if (hasEmptyAnswers) {
+      // 有未填写的答案时，发出警告但仍提交所有答案
+      ElMessage({
+        message: '部分题目未填写答案，已提交已完成的题目！',
+        type: 'warning'
+      });
+    } else {
+      ElMessage({
+        message: '所有答案已提交！',
+        type: 'success'
+      });
+    }
+    
+    // 提交所有答案
+    submittedAnswers.forEach(submittedAnswer => {
+      emit('answer-submitted', submittedAnswer);
+    });
   }
-  
-  // 标准化答案格式，确保都是数组
-  const userAnswerArray = Array.isArray(userAnswer.value) ? userAnswer.value : [userAnswer.value];
-  
-  // 发出答案提交事件，不包含正确性判断
-  emit('answer-submitted', {
-    questionId: props.question.id,
-    answer: userAnswer.value,
-    isEmpty: false
-  });
-  
-  ElMessage({
-    message: '答案已提交！',
-    type: 'success'
-  });
 };
 
-// 运行代码（模拟）
-const runCode = () => {
-  if (!userAnswer.value.trim()) {
-    ElMessage.warning('请先编写代码！');
-    return;
-  }
-  
-  // 模拟代码运行结果
-  codeResult.value = `[${new Date().toLocaleTimeString()}] 运行成功！\n输出：Hello, World!\n执行时间：12ms`;
-  ElMessage.success('代码运行成功！');
+// 处理编程题答案提交
+const handleProgrammingAnswerSubmitted = (result) => {
+  emit('answer-submitted', result);
 };
 
-// 重置代码
-const resetCode = () => {
-  userAnswer.value = '';
-  codeResult.value = '';
+// 处理编程题答案变化
+const handleAnswerChanged = (questionId, answer) => {
+  emit('answer-changed', questionId, answer);
 };
 
 // 上一题
@@ -493,69 +638,7 @@ const nextQuestion = () => {
   line-height: 1.5;
 }
 
-/* 编程题样式 */
-.programming-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
 
-.language-selector {
-  width: 160px;
-}
-
-.code-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.code-editor {
-  margin-bottom: 16px;
-  border: 1px solid #dcdfe6;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #fafafa;
-}
-
-.code-input {
-  width: 100%;
-  min-height: 200px;
-  padding: 16px;
-  border: none;
-  outline: none;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  background: #fafafa;
-  resize: vertical;
-}
-
-.code-editor pre {
-  margin: 0;
-  padding: 16px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  background: #fafafa;
-  overflow-x: auto;
-}
-
-.code-result {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #f0f9eb;
-  border: 1px solid #e1f3d8;
-  border-radius: 6px;
-}
-
-.code-result pre {
-  margin: 0;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #67c23a;
-}
 
 /* 正确答案展示 */
 .correct-answer {
@@ -609,6 +692,40 @@ const nextQuestion = () => {
   gap: 12px;
 }
 
+/* 单题模式样式 */
+.single-question-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 所有题目展示样式 */
+.all-questions-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.single-question-container {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  border: 1px solid #ebeef5;
+}
+
+.single-question-container .question-header {
+  margin-bottom: 16px;
+}
+
+.single-question-container .question-content {
+  margin-bottom: 16px;
+}
+
+.single-question-container .answer-section {
+  margin-bottom: 0;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .question-display {
@@ -621,6 +738,11 @@ const nextQuestion = () => {
   
   .option-item {
     padding: 12px;
+  }
+  
+  .single-question-container {
+    padding: 12px;
+    margin-bottom: 12px;
   }
   
   .programming-header {

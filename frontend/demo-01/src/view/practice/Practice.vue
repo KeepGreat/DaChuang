@@ -1,12 +1,15 @@
 <template>
   <div class="practice-view">
+    <!-- 导航栏组件 -->
     <PracticeNavbar 
       :practice-title="practiceTitle" 
       :remaining-time="remainingTime" 
       :user-info="userInfo"
+      v-model:single-question-mode="singleQuestionMode"
     />
     
     <div class="practice-content">
+      <!-- 侧边栏组件 -->
       <PracticeSiderbar 
         :question-types="sidebarQuestionTypes" 
         :active-type-id="activeType"
@@ -14,13 +17,16 @@
       />
       
       <div class="main-content">
+        <!-- 题目展示容器 -->
         <div class="question-container">
           <QuestionDisplay 
             :question="currentQuestion" 
             :question-number="currentQuestionIndex + 1"
             :show-correctness="showCorrectness"
             :user-answer="currentQuestion ? userAnswers[currentQuestion.id] || [] : []"
-            @set-show-correctness="setShowCorrectness"
+            :single-question-mode="singleQuestionMode"
+            :same-type-questions="filteredQuestions"
+            @set-show-correctness="toggleShowCorrectness"
             @answer-submitted="handleAnswerSubmitted"
             @answer-changed="handleAnswerChanged"
             @previous="handlePreviousQuestion"
@@ -28,6 +34,7 @@
           />
         </div>
         
+        <!-- 进度信息区域 -->
         <div class="progress-info">
           <div class="progress-bar">
             <el-progress 
@@ -48,67 +55,29 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted, onMounted } from 'vue';
+// 导入依赖
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import PracticeNavbar from '@/components/practice/PracticeNavbar.vue';
 import PracticeSiderbar from '@/components/practice/PracticeSiderbar.vue';
 import QuestionDisplay from '@/components/practice/QuestionDisplay.vue';
 
-// 练习数据
+// -------------------
+// 基础数据定义
+// -------------------
+
+// 练习基本信息
 const practiceTitle = ref('JavaScript基础练习');
 const userInfo = ref({ name: '张三', avatar: '' });
+
+// 单题作答模式，默认为false
+const singleQuestionMode = ref(false);
 
 // 倒计时相关
 const deadline = ref(new Date(Date.now() + 30 * 60 * 1000)); // 示例：当前时间后30分钟
 const remainingTime = ref('30:00');
 let timerInterval = null;
 
-// 计算剩余秒数
-const calculateRemainingSeconds = () => {
-  const now = Date.now();
-  const diff = deadline.value - now;
-  return Math.max(0, Math.floor(diff / 1000));
-};
-
-// 格式化时间显示
-const formatTime = (seconds) => {
-  if (seconds <= 0) {
-    return '00:00';
-  }
-  const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const secs = (seconds % 60).toString().padStart(2, '0');
-  return `${mins}:${secs}`;
-};
-
-// 更新剩余时间
-const updateRemainingTime = () => {
-  const seconds = calculateRemainingSeconds();
-  remainingTime.value = formatTime(seconds);
-  return seconds;
-};
-
-// 倒计时函数
-const startTimer = () => {
-  // 初始化剩余时间
-  const initialSeconds = updateRemainingTime();
-  
-  if (initialSeconds <= 0) {
-    console.log('练习时间已结束');
-    return;
-  }
-  
-  timerInterval = setInterval(() => {
-    const seconds = updateRemainingTime();
-    if (seconds <= 0) {
-      // 时间结束，停止计时器
-      clearInterval(timerInterval);
-      timerInterval = null;
-      // 可以添加时间结束的处理逻辑
-      console.log('练习时间结束');
-    }
-  }, 1000);
-};
-
-// 题型列表
+// 题型列表配置
 const questionTypes = ref([
   { type: -1, name: '全部题型' },
   { type: 0, name: '判断题' },
@@ -117,56 +86,21 @@ const questionTypes = ref([
   { type: 3, name: '编程题' }
 ]);
 
+// 当前激活的题型
 const activeType = ref('all');
 
-// 存储用户答案，key为questionId，value为用户答案
+// 用户答案存储，key为questionId，value为用户答案
 const userAnswers = ref({});
 
-// 初始化用户答案函数
-const initUserAnswers = () => {
-  const initialAnswers = {};
-  questions.value.forEach(question => {
-    initialAnswers[question.id] = []; // 为每道题初始化空数组作为答案
-  });
-  userAnswers.value = initialAnswers;
-};
+// 当前问题索引
+const currentQuestionIndex = ref(0);
 
-// 用户答案更新函数
-const updateUserAnswer = (questionId, answer) => {
-  userAnswers.value[questionId] = answer;
-};
+// 是否显示正确答案
+const showCorrectness = ref(false);
 
-// 计算属性：按type值分组并统计题型数据
-const sidebarQuestionTypes = computed(() => {
-  // 初始化题型统计数据，包含"全部题型"
-  const typesWithStats = [
-    {
-      id: 'all',
-      name: '全部题型',
-      total: totalQuestions.value,
-      answered: questions.value.filter(q => q.status !== null).length
-    }
-  ];
-  
-  // 为每种题型生成统计数据
-  questionTypes.value.forEach(type => {
-    if (type.type !== -1) { // 排除"全部题型"（已单独处理）
-      const typeQuestions = questions.value.filter(q => q.type === type.type);
-      const typeAnswered = typeQuestions.filter(q => q.status !== null).length;
-      
-      typesWithStats.push({
-        id: type.type,
-        name: type.name,
-        total: typeQuestions.length,
-        answered: typeAnswered
-      });
-    }
-  });
-  
-  return typesWithStats;
-});
-
-// 问题数据示例
+// -------------------
+// 示例问题数据
+// -------------------
 const questions = ref([
   {
     id: 0,
@@ -268,7 +202,7 @@ const questions = ref([
     title: '请简述JavaScript中事件冒泡和事件捕获的区别。',
     content: '',
     options: [],
-    answer: '事件冒泡是指事件从最具体的元素开始触发，然后逐级向上传播到更不具体的元素；事件捕获则相反，事件从最不具体的元素开始触发，然后逐级向下传播到最具体的元素。',
+    answer: ['事件冒泡是指事件从最具体的元素开始触发，然后逐级向上传播到更不具体的元素；事件捕获则相反，事件从最不具体的元素开始触发，然后逐级向下传播到最具体的元素。'],
     status: null
   },
   {
@@ -277,7 +211,7 @@ const questions = ref([
     title: '编写一个函数，计算数组中所有元素的和。',
     content: '请实现一个sum函数，接收一个数组作为参数，返回数组中所有元素的和。例如：sum([1, 2, 3, 4]) 应返回 10。',
     options: [],
-    answer: 'function sum(arr) {\n  return arr.reduce((acc, curr) => acc + curr, 0);\n}',
+    answer: ['function sum(arr) {\n  return arr.reduce((acc, curr) => acc + curr, 0);\n}'],
     status: null
   },
   {
@@ -286,15 +220,14 @@ const questions = ref([
     title: '实现一个简单的防抖函数。',
     content: '请实现一个debounce函数，接收一个函数和延迟时间作为参数，返回一个新的函数，该函数在连续调用时，只在最后一次调用后等待指定时间才执行。',
     options: [],
-    answer: 'function debounce(func, delay) {\n  let timer = null;\n  return function() {\n    const context = this;\n    const args = arguments;\n    clearTimeout(timer);\n    timer = setTimeout(() => {\n      func.apply(context, args);\n    }, delay);\n  };\n}',
+    answer: ['function debounce(func, delay) {\n  let timer = null;\n  return function() {\n    const context = this;\n    const args = arguments;\n    clearTimeout(timer);\n    timer = setTimeout(() => {\n      func.apply(context, args);\n    }, delay);\n  };\n}'],
     status: null
   }
 ]);
 
-// 当前问题索引
-const currentQuestionIndex = ref(0);
-// 是否显示正确答案
-const showCorrectness = ref(false);
+// -------------------
+// 计算属性
+// -------------------
 
 // 根据题型过滤问题
 const filteredQuestions = computed(() => {
@@ -304,7 +237,7 @@ const filteredQuestions = computed(() => {
   return questions.value.filter(q => q.type === activeType.value);
 });
 
-// 计算当前显示的问题
+// 当前显示的问题
 const currentQuestion = computed(() => {
   if (filteredQuestions.value.length === 0) {
     return null;
@@ -338,7 +271,7 @@ const progressPercentage = computed(() => {
   return Math.round((answeredCount.value / totalQuestions.value) * 100);
 });
 
-// 完成率
+// 完成率（与进度百分比相同）
 const completionRate = computed(() => {
   return progressPercentage.value;
 });
@@ -348,16 +281,109 @@ const progressColor = computed(() => {
   return 'linear-gradient(45deg, #2563eb, #1d4ed8)'; // 与PracticeSiderbar.vue第147行相同的渐变色
 });
 
-// 设置showCorrectness的函数 - 切换真假值
-const setShowCorrectness = () => {
+// 侧边栏题型统计数据
+const sidebarQuestionTypes = computed(() => {
+  // 初始化包含"全部题型"的统计数据
+  const typesWithStats = [
+    {
+      id: 'all',
+      name: '全部题型',
+      total: totalQuestions.value,
+      answered: answeredCount.value
+    }
+  ];
+  
+  // 为每种题型生成统计数据
+  questionTypes.value.forEach(type => {
+    if (type.type !== -1) { // 排除"全部题型"（已单独处理）
+      const typeQuestions = questions.value.filter(q => q.type === type.type);
+      const typeAnswered = typeQuestions.filter(q => q.status !== null).length;
+      
+      typesWithStats.push({
+        id: type.type,
+        name: type.name,
+        total: typeQuestions.length,
+        answered: typeAnswered
+      });
+    }
+  });
+  
+  return typesWithStats;
+});
+
+// -------------------
+// 方法定义
+// -------------------
+
+// 初始化用户答案
+const initUserAnswers = () => {
+  const initialAnswers = {};
+  questions.value.forEach(question => {
+    initialAnswers[question.id] = []; // 为每道题初始化空数组作为答案
+  });
+  userAnswers.value = initialAnswers;
+};
+
+// 更新用户答案
+const updateUserAnswer = (questionId, answer) => {
+  userAnswers.value[questionId] = answer;
+};
+
+// 计算剩余秒数
+const calculateRemainingSeconds = () => {
+  const now = Date.now();
+  const diff = deadline.value - now;
+  return Math.max(0, Math.floor(diff / 1000));
+};
+
+// 格式化时间显示
+const formatTime = (seconds) => {
+  if (seconds <= 0) {
+    return '00:00';
+  }
+  const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const secs = (seconds % 60).toString().padStart(2, '0');
+  return `${mins}:${secs}`;
+};
+
+// 更新剩余时间
+const updateRemainingTime = () => {
+  const seconds = calculateRemainingSeconds();
+  remainingTime.value = formatTime(seconds);
+  return seconds;
+};
+
+// 启动倒计时
+const startTimer = () => {
+  // 初始化剩余时间
+  const initialSeconds = updateRemainingTime();
+  
+  if (initialSeconds <= 0) {
+    console.log('练习时间已结束');
+    return;
+  }
+  
+  timerInterval = setInterval(() => {
+    const seconds = updateRemainingTime();
+    if (seconds <= 0) {
+      // 时间结束，停止计时器
+      clearInterval(timerInterval);
+      timerInterval = null;
+      console.log('练习时间结束');
+      // 可以添加时间结束的处理逻辑
+    }
+  }, 1000);
+};
+
+// 切换显示正确答案
+const toggleShowCorrectness = () => {
   showCorrectness.value = !showCorrectness.value;
 };
 
 // 处理题型切换
 const handleTypeChange = (typeId) => {
   activeType.value = typeId;
-  // 切换题型时，重置到第一个问题
-  currentQuestionIndex.value = 0;
+  currentQuestionIndex.value = 0; // 切换题型时，重置到第一个问题
 };
 
 // 处理答案变化
@@ -373,11 +399,7 @@ const handleAnswerSubmitted = (result) => {
     updateUserAnswer(result.questionId, result.answer);
     
     // 根据是否为空答案设置题目状态
-    if (result.isEmpty) {
-      question.status = null; // 空答案时状态设为null
-    } else {
-      question.status = 'answered'; // 非空答案时标记为已作答
-    }
+    question.status = result.isEmpty ? null : 'answered';
   }
 };
 
@@ -390,7 +412,6 @@ const handlePreviousQuestion = () => {
     // 当前是当前题型的第一题，切换到上一类题型的最后一题
     const currentTypeIndex = sidebarQuestionTypes.value.findIndex(type => type.id === activeType.value);
     if (currentTypeIndex > 0) {
-      // 有上一类题型
       const prevType = sidebarQuestionTypes.value[currentTypeIndex - 1];
       activeType.value = prevType.id;
       // 设置为上一类题型的最后一题
@@ -409,27 +430,25 @@ const handleNextQuestion = () => {
     // 当前是当前题型的最后一题，切换到下一类题型的第一题
     const currentTypeIndex = sidebarQuestionTypes.value.findIndex(type => type.id === activeType.value);
     if (currentTypeIndex < sidebarQuestionTypes.value.length - 1) {
-      // 有下一类题型
       const nextType = sidebarQuestionTypes.value[currentTypeIndex + 1];
       activeType.value = nextType.id;
-      // 设置为下一类题型的第一题
-      currentQuestionIndex.value = 0;
+      currentQuestionIndex.value = 0; // 设置为下一类题型的第一题
     }
   }
 };
 
-// 初始化和倒计时功能
+// -------------------
+// 生命周期钩子
+// -------------------
+
+// 组件挂载时初始化
 onMounted(() => {
-  // 初始化用户答案
-  initUserAnswers();
-  
-  // 启动倒计时
-  startTimer();
+  initUserAnswers(); // 初始化用户答案
+  startTimer(); // 启动倒计时
 });
 
-// 组件卸载时清除计时器
+// 组件卸载时清理
 onUnmounted(() => {
-  // 确保清除计时器并重置引用
   if (timerInterval) {
     clearInterval(timerInterval);
     timerInterval = null;
@@ -438,6 +457,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 练习页面主容器 */
 .practice-view {
   display: flex;
   flex-direction: column;
@@ -445,12 +465,14 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
+/* 练习内容区域 */
 .practice-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
+/* 主内容区域 */
 .main-content {
   flex: 1;
   display: flex;
@@ -460,6 +482,7 @@ onUnmounted(() => {
   background: #f5f7fa;
 }
 
+/* 题目容器 */
 .question-container {
   flex: 1;
   overflow-y: auto;
@@ -469,6 +492,7 @@ onUnmounted(() => {
   margin-bottom: 20px;
 }
 
+/* 进度信息容器 */
 .progress-info {
   background: #fff;
   padding: 16px;
@@ -476,10 +500,12 @@ onUnmounted(() => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
+/* 进度条容器 */
 .progress-bar {
   margin-bottom: 12px;
 }
 
+/* 进度统计信息 */
 .progress-stats {
   display: flex;
   justify-content: space-between;

@@ -1,0 +1,613 @@
+<template>
+  <div class="programming-question-container">
+    <!-- 左侧：问题描述区域 -->
+    <div class="left-section">
+      <div class="section-card">
+        <h3 class="section-title">问题题目</h3>
+        <div class="problem-title">{{ question.title }}</div>
+      </div>
+      
+      <div class="section-card">
+        <h3 class="section-title">问题要求</h3>
+        <div class="problem-content">{{ question.content }}</div>
+      </div>
+      
+      <div class="section-card">
+        <h3 class="section-title">问题说明</h3>
+        <div class="note-content">
+          <div v-if="question.input" class="note-item">
+            <span class="note-label">输入:</span> {{ question.input }}
+          </div>
+          <div v-if="question.output" class="note-item">
+            <span class="note-label">输出:</span> {{ question.output }}
+          </div>
+          <div v-if="question.note" class="note-item">
+            <span class="note-label">注意:</span> {{ question.note }}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 右侧：代码编写区域 -->
+    <div class="right-section">
+      <div class="code-card">
+        <div class="code-header">
+          <span class="code-title">编写代码</span>
+          <div class="code-actions">
+            <el-select
+              v-model="language"
+              placeholder="选择语言"
+              size="medium"
+              style="width: 100px"
+            >
+              <el-option label="Python" value="python"></el-option>
+              <el-option label="Java" value="java"></el-option>
+              <el-option label="C++" value="cpp"></el-option>
+              <el-option label="JavaScript" value="javascript"></el-option>
+            </el-select>
+            <el-button
+              v-if="hasPreviousEvaluation"
+              size="medium"
+              style="margin-left: 10px"
+              @click="showPreviousEvaluation"
+              >查看上一次评测</el-button
+            >
+          </div>
+        </div>
+        
+        <div class="code-content">
+          <textarea
+            v-model="code"
+            class="code-input"
+            placeholder="在此输入代码..."
+            :disabled="showCorrectness"
+          ></textarea>
+        </div>
+        
+        <!-- 代码运行结果 -->
+        <div v-if="codeResult" class="code-result">
+          <h4>运行结果：</h4>
+          <pre>{{ codeResult }}</pre>
+        </div>
+        
+        <!-- 正确答案展示 -->
+        <div v-if="showCorrectness && question.answer" class="correct-answer">
+          <h4>参考答案：</h4>
+          <div class="code-editor">
+            <pre>{{ question.answer }}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 评估结果对话框 -->
+    <el-dialog v-model="dialogVisible" width="80%" :before-close="handleClose">
+      <div class="evaluation-container">
+        <h3 class="dialog-inner-title">代码评测结果</h3>
+
+        <div class="evaluation-content" v-loading="evaluationLoading">
+          <div
+            v-if="evaluationText && !evaluationLoading"
+            class="evaluation-item markdown-content"
+          >
+            <div v-html="parseMarkdown(evaluationText)"></div>
+          </div>
+
+          <div v-else-if="!evaluationLoading" class="empty-state">
+            <p>暂无评估结果</p>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogVisible = false">关闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ElMessage } from "element-plus";
+import { marked } from "marked";
+import { nextTick, onMounted, ref, watch } from "vue";
+
+// Props 定义
+const props = defineProps({
+  question: {
+    type: Object,
+    required: true,
+    default: () => ({
+      id: '',
+      title: '',
+      content: '',
+      input: '',
+      output: '',
+      note: '',
+      answer: '',
+      status: null
+    })
+  },
+  showCorrectness: {
+    type: Boolean,
+    default: false
+  },
+  userAnswer: {
+    type: String,
+    default: ''
+  }
+});
+
+// Emits 定义
+const emit = defineEmits(['answer-submitted', 'answer-changed']);
+
+// 暴露提交方法给父组件
+defineExpose({
+  submitCode
+});
+
+// 响应式数据
+const language = ref("cpp");
+const code = ref('');
+const codeResult = ref('');
+
+// dialog相关状态
+const dialogVisible = ref(false);
+const evaluationText = ref(""); // 使用单个字符串来存储完整的评估文本
+const evaluationLoading = ref(false);
+const hasPreviousEvaluation = ref(false);
+
+// 监听props变化，更新本地代码
+watch(() => props.question, (newQuestion) => {
+  if (newQuestion) {
+    // 初始化代码，如果userAnswer有值则使用userAnswer，否则使用空字符串
+    code.value = props.userAnswer || '';
+  }
+  codeResult.value = '';
+}, { immediate: true, deep: true });
+
+// 监听代码变化，触发答案变更事件
+watch(code, (newCode) => {
+  emit('answer-changed', props.question.id, newCode);
+}, { deep: true });
+
+// 初始化检查是否有上一次评估结果
+onMounted(() => {
+  checkPreviousEvaluation();
+});
+
+// 检查是否有上一次评估结果
+function checkPreviousEvaluation() {
+  const savedEvaluation = sessionStorage.getItem("previousEvaluation");
+  hasPreviousEvaluation.value = !!savedEvaluation;
+}
+
+// 提交代码并处理flux响应
+async function submitCode() {
+  if (!code.value.trim()) {
+    ElMessage.error("请输入代码");
+    return;
+  }
+
+  // 发出答案提交事件
+  emit('answer-submitted', {
+    questionId: props.question.id,
+    answer: code.value,
+    isEmpty: false
+  });
+
+  // 准备提交数据
+  const submission = {
+    question: props.question.title + '\n' + props.question.content,
+    codeLanguage: language.value,
+    code: code.value,
+    input: props.question.input || '',
+    output: props.question.output || ''
+  };
+
+  // 重置评估结果
+  evaluationText.value = "";
+  evaluationLoading.value = true;
+  dialogVisible.value = true;
+
+  try {
+    //发送请求并处理Flux响应
+    const response = await fetch("http://localhost:80/api/analysis/evaluate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(submission),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // 处理Flux响应流
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulatedText = "";
+
+    // 读取流数据并实现流式展示
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        break;
+      }
+
+      // 解码接收到的数据
+      const chunk = decoder.decode(value, { stream: true });
+      accumulatedText += chunk;
+
+      // 使用nextTick确保UI能够正确更新，实现流式显示效果
+      await nextTick();
+      evaluationText.value = accumulatedText;
+    }
+
+    // 保存完整结果到sessionStorage
+    sessionStorage.setItem("previousEvaluation", accumulatedText);
+    hasPreviousEvaluation.value = true;
+  } catch (error) {
+    console.error("Submit code error:", error);
+    ElMessage.error("代码提交失败，请稍后重试");
+  } finally {
+    evaluationLoading.value = false;
+  }
+}
+
+// 显示上一次评测结果
+function showPreviousEvaluation() {
+  const savedEvaluation = sessionStorage.getItem("previousEvaluation");
+  if (savedEvaluation) {
+    try {
+      evaluationText.value = savedEvaluation;
+    } catch (error) {
+      evaluationText.value = savedEvaluation;
+    }
+    evaluationLoading.value = false;
+    dialogVisible.value = true;
+  }
+}
+
+// 对话框关闭前的处理
+function handleClose() {
+  dialogVisible.value = false;
+}
+
+// Markdown解析函数
+function parseMarkdown(text) {
+  try {
+    return marked.parse(text);
+  } catch (error) {
+    console.error("Markdown解析错误:", error);
+    return text; // 解析失败时返回原始文本
+  }
+}
+</script>
+
+<style scoped>
+.programming-question-container {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+/* 左侧区域样式 */
+.left-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.section-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e6f7ff;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1890ff;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.problem-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.6;
+}
+
+.problem-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.note-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+}
+
+.note-item {
+  margin-bottom: 10px;
+}
+
+.note-label {
+  font-weight: 600;
+  color: #333;
+  margin-right: 5px;
+}
+
+/* 右侧区域样式 */
+.right-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: hidden;
+}
+
+.code-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e6f7ff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #fafafa;
+}
+
+.code-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.code-actions {
+  display: flex;
+  align-items: center;
+}
+
+.code-content {
+  flex: 1;
+  position: relative;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.code-input {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background-color: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  outline: none;
+  resize: none;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  caret-color: #000;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  letter-spacing: 0;
+  tab-size: 4;
+  padding: 15px;
+}
+
+/* 代码运行结果 */
+.code-result {
+  margin: 0 20px 20px 20px;
+  padding: 12px;
+  background: #f0f9eb;
+  border: 1px solid #e1f3d8;
+  border-radius: 6px;
+}
+
+.code-result h4 {
+  margin: 0 0 10px 0;
+  color: #67c23a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.code-result pre {
+  margin: 0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #67c23a;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 正确答案展示 */
+.correct-answer {
+  margin: 0 20px 20px 20px;
+  padding: 16px;
+  background: #f0f9eb;
+  border: 1px solid #e1f3d8;
+  border-radius: 6px;
+}
+
+.correct-answer h4 {
+  margin: 0 0 12px 0;
+  color: #67c23a;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.correct-answer .code-editor {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  border: 1px solid #ddd;
+}
+
+.correct-answer pre {
+  margin: 0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 评估对话框样式 */
+.evaluation-container {
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.dialog-inner-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1890ff;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.evaluation-content {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.evaluation-item {
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.evaluation-item pre {
+  margin: 8px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.6;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+/* Markdown 内容样式 */
+.markdown-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.markdown-content h1 { font-size: 24px; }
+.markdown-content h2 { font-size: 20px; }
+.markdown-content h3 { font-size: 18px; }
+
+.markdown-content p { margin-bottom: 12px; margin-top: 0; }
+.markdown-content a { color: #1890ff; text-decoration: none; }
+.markdown-content a:hover { text-decoration: underline; }
+
+.markdown-content ul, .markdown-content ol {
+  margin-bottom: 12px;
+  padding-left: 24px;
+}
+
+.markdown-content code {
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 13px;
+}
+
+.markdown-content pre {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+}
+
+.markdown-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* 自定义滚动条样式 */
+.left-section::-webkit-scrollbar,
+.code-input::-webkit-scrollbar,
+.evaluation-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.left-section::-webkit-scrollbar-thumb,
+.code-input::-webkit-scrollbar-thumb,
+.evaluation-container::-webkit-scrollbar-thumb {
+  background-color: #d9d9d9;
+  border-radius: 3px;
+}
+
+.left-section::-webkit-scrollbar-track,
+.code-input::-webkit-scrollbar-track,
+.evaluation-container::-webkit-scrollbar-track {
+  background-color: #f5f5f5;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .programming-question-container {
+    flex-direction: column;
+  }
+  
+  .left-section,
+  .right-section {
+    overflow: visible;
+  }
+  
+  .code-content {
+    height: 400px;
+  }
+}
+</style>
