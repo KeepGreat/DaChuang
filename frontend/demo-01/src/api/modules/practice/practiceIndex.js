@@ -14,6 +14,16 @@ import request from "@/utils/request";
  * @property {number} courseId - 课程ID
  */
 
+// request
+/**
+ * 更新练习索引请求参数（仅id必填，其他字段可选）
+ * @typedef {Object} UpdatePracticeIndexRequest
+ * @property {number} id - 索引ID
+ * @property {number} [practiceId] - 练习ID
+ * @property {number} [courseSectionId] - 课程系列ID
+ * @property {number} [courseId] - 课程ID
+ */
+
 /**
  * 新增练习与课程关系
  * @param {PracticeIndex[]} indexList - PracticeIndex数组，要求每项元素的practiceId、courseSectionId不能为空
@@ -42,7 +52,7 @@ export function deletePracticeIndexByIds(indexIds) {
 
 /**
  * 更新练习与课程关系
- * @param {PracticeIndex} practiceIndex - PracticeIndex类，要求id不能为空，要更新的字段不能为空
+ * @param {UpdatePracticeIndexRequest} practiceIndex - 更新请求参数，id必填，其他字段可选（传递则不能为空）
  * @returns {Promise<ApiResponse<null>>}
  */
 export function updatePracticeIndex(practiceIndex) {
