@@ -49,7 +49,7 @@ import request from "@/utils/request";
  * @param {CreatePracticeRequest} data
  * @returns {Promise<ApiResponse<null>>}
  */
-export function createPractice(data) {
+export function createPracticeAndIndex(data) {
   return request({
     url: "/api/practice/practice",
     method: "POST",
@@ -108,7 +108,7 @@ export function updatePractice(data) {
  * @param {string} [params.expiredAtEnd] - 过期时间结束点
  * @returns {Promise<ApiResponse<Practice[]>>} 练习列表
  */
-export function searchPractices(params = {}) {
+export function getPractices(params = {}) {
   return request({
     url: "/api/practice/practice",
     method: "GET",
@@ -130,7 +130,7 @@ export function searchPractices(params = {}) {
  * @param {string} [queryParams.expiredAtEnd] - 过期时间结束点
  * @returns {Promise<ApiResponse<Page<Practice>>>} 分页练习列表
  */
-export function searchPracticesPage(pageParams, queryParams = {}) {
+export function getPracticesPage(pageParams, queryParams = {}) {
   const { pageNo, pageSize } = pageParams;
   return request({
     url: `/api/practice/practice/${pageNo}/${pageSize}`,

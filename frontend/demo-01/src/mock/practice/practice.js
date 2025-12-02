@@ -1,7 +1,7 @@
 import { generateDateTime, getNextId, parsePathParams, practiceIndexes, practices } from "./mockData";
 
 export default [
-  // createPractice - 新增练习及关联的 PracticeIndex
+  // createPracticeAndIndex - 新增练习及关联的 PracticeIndex
   {
     url: "/api/practice/practice",
     method: "post",
@@ -55,14 +55,14 @@ export default [
         practices.push(newPractice);
         practiceIndexes.push(newPracticeIndex);
 
-        console.log("createPractice success:", { newPractice, newPracticeIndex });
+        console.log("createPracticeAndIndex success:", { newPractice, newPracticeIndex });
         return {
           code: 200,
           message: "新增练习成功",
           data: null,
         };
       } catch (error) {
-        console.error("createPractice error:", error);
+        console.error("createPracticeAndIndex error:", error);
         return {
           code: 500,
           message: "Internal Server Error",
@@ -254,7 +254,7 @@ export default [
     },
   },
 
-  // searchPractices - 按参数查询Practice
+  // getPractices - 按参数查询Practice
   {
     url: "/api/practice/practice",
     method: "get",
@@ -298,7 +298,7 @@ export default [
     },
   },
 
-  // searchPracticesPage - 按参数分页查询Practice
+  // getPracticesPage - 按参数分页查询Practice
   {
     url: "/api/practice/practice/:page/:size",
     method: "get",
