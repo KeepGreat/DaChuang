@@ -9,6 +9,7 @@ export * from "./modules/teaching/TeachingAPI";
 export * from "./modules/auth/auth";
 
 // practice
+export * from "./modules/practice/answer";
 export * from "./modules/practice/practice";
 export * from "./modules/practice/practiceIndex";
 export * from "./modules/practice/question";

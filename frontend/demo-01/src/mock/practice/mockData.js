@@ -70,6 +70,46 @@ export const practiceIndexes = [
   { id: 6, practiceId: 6, courseSectionId: 104, courseId: 1005 },
 ];
 
+// 答案数据
+export const answers = [
+  {
+    id: 1,
+    content: "True",
+    analysis: "这是一个判断题的正确答案",
+    questionId: 1,
+  },
+  {
+    id: 2,
+    content: "A",
+    analysis: "这是一个选择题的正确答案，选项A符合题目要求",
+    questionId: 2,
+  },
+  {
+    id: 3,
+    content: "这是一个简答题的标准答案，需要包含关键要点",
+    analysis: "简答题评分要点：1.概念清晰 2.逻辑完整 3.表达准确",
+    questionId: 3,
+  },
+  {
+    id: 4,
+    content: "def hello():\n    print('Hello, World!')",
+    analysis: "编程题答案：定义一个hello函数，输出Hello, World!",
+    questionId: 4,
+  },
+  {
+    id: 5,
+    content: "False",
+    analysis: "判断题错误答案，该陈述不成立",
+    questionId: 5,
+  },
+  {
+    id: 6,
+    content: "C",
+    analysis: "选择题答案，选项C是正确答案",
+    questionId: 6,
+  },
+];
+
 // 问题数据
 export const questions = [
   {
