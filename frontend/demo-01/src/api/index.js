@@ -10,6 +10,7 @@ export * from "./modules/auth/auth";
 
 // practice
 export * from "./modules/practice/practice";
+export * from "./modules/practice/practiceIndex";
 
 export * from "./modules/ExperimentAPI";
 export * from "./modules/PracticeAPI";
