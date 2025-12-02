@@ -69,3 +69,45 @@ export const practiceIndexes = [
   { id: 5, practiceId: 5, courseSectionId: 104, courseId: 1004 },
   { id: 6, practiceId: 6, courseSectionId: 104, courseId: 1005 },
 ];
+
+// 问题数据
+export const questions = [
+  {
+    id: 1,
+    name: "判断题1",
+    type: 0, // 0:判断,1:选择,2:简答,3:编程
+    content: "1+1=2是对的吗？",
+    hasResource: false,
+  },
+  {
+    id: 2,
+    name: "选择题1",
+    type: 1,
+    content: "以下哪个是JavaScript的数据类型？\nA. String\nB. Integer\nC. Float\nD. Character",
+    hasResource: true,
+  },
+  {
+    id: 3,
+    name: "简答题1",
+    type: 2,
+    content: "请简述Vue 3的Composition API的优势。",
+    hasResource: false,
+  },
+  {
+    id: 4,
+    name: "编程题1",
+    type: 3,
+    content: "请编写一个函数，实现数组去重的功能。",
+    hasResource: true,
+  },
+];
+
+// 问题索引数据（用于关联练习）
+export const questionIndexes = [
+  { id: 1, questionId: 1, practiceId: 1 },
+  { id: 2, questionId: 2, practiceId: 1 },
+  { id: 3, questionId: 3, practiceId: 2 },
+  { id: 4, questionId: 4, practiceId: 3 },
+  { id: 5, questionId: 1, practiceId: 4 },
+  { id: 6, questionId: 2, practiceId: 5 },
+];
