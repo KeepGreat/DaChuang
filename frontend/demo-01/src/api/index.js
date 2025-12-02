@@ -1,10 +1,16 @@
+// teaching
 export * from "./modules/teaching/CourseAPI";
 export * from "./modules/teaching/CourseSectionAPI";
 export * from "./modules/teaching/FileContentAPI";
 export * from "./modules/teaching/MaterialAPI";
 export * from "./modules/teaching/TeachingAPI";
 
+// auth
 export * from "./modules/auth/auth";
+
+// practice
+export * from "./modules/practice/practice";
+
 export * from "./modules/ExperimentAPI";
 export * from "./modules/PracticeAPI";
 export * from "./modules/profiling/api";
