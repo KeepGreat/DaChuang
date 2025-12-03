@@ -496,18 +496,20 @@ onMounted(() => {
   flex-direction: column;
   height: 100vh;
   width: 100%;
-  background-color: #f9fbfd;
+  background: #fff6fb;
+  font-family: "Inter", Arial, sans-serif;
 }
 
 /* ========== 导航栏优化 ========== */
 .nav-bar {
   height: 60px;
-  background: #ffffff;
+  background: rgba(255,255,255,0.9);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   padding: 0 24px;
   z-index: 10;
+  border-bottom: 1px solid #f5dbe7;
 }
 
 .nav-left, .nav-right {
@@ -524,7 +526,7 @@ onMounted(() => {
 
 .back-button {
   font-weight: 500;
-  color: #409eff;
+  color: #d63384;
 }
 
 .nav-tab {
@@ -533,22 +535,23 @@ onMounted(() => {
   border-radius: 6px 6px 6px 6px;
   font-size: 15px;
   font-weight: 500;
-  color: #606266;
-  background: #f5f7fa;
+  color: #6b3b52;
+  background: linear-gradient(180deg,#fff,#fff0f4);
   transition: all 0.25s ease;
-  border: 1px solid transparent;
+  border: 1px solid #ffd6e7;
   border-bottom: none;
 }
 
 .nav-tab:hover {
-  background: #eef2f7;
-  color: #409eff;
+  background: #fff0f6;
+  color: #d63384;
+  transform: translateY(-2px);
 }
 
 .nav-tab.active {
-  background: #409eff;
+  background: #d63384;
   color: white;
-  border-color: #409eff;
+  border-color: #d63384;
 }
 
 /* ========== 主内容区 ========== */
@@ -562,13 +565,13 @@ onMounted(() => {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
-  background: #f9fbfd;
+  background: #fff6fb;
 }
 
 .teaching-card {
   margin-bottom: 24px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
 }
 
 .card-header {
@@ -579,8 +582,8 @@ onMounted(() => {
 
 .header-title {
   font-size: 16px;
-  font-weight: 600;
-  color: #303133;
+  font-weight: 700;
+  color: #d63384;
 }
 
 .language-select {
@@ -590,8 +593,8 @@ onMounted(() => {
 /* ========== 代码沙箱 ========== */
 .code-editor-card {
   margin-bottom: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
 }
 
 .code-editor-wrapper {
@@ -665,8 +668,8 @@ onMounted(() => {
 }
 
 .text-input:focus {
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+  border-color: #d63384;
+  box-shadow: 0 0 0 2px rgba(214, 51, 132, 0.2);
 }
 
 .output-display {
@@ -684,42 +687,41 @@ onMounted(() => {
 .run-button {
   padding: 6px 16px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
-  background: linear-gradient(135deg, #66b1ff, #409eff);
+  background: linear-gradient(90deg,#ff7ab1,#d63384);
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 4px rgba(64, 158, 255, 0.2);
+  transition: all 0.16s ease;
+  box-shadow: 0 8px 24px rgba(214, 51, 132, 0.12);
   height: auto;
   min-height: auto;
 }
 
 .run-button:hover {
-  background: linear-gradient(135deg, #53a8ff, #3a8fdb);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(64, 158, 255, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(214, 51, 132, 0.18);
 }
 
 .run-button:active {
   transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(64, 158, 255, 0.25);
+  box-shadow: 0 6px 18px rgba(214, 51, 132, 0.15);
 }
 
 .run-button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.25);
+  box-shadow: 0 0 0 2px rgba(214, 51, 132, 0.25);
 }
 
 /* ========== 侧边栏 ========== */
 .sidebar {
   width: 380px;
   background: white;
-  border-left: 1px solid #ebeef5;
+  border-left: 1px solid #f5dbe7;
   display: flex;
   flex-direction: column;
   box-shadow: -2px 0 12px rgba(0, 0, 0, 0.06);
@@ -727,14 +729,14 @@ onMounted(() => {
 
 .sidebar-header {
   padding: 18px 20px;
-  border-bottom: 1px solid #ebeef5;
-  background: #fafafa;
+  border-bottom: 1px solid #f5dbe7;
+  background: linear-gradient(180deg,#fff,#fff0f4);
 }
 
 .sidebar-header h3 {
   margin: 0;
-  font-weight: 600;
-  color: #303133;
+  font-weight: 700;
+  color: #d63384;
 }
 
 .chat-messages {
@@ -744,7 +746,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #f9fbfd;
+  background: #fff6fb;
 }
 
 .message {
@@ -766,18 +768,18 @@ onMounted(() => {
 }
 
 .user-message .message-avatar {
-  background: #409eff;
+  background: #d63384;
   color: white;
 }
 
 .ai-message .message-avatar {
-  background: #67c23a;
+  background: #ff7ab1;
   color: white;
 }
 
 .system-message .message-avatar {
-  background: #e6a23c;
-  color: white;
+  background: #ffb6d9;
+  color: #9b1f54;
 }
 
 .message-content {
@@ -789,7 +791,7 @@ onMounted(() => {
 }
 
 .user-message .message-content {
-  background: #409eff;
+  background: #d63384;
   color: white;
   align-self: flex-end;
   margin-left: auto;
@@ -798,12 +800,12 @@ onMounted(() => {
 .ai-message .message-content,
 .system-message .message-content {
   background: white;
-  border: 1px solid #ebeef5;
+  border: 1px solid #ffd6e7;
 }
 
 .chat-input-area {
   padding: 16px;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid #f5dbe7;
   display: flex;
   gap: 12px;
 }
@@ -813,8 +815,8 @@ onMounted(() => {
   min-height: 70px;
   max-height: 140px;
   padding: 12px 14px;
-  border: 1px solid #dcdfe6;
-  border-radius: 6px;
+  border: 1px solid #ffd6e7;
+  border-radius: 12px;
   font-size: 14px;
   line-height: 1.5;
   resize: vertical;
@@ -822,14 +824,14 @@ onMounted(() => {
 
 .chat-input:focus {
   outline: none;
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+  border-color: #d63384;
+  box-shadow: 0 0 0 2px rgba(214, 51, 132, 0.2);
 }
 
 .send-button {
   padding: 12px 20px;
   height: fit-content;
-  border-radius: 6px;
+  border-radius: 12px;
 }
 
 /* ========== 响应式 ========== */

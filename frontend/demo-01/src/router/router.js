@@ -48,9 +48,71 @@ const router = createRouter({
           component: () => import("@/view/teaching/CourseSection.vue"),
         },
         {
-          path: "courselist/:id",
-          name: "Course",
+          path: "teaching/course/:id",
+          name: "TeachingCourse",
           component: () => import("@/view/teaching/Course.vue"),
+          children: [
+            {
+              path: "learn",
+              name: "CourseContent",
+              component: () => import("@/view/teaching/CourseContent.vue"),
+            },
+            {
+              path: "task",
+              name: "TaskList",
+              component: () => import("@/view/teaching/TaskList.vue"),
+            },
+            {
+              path: "task/:taskId",
+              name: "TaskDetail",
+              component: () => import("@/view/teaching/TaskDetail.vue"),
+            },
+            {
+              path: "assignment",
+              name: "AssignmentList",
+              component: () => import("@/view/teaching/AssignmentList.vue"),
+            },
+            {
+              path: "assignment/:assignmentId",
+              name: "AssignmentDetail",
+              component: () => import("@/view/teaching/AssignmentDetail.vue"),
+            },
+            {
+              path: "exam",
+              name: "ExamList",
+              component: () => import("@/view/teaching/ExamList.vue"),
+            },
+            {
+              path: "exam/:examId",
+              name: "ExamDetail",
+              component: () => import("@/view/teaching/ExamDetail.vue"),
+            },
+            {
+              path: "resource",
+              name: "ResourceList",
+              component: () => import("@/view/teaching/ResourceList.vue"),
+            },
+            {
+              path: "resource/:resourceId",
+              name: "ResourceDetail",
+              component: () => import("@/view/teaching/ResourceDetail.vue"),
+            },
+            {
+              path: "discussion",
+              name: "DiscussionList",
+              component: () => import("@/view/teaching/DiscussionList.vue"),
+            },
+            {
+              path: "discussion/:discussionId",
+              name: "DiscussionDetail",
+              component: () => import("@/view/teaching/DiscussionDetail.vue"),
+            },
+            {
+              path: "knowledge",
+              name: "KnowledgeGraph",
+              component: () => import("@/view/teaching/KnowledgeGraph.vue"),
+            },
+          ],
         },
         {
           path: "teach",

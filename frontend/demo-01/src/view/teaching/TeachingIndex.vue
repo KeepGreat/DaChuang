@@ -101,9 +101,10 @@ const handleClick = (item) => {
 
 <style scoped>
 .teaching-index-container {
-  background-color: #f0f7ff;
+  background: #fff6fb;
   height: 100%;
   overflow-y: auto;
+  font-family: "Inter", Arial, sans-serif;
 }
 
 .page-header {
@@ -115,12 +116,13 @@ const handleClick = (item) => {
 .page-title {
   font-size: 36px;
   margin: 0 0 10px 0;
-  color: #333;
+  color: #d63384;
+  font-weight: 800;
 }
 
 .page-subtitle {
   font-size: 18px;
-  color: #666;
+  color: #6b3b52;
   margin: 0;
 }
 
@@ -162,13 +164,14 @@ const handleClick = (item) => {
 .course-card {
   margin-bottom: 20px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-radius: 8px;
+  border-radius: 12px;
   height: 120px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
 }
 
 .course-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(214,51,132,0.08);
 }
 
 .course-card-content {
@@ -180,7 +183,7 @@ const handleClick = (item) => {
 
 .course-icon {
   font-size: 40px;
-  color: #409eff;
+  color: #d63384;
   margin-right: 20px;
   flex-shrink: 0;
 }
@@ -192,11 +195,12 @@ const handleClick = (item) => {
 .course-title {
   font-size: 20px;
   margin: 0 0 10px 0;
-  color: #333;
+  color: #7b2a53;
+  font-weight: 700;
 }
 
 .course-description {
-  color: #666;
+  color: #9b7a88;
   line-height: 1.6;
   margin: 0;
   min-height: 40px;
@@ -208,7 +212,7 @@ const handleClick = (item) => {
   justify-content: center;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #f5dbe7;
 }
 
 /* 响应式设计 */
