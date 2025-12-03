@@ -22,7 +22,7 @@ import axios from "axios";
  * 新增问题资源请求参数
  * @typedef {Object} CreateQuestionResourceRequest
  * @property {string|null} [description] - 资源描述
- * @property {string} name - 资源名称
+ * @property {string} [name] - 资源名称
  * @property {number} type - 资源类型（0:测试用例,1:用例答案,2:问题描述资料）
  * @property {number} size - 资源大小
  * @property {number} questionId - 问题ID
