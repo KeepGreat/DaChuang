@@ -40,7 +40,7 @@ function extractQuestionResourceJSON(multipartString) {
 
   // 查找JSON开始位置，查找字段标识后的第一个{字符
   const afterFieldIndex = fieldIndex + fieldMarker.length;
-  const jsonStartIndex = multipartString.indexOf('{', afterFieldIndex);
+  const jsonStartIndex = multipartString.indexOf("{", afterFieldIndex);
 
   if (jsonStartIndex === -1) {
     console.log("未找到JSON开始标记");
@@ -383,7 +383,130 @@ export default [
     },
   },
 
+  // downloadQuestionResource - 下载问题资源文件
+  {
+    url: "/api/question/questionresource/download/:id",
+    method: "get",
+    rawResponse: async (req, res) => {
+      try {
+        // 解析路径参数
+        const pathParams = parsePathParams(req, 1);
+        const id = Number(pathParams.param1);
+
+        // 验证资源是否存在
+        const resource = questionResources.find((item) => item.id === id);
+        if (!resource) {
+          res.statusCode = 404;
+          res.setHeader("Content-Type", "application/json");
+          res.end(
+            JSON.stringify({
+              code: 404,
+              message: "问题资源不存在",
+              data: null,
+            })
+          );
+          return;
+        }
+
+        // 检查是否有模拟文件
+        const file = storedFiles.get(id);
+        if (!file) {
+          res.statusCode = 404;
+          res.setHeader("Content-Type", "application/json");
+          res.end(
+            JSON.stringify({
+              code: 404,
+              message: "文件不存在",
+              data: null,
+            })
+          );
+          return;
+        }
+
+        // 生成简单的模拟文件内容
+        const mockContent = `# 问题资源文件
+文件名: ${resource.name}
+资源ID: ${resource.id}
+资源类型: ${resource.type} (0:测试用例,1:用例答案,2:问题描述资料)
+资源大小: ${resource.size} bytes
+问题ID: ${resource.questionId}
+描述: ${resource.description || "无描述"}
+生成时间: ${new Date().toISOString()}
+
+这是一个模拟的文件内容，用于测试文件下载功能。
+`;
+
+        console.log("downloadQuestionResource success:", {
+          id,
+          filename: resource.name,
+          size: mockContent.length,
+          contentPreview: mockContent.substring(0, 100) + "...",
+          contentEnd: mockContent.substring(mockContent.length - 50),
+        });
+
+        // 根据文件扩展名获取正确的 MIME 类型（不确定，但是如果只是 res.setHeader text/plain 这样可能不太对）
+        function getContentType(filename) {
+          const ext = filename.split(".").pop().toLowerCase();
+          // https://www.runoob.com/http/http-content-type.html
+          const mimeTypes = {
+            txt: "text/plain; charset=utf-8",
+            json: "application/json; charset=utf-8",
+            pdf: "application/pdf",
+            doc: "application/msword",
+            docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ppt: "application/vnd.ms-powerpoint",
+            pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            xls: "application/vnd.ms-excel",
+            xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            zip: "application/zip",
+            rar: "application/x-rar-compressed",
+            jpg: "image/jpeg",
+            jpeg: "image/jpeg",
+            png: "image/png",
+            gif: "image/gif",
+            svg: "image/svg+xml",
+            mp4: "video/mp4",
+            mp3: "audio/mpeg",
+          };
+          return mimeTypes[ext] || "application/octet-stream";
+        }
+
+        // 设置响应头
+        res.statusCode = 200;
+        const contentType = getContentType(resource.name);
+        console.log("contentType :", contentType);
+        res.setHeader("Content-Type", contentType);
+        res.setHeader("Content-Disposition", `attachment; filename="${resource.name}"`);
+        // 不设置 Content-Length，让浏览器自动处理，否则文件会被截断
+
+        // 发送文件内容
+        // 对于二进制文件类型，不指定编码；对于文本文件，使用 utf-8
+        if (
+          contentType.includes("text/") ||
+          contentType.includes("json") ||
+          contentType.includes("xml")
+        ) {
+          res.write(mockContent, "utf8");
+        } else {
+          res.write(mockContent);
+        }
+        res.end();
+      } catch (error) {
+        console.error("downloadQuestionResource error:", error);
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          JSON.stringify({
+            code: 500,
+            message: "Internal Server Error",
+            data: null,
+          })
+        );
+      }
+    },
+  },
   // getQuestionResourcesPage - 按参数分页查询问题资源
+  // 更通用的url匹配放在后面，否则会在调用downloadQuestionResource时被匹配到getQuestionResourcesPage
   {
     url: "/api/question/questionresource/:pageNo/:pageSize",
     method: "get",
@@ -435,61 +558,6 @@ export default [
         };
       } catch (error) {
         console.error("getQuestionResourcesPage error:", error);
-        return {
-          code: 500,
-          message: "Internal Server Error",
-          data: null,
-        };
-      }
-    },
-  },
-
-  // downloadQuestionResource - 下载问题资源文件
-  // TODO 未完成
-  {
-    url: "/api/question/questionresource/download/:id",
-    method: "get",
-    response: (req, res) => {
-      try {
-        // console.log("downloadQuestionResource req:", req);
-
-        // 解析路径参数
-        const pathParams = parsePathParams(req, 1);
-        const id = Number(pathParams.param1);
-
-        // 验证资源是否存在
-        const resource = questionResources.find((item) => item.id === id);
-        if (!resource) {
-          return {
-            code: 404,
-            message: "问题资源不存在",
-            data: null,
-          };
-        }
-
-        // 检查是否有模拟文件
-        const file = storedFiles.get(id);
-        if (!file) {
-          return {
-            code: 404,
-            message: "文件不存在",
-            data: null,
-          };
-        }
-
-        console.log("downloadQuestionResource success:", { id, filename: resource.name });
-
-        // 返回模拟的文件信息
-        return {
-          headers: {
-            "Content-Type": "application/octet-stream",
-            "Content-Disposition": `attachment; filename="${resource.name}"`,
-            "Content-Length": file.size.toString(),
-          },
-          body: `Mock file content for ${resource.name}`,
-        };
-      } catch (error) {
-        console.error("downloadQuestionResource error:", error);
         return {
           code: 500,
           message: "Internal Server Error",
