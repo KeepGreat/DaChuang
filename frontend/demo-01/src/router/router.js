@@ -152,8 +152,9 @@ const router = createRouter({
     },
 
     {
-      path: "/courses/:id/practice/:examId",
+      path: "/courses/:id/practice/:pracId",
       name: "Practices",
+      props: true,
       component: () => import("@/view/practice/Practice.vue"),
     },
 

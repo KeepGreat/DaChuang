@@ -1,4 +1,4 @@
-import { users } from "../user/mock-data";
+import { users } from "../user/mockData";
 
 /**
  * 生成可读的日期时间格式:
@@ -27,7 +27,7 @@ function generateToken(user) {
 export default [
   // register
   {
-    url: "/api/user/register",
+    url: "/user/register",
     method: "post",
     response: (req) => {
       try {
@@ -73,7 +73,7 @@ export default [
   },
   // login
   {
-    url: "/api/authenticate",
+    url: "/authenticate",
     method: "post",
     response: (req) => {
       try {
@@ -122,7 +122,7 @@ export default [
 
   // refreshToken
   {
-    url: "/api/refreshtoken",
+    url: "/refreshtoken",
     method: "post",
     response: (req) => {
       try {

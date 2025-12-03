@@ -4,7 +4,7 @@
       <h3 class="sidebar-title">题型导航</h3>
     </div>
     <div class="sidebar-content">
-      <div class="background-box" :style="{ top: backgroundBoxTop + 'px', height: backgroundBoxHeight + 'px' }"></div>
+      <div class="background-box" :style="{ top: backgroundBoxTop + 'px', height: backgroundBoxHeight + 'px' }" ref="backgroundBox"></div>
       <ul class="question-type-list" @mouseleave="resetBackgroundBox">
         <li 
           v-for="type in questionTypes" 
@@ -27,21 +27,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
 import { ArrowRight } from '@element-plus/icons-vue';
 
-// 定义题型数据（实际项目中可从API获取）
-const questionTypes = ref([
-  { id: 'single_choice', name: '单选题', answered: 2, total: 5 },
-  { id: 'multiple_choice', name: '多选题', answered: 1, total: 3 },
-  { id: 'judgment', name: '判断题', answered: 0, total: 4 },
-  { id: 'fill_blank', name: '填空题', answered: 3, total: 5 },
-  { id: 'short_answer', name: '简答题', answered: 0, total: 2 },
-  { id: 'programming', name: '编程题', answered: 1, total: 3 }
-]);
+// 接收父组件传递的props
+const props = defineProps({
+  questionTypes: {
+    type: Array,
+    required: true
+  },
+  activeTypeId: {
+    type: [String, Number],
+    default: 'all'
+  }
+});
 
-// 当前激活的题型ID
-const activeTypeId = ref('single_choice');
+// 定义事件
+const emit = defineEmits(['type-change']);
 
 // 背景框位置和高度
 const backgroundBoxTop = ref(0);
@@ -52,7 +54,8 @@ const questionTypeItems = ref([]);
 
 // 切换题型的方法
 const switchQuestionType = (typeId) => {
-  activeTypeId.value = typeId;
+  // 触发事件通知父组件
+  emit('type-change', typeId);
   // 更新背景框位置
   nextTick(() => {
     const activeItem = questionTypeItems.value.find(item => 
@@ -62,9 +65,19 @@ const switchQuestionType = (typeId) => {
       updateBackgroundBoxFromElement(activeItem);
     }
   });
-  // 此处可以添加切换题型的逻辑，如触发事件或调用API获取对应题型的题目
-  console.log('切换到题型：', typeId);
 };
+
+// 监听activeTypeId变化，更新背景框
+watch(() => props.activeTypeId, (newTypeId) => {
+  nextTick(() => {
+    const activeItem = questionTypeItems.value.find(item => 
+      item.classList.contains('active')
+    );
+    if (activeItem) {
+      updateBackgroundBoxFromElement(activeItem);
+    }
+  });
+});
 
 // 从元素更新背景框位置
 const updateBackgroundBoxFromElement = (element) => {
