@@ -385,7 +385,7 @@ export default [
 
   // getQuestionResourcesPage - 按参数分页查询问题资源
   {
-    url: "/api/question/questionresource/:page/:size",
+    url: "/api/question/questionresource/:pageNo/:pageSize",
     method: "get",
     response: (req) => {
       try {
