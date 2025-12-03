@@ -172,15 +172,111 @@ export const questionResources = [
   },
   {
     id: 3,
-    description: "问题描述资料",
-    name: "question_desc.pdf",
+    description: "编程题目说明",
+    name: "programming_guide.pdf",
     type: 2, // 2:问题描述资料
     size: 2048,
     questionId: 2,
   },
+  {
+    id: 4,
+    description: "算法执行流程图",
+    name: "algorithm_flow.png",
+    type: 2, // 2:问题描述资料
+    size: 15360,
+    questionId: 3,
+  },
+  {
+    id: 5,
+    description: "代码结构示意图",
+    name: "code_structure.jpg",
+    type: 2, // 2:问题描述资料
+    size: 25600,
+    questionId: 4,
+  },
+  {
+    id: 6,
+    description: "数据结构示意图",
+    name: "data_structure.png",
+    type: 2, // 2:问题描述资料
+    size: 8192,
+    questionId: 2,
+  },
+  {
+    id: 7,
+    description: "编程界面示例",
+    name: "coding_interface.png",
+    type: 2, // 2:问题描述资料
+    size: 32768,
+    questionId: 4,
+  },
+  {
+    id: 8,
+    description: "系统架构图",
+    name: "system_architecture.jpg",
+    type: 2, // 2:问题描述资料
+    size: 45056,
+    questionId: 3,
+  },
+  {
+    id: 9,
+    description: "知识点关系图",
+    name: "knowledge_map.jpg",
+    type: 2, // 2:问题描述资料
+    size: 12288,
+    questionId: 2,
+  },
+  {
+    id: 10,
+    description: "练习界面原型",
+    name: "exercise_ui.png",
+    type: 2, // 2:问题描述资料
+    size: 28672,
+    questionId: 1,
+  },
+  {
+    id: 11,
+    description: "算法演示动画",
+    name: "algorithm_demo.gif",
+    type: 2, // 2:问题描述资料
+    size: 18432,
+    questionId: 4,
+  },
+  {
+    id: 12,
+    description: "函数调用关系图",
+    name: "function_calls.png",
+    type: 2, // 2:问题描述资料
+    size: 9728,
+    questionId: 3,
+  },
+  {
+    id: 13,
+    description: "程序执行时序图",
+    name: "execution_sequence.jpg",
+    type: 2, // 2:问题描述资料
+    size: 21504,
+    questionId: 2,
+  },
+  {
+    id: 14,
+    description: "状态转换图",
+    name: "state_transition.png",
+    type: 2, // 2:问题描述资料
+    size: 16384,
+    questionId: 1,
+  },
+  {
+    id: 15,
+    description: "数据库设计图",
+    name: "database_design.jpg",
+    type: 2, // 2:问题描述资料
+    size: 14336,
+    questionId: 4,
+  },
 ];
 
-// 模拟文件存储（在实际应用中，文件会存储在文件系统）
+// 模拟文件存储
 export const storedFiles = new Map([
   [
     1,
@@ -201,9 +297,105 @@ export const storedFiles = new Map([
   [
     3,
     {
-      filename: "question_desc.pdf",
+      filename: "programming_guide.pdf",
       size: 2048,
       uploadedAt: "2025-11-01T08:10:00Z",
+    },
+  ],
+  [
+    4,
+    {
+      filename: "algorithm_flow.png",
+      size: 15360,
+      uploadedAt: "2025-11-01T08:15:00Z",
+    },
+  ],
+  [
+    5,
+    {
+      filename: "code_structure.jpg",
+      size: 25600,
+      uploadedAt: "2025-11-01T08:20:00Z",
+    },
+  ],
+  [
+    6,
+    {
+      filename: "data_structure.png",
+      size: 8192,
+      uploadedAt: "2025-11-01T08:25:00Z",
+    },
+  ],
+  [
+    7,
+    {
+      filename: "coding_interface.png",
+      size: 32768,
+      uploadedAt: "2025-11-01T08:30:00Z",
+    },
+  ],
+  [
+    8,
+    {
+      filename: "system_architecture.jpg",
+      size: 45056,
+      uploadedAt: "2025-11-01T08:35:00Z",
+    },
+  ],
+  [
+    9,
+    {
+      filename: "knowledge_map.jpg",
+      size: 12288,
+      uploadedAt: "2025-11-01T08:40:00Z",
+    },
+  ],
+  [
+    10,
+    {
+      filename: "exercise_ui.png",
+      size: 28672,
+      uploadedAt: "2025-11-01T08:45:00Z",
+    },
+  ],
+  [
+    11,
+    {
+      filename: "algorithm_demo.gif",
+      size: 18432,
+      uploadedAt: "2025-11-01T08:50:00Z",
+    },
+  ],
+  [
+    12,
+    {
+      filename: "function_calls.png",
+      size: 9728,
+      uploadedAt: "2025-11-01T08:55:00Z",
+    },
+  ],
+  [
+    13,
+    {
+      filename: "execution_sequence.jpg",
+      size: 21504,
+      uploadedAt: "2025-11-01T09:00:00Z",
+    },
+  ],
+  [
+    14,
+    {
+      filename: "state_transition.png",
+      size: 16384,
+      uploadedAt: "2025-11-01T09:05:00Z",
+    },
+  ],
+  [
+    15,
+    {
+      filename: "database_design.jpg",
+      size: 14336,
+      uploadedAt: "2025-11-01T09:10:00Z",
     },
   ],
 ]);

@@ -76,6 +76,78 @@ function findJsonEndIndex(multipartString, jsonStartIndex) {
   return endIndex;
 }
 
+/**
+ * 根据文件扩展名获取正确的 MIME 类型，
+ * 不确定，但是如果只是 res.setHeader text/plain 这样可能不太对
+ * @param {string} filename - 文件名
+ * @returns {string} - 文件类型，用在 res.setHeader 中
+ */
+function getContentType(filename) {
+  const ext = filename.split(".").pop().toLowerCase();
+  // https://www.runoob.com/http/http-content-type.html
+  const mimeTypes = {
+    txt: "text/plain; charset=utf-8",
+    json: "application/json; charset=utf-8",
+    pdf: "application/pdf",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ppt: "application/vnd.ms-powerpoint",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    xls: "application/vnd.ms-excel",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    zip: "application/zip",
+    rar: "application/x-rar-compressed",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    svg: "image/svg+xml",
+    mp4: "video/mp4",
+    mp3: "audio/mpeg",
+  };
+  return mimeTypes[ext] || "application/octet-stream";
+}
+
+/**
+ * 生成 dummyimage 图片的 Buffer
+ * @param {string} filename - 文件名
+ * @param {number} resourceId - 资源ID
+ * @returns {Promise<Buffer>} - 图片的 Buffer
+ */
+async function generateDummyImage(filename, resourceId) {
+  const fileExt = filename.split(".").pop().toLowerCase();
+
+  // 根据资源ID生成不同的图片参数，长宽和颜色
+  const width = 400 + (resourceId % 3) * 100; // 400-600px
+  const height = 300 + (resourceId % 2) * 100; // 300-400px
+  const bgColor = ["f0f0f0", "e8f4f8", "f8f0e8"][resourceId % 3];
+  const textColor = ["333", "0066cc", "cc6600"][resourceId % 3];
+
+  // 根据文件扩展名确定图片格式
+  let imageFormat = "png"; // 默认格式
+  if (["jpg", "jpeg"].includes(fileExt)) {
+    imageFormat = "jpg";
+  } else if (fileExt === "gif") {
+    imageFormat = "gif";
+  }
+
+  // 构建 dummyimage URL，使用对应的格式 https://www.dummyimage.com/
+  const imageUrl = `https://dummyimage.com/${width}x${height}/${bgColor}/${textColor}.${imageFormat}&text=${encodeURIComponent(
+    `Resource ${resourceId}`
+  )}`;
+  console.log("imageUrl :", imageUrl);
+
+  // 使用 fetch API 获取图片
+  const response = await fetch(imageUrl);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.status}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
 export default [
   // createQuestionResource - 新增问题资源
   {
@@ -423,8 +495,16 @@ export default [
           return;
         }
 
-        // 生成简单的模拟文件内容
-        const mockContent = `# 问题资源文件
+        // 根据文件类型生成不同的内容
+        let mockContent;
+        const fileExt = resource.name.split(".").pop().toLowerCase();
+
+        if (["jpg", "jpeg", "png", "gif", "svg"].includes(fileExt)) {
+          // 图片文件：生成 dummyimage 图片
+          mockContent = await generateDummyImage(resource.name, resource.id);
+        } else {
+          // 文本文件：生成文本内容
+          mockContent = `# 问题资源文件
 文件名: ${resource.name}
 资源ID: ${resource.id}
 资源类型: ${resource.type} (0:测试用例,1:用例答案,2:问题描述资料)
@@ -433,64 +513,41 @@ export default [
 描述: ${resource.description || "无描述"}
 生成时间: ${new Date().toISOString()}
 
-这是一个模拟的文件内容，用于测试文件下载功能。
-`;
+这是一个模拟的文件内容，用于测试文件下载功能。`;
+        }
+
+        // 获取 Content-Type
+        const contentType = getContentType(resource.name);
+        console.log("contentType :", contentType);
+
+        // 计算实际内容长度
+        const contentLength = Buffer.isBuffer(mockContent)
+          ? mockContent.length
+          : Buffer.byteLength(mockContent, "utf8");
 
         console.log("downloadQuestionResource success:", {
           id,
           filename: resource.name,
-          size: mockContent.length,
-          contentPreview: mockContent.substring(0, 100) + "...",
-          contentEnd: mockContent.substring(mockContent.length - 50),
+          size: contentLength,
+          isBuffer: Buffer.isBuffer(mockContent),
+          contentType: contentType,
         });
-
-        // 根据文件扩展名获取正确的 MIME 类型（不确定，但是如果只是 res.setHeader text/plain 这样可能不太对）
-        function getContentType(filename) {
-          const ext = filename.split(".").pop().toLowerCase();
-          // https://www.runoob.com/http/http-content-type.html
-          const mimeTypes = {
-            txt: "text/plain; charset=utf-8",
-            json: "application/json; charset=utf-8",
-            pdf: "application/pdf",
-            doc: "application/msword",
-            docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            ppt: "application/vnd.ms-powerpoint",
-            pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            xls: "application/vnd.ms-excel",
-            xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            zip: "application/zip",
-            rar: "application/x-rar-compressed",
-            jpg: "image/jpeg",
-            jpeg: "image/jpeg",
-            png: "image/png",
-            gif: "image/gif",
-            svg: "image/svg+xml",
-            mp4: "video/mp4",
-            mp3: "audio/mpeg",
-          };
-          return mimeTypes[ext] || "application/octet-stream";
-        }
 
         // 设置响应头
         res.statusCode = 200;
-        const contentType = getContentType(resource.name);
-        console.log("contentType :", contentType);
         res.setHeader("Content-Type", contentType);
         res.setHeader("Content-Disposition", `attachment; filename="${resource.name}"`);
         // 不设置 Content-Length，让浏览器自动处理，否则文件会被截断
 
         // 发送文件内容
-        // 对于二进制文件类型，不指定编码；对于文本文件，使用 utf-8
-        if (
-          contentType.includes("text/") ||
-          contentType.includes("json") ||
-          contentType.includes("xml")
-        ) {
-          res.write(mockContent, "utf8");
+        // 对于二进制文件（图片等），直接发送 Buffer；对于文本文件，使用 utf-8
+        if (Buffer.isBuffer(mockContent)) {
+          // 图片等二进制文件
+          res.end(mockContent);
         } else {
-          res.write(mockContent);
+          // 文本文件
+          res.end(mockContent, "utf8");
         }
-        res.end();
       } catch (error) {
         console.error("downloadQuestionResource error:", error);
         res.statusCode = 500;
