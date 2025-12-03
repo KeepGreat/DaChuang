@@ -14,6 +14,7 @@ export * from "./modules/practice/practice";
 export * from "./modules/practice/practiceIndex";
 export * from "./modules/practice/question";
 export * from "./modules/practice/questionIndex";
+export * from "./modules/practice/questionResource";
 
 export * from "./modules/ExperimentAPI";
 export * from "./modules/PracticeAPI";
