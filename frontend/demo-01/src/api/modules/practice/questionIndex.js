@@ -15,6 +15,13 @@ import request from "@/utils/request";
 
 // request
 /**
+ * 新增问题索引请求参数
+ * @typedef {Object} CreateQuestionIndexRequest
+ * @property {number} questionId - 问题ID（必填）
+ * @property {number} practiceId - 练习ID（必填）
+ */
+
+/**
  * 更新问题索引请求参数（仅id必填，其他字段可选）
  * @typedef {Object} UpdateQuestionIndexRequest
  * @property {number} id - 索引ID
@@ -24,7 +31,7 @@ import request from "@/utils/request";
 
 /**
  * 新增问题与练习关系
- * @param {QuestionIndex[]} questionIndexList - QuestionIndex数组，要求每项元素的practiceId、questionId不能为空
+ * @param {CreateQuestionIndexRequest[]} questionIndexList - QuestionIndex数组，要求每项元素的practiceId、questionId不能为空
  * @returns {Promise<ApiResponse<null>>}
  */
 export function createQuestionIndexes(questionIndexList) {

@@ -16,6 +16,14 @@ import request from "@/utils/request";
 
 // request
 /**
+ * 新增练习索引请求参数
+ * @typedef {Object} CreatePracticeIndexRequest
+ * @property {number} practiceId - 练习ID（必填）
+ * @property {number} courseSectionId - 课程系列ID（必填）
+ * @property {number} [courseId] - 课程ID（可选，默认为0）
+ */
+
+/**
  * 更新练习索引请求参数（仅id必填，其他字段可选）
  * @typedef {Object} UpdatePracticeIndexRequest
  * @property {number} id - 索引ID
@@ -26,7 +34,7 @@ import request from "@/utils/request";
 
 /**
  * 新增练习与课程关系
- * @param {PracticeIndex[]} indexList - PracticeIndex数组，要求每项元素的practiceId、courseSectionId不能为空
+ * @param {CreatePracticeIndexRequest[]} indexList - PracticeIndex数组，要求每项元素的practiceId、courseSectionId不能为空
  * @returns {Promise<ApiResponse<null>>}
  */
 export function createPracticeIndex(indexList) {
