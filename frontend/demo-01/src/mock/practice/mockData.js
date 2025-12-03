@@ -151,3 +151,59 @@ export const questionIndexes = [
   { id: 5, questionId: 1, practiceId: 4 },
   { id: 6, questionId: 2, practiceId: 5 },
 ];
+
+// 问题资源数据
+export const questionResources = [
+  {
+    id: 1,
+    description: "测试用例文件",
+    name: "test_cases.txt",
+    type: 0, // 0:测试用例
+    size: 1024,
+    questionId: 1,
+  },
+  {
+    id: 2,
+    description: "答案文件",
+    name: "answer.json",
+    type: 1, // 1:用例答案
+    size: 512,
+    questionId: 1,
+  },
+  {
+    id: 3,
+    description: "问题描述资料",
+    name: "question_desc.pdf",
+    type: 2, // 2:问题描述资料
+    size: 2048,
+    questionId: 2,
+  },
+];
+
+// 模拟文件存储（在实际应用中，文件会存储在文件系统）
+export const storedFiles = new Map([
+  [
+    1,
+    {
+      filename: "test_cases.txt",
+      size: 1024,
+      uploadedAt: "2025-11-01T08:00:00Z",
+    },
+  ],
+  [
+    2,
+    {
+      filename: "answer.json",
+      size: 512,
+      uploadedAt: "2025-11-01T08:05:00Z",
+    },
+  ],
+  [
+    3,
+    {
+      filename: "question_desc.pdf",
+      size: 2048,
+      uploadedAt: "2025-11-01T08:10:00Z",
+    },
+  ],
+]);
