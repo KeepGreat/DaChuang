@@ -289,7 +289,7 @@ export default [
 
   // getQuestionsPage - 按参数分页查询问题
   {
-    url: "/api/practice/question/:page/:size",
+    url: "/api/practice/question/:pageNo/:pageSize",
     method: "get",
     response: (req) => {
       try {
@@ -389,7 +389,7 @@ export default [
 
   // getQuestionPageByIndex - 根据练习ID分页查询问题
   {
-    url: "/api/practice/question/index/:page/:size",
+    url: "/api/practice/question/index/:pageNo/:pageSize",
     method: "get",
     response: (req) => {
       try {

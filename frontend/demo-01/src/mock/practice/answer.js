@@ -231,7 +231,7 @@ export default [
 
   // getAnswersPage - 按参数分页查询答案
   {
-    url: "/api/practice/answer/:page/:size",
+    url: "/api/practice/answer/:pageNo/:pageSize",
     method: "get",
     response: (req) => {
       try {

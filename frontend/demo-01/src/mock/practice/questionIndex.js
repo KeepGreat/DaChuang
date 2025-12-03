@@ -228,7 +228,7 @@ export default [
 
   // getQuestionIndexesPage - 按参数分页查询问题索引
   {
-    url: "/api/practice/questionindex/:page/:size",
+    url: "/api/practice/questionindex/:pageNo/:pageSize",
     method: "get",
     response: (req) => {
       try {

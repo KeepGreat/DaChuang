@@ -233,7 +233,7 @@ export default [
 
   // getPracticeIndexesPage - 按参数分页查询练习索引
   {
-    url: "/api/practice/practiceindex/:page/:size",
+    url: "/api/practice/practiceindex/:pageNo/:pageSize",
     method: "get",
     response: (req) => {
       try {

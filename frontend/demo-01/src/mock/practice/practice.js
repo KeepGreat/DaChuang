@@ -300,7 +300,7 @@ export default [
 
   // getPracticesPage - 按参数分页查询Practice
   {
-    url: "/api/practice/practice/:page/:size",
+    url: "/api/practice/practice/:pageNo/:pageSize",
     method: "get",
     response: (req) => {
       try {
@@ -410,7 +410,7 @@ export default [
 
   // getPracticesPageByIndex - 根据课程索引分页查询Practice
   {
-    url: "/api/practice/practice/index/:page/:size",
+    url: "/api/practice/practice/index/:pageNo/:pageSize",
     method: "get",
     response: (req) => {
       try {
