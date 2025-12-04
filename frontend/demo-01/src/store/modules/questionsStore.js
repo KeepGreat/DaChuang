@@ -181,6 +181,33 @@ export const useQuestionsStore = defineStore(
     });
 
 
+    // 辅助函数：将API返回的Question转换为store所需的结构
+    const transformQuestion = (apiQuestion) => {
+      // 根据问题类型设置默认选项
+      let defaultOptions = [];
+      if (apiQuestion.type === 0) { // 判断题
+        defaultOptions = [
+          { label: 'A', value: 'true', text: '正确' },
+          { label: 'B', value: 'false', text: '错误' }
+        ];
+      } else if (apiQuestion.type === 1) { // 选择题
+        // 默认空选项，实际应用中应从API获取
+        defaultOptions = [];
+      }
+      
+      // 转换为store所需的结构
+      return {
+        id: apiQuestion.id,
+        name: apiQuestion.name,
+        type: apiQuestion.type,
+        content: apiQuestion.content,
+        hasResource: apiQuestion.hasResource,
+        options: defaultOptions, // 选择题/判断题的选项
+        answer: [], // 正确答案，实际应用中应从API获取
+        status: null // 答题状态，初始为null
+      };
+    };
+
     // Actions
     const updateQuestionStatus = (questionId, status) => {
       const question = questions.value.find(q => q.id === questionId);
@@ -189,13 +216,26 @@ export const useQuestionsStore = defineStore(
       }
     };
 
+    const setQuestions = (newQuestions) => {
+      // 如果传入的问题不是store所需的结构，则进行转换
+      const transformedQuestions = newQuestions.map(transformQuestion);
+      questions.value = transformedQuestions;
+    };
+
+    // 导出transformQuestion供外部使用
+    const transformApiQuestions = (apiQuestions) => {
+      return apiQuestions.map(transformQuestion);
+    };
+
     return {
       questions,
       questionTypes,
       sidebarQuestionTypes,
       answeredCount,
       totalQuestions,
-      updateQuestionStatus
+      updateQuestionStatus,
+      setQuestions,
+      transformApiQuestions
     };
   },
   {
