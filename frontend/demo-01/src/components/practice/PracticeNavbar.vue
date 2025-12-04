@@ -24,9 +24,6 @@
         <el-icon class="timer-icon"><Timer /></el-icon>
         <span class="timer-text">{{ remainingTime }}</span>
       </div>
-      <button class="user-btn" @click="goToProfile">
-        <el-icon class="user-icon"><User /></el-icon>
-      </button>
     </div>
   </header>
 </template>
@@ -73,11 +70,6 @@ watch(() => props.singleQuestionMode, (newVal) => {
 // 返回上一页
 function goBack() {
   router.back();
-}
-
-// 跳转到个人中心
-function goToProfile() {
-  router.push('/profile');
 }
 
 // 处理单题作答开关切换

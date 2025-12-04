@@ -123,13 +123,15 @@ onMounted(() => {
 <style scoped>
 .practice-sidebar {
   width: 240px;
-  height: calc(100vh - 56px);
+  height: 500px; 
   background-color: #ffffff;
   border-right: 1px solid #dbeafe;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  margin: 20px 0;
 }
 
 .sidebar-header {

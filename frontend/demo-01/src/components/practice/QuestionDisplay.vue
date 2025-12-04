@@ -142,7 +142,8 @@
       
       <!-- 答题操作按钮 - 所有题型共用 -->
       <div class="question-actions">
-        <el-button @click="previousQuestion">上一题</el-button>
+        <!-- 上一题/下一题按钮仅在单题模式下显示 -->
+        <el-button v-if="singleQuestionMode" @click="previousQuestion">上一题</el-button>
         <div class="right-buttons">
           <el-button type="info" @click="toggleCorrectness" :disabled="false">
             {{ showCorrectness ? '隐藏答案' : '查看答案' }}
@@ -154,7 +155,8 @@
           >
             提交答案
           </el-button>
-          <el-button type="success" @click="nextQuestion">下一题</el-button>
+          <!-- 下一题按钮仅在单题模式下显示 -->
+          <el-button v-if="singleQuestionMode" type="success" @click="nextQuestion">下一题</el-button>
         </div>
       </div>
     </template>
@@ -192,6 +194,10 @@ const props = defineProps({
   userAnswer: {
     type: [Number, Array],
     default: () => []
+  },
+  userAnswers: {
+    type: Object,
+    default: () => ({})
   },
   singleQuestionMode: {
     type: Boolean,
@@ -231,15 +237,33 @@ watch(() => props.question, (newQuestion, oldQuestion) => {
   }
 }, { immediate: true, deep: true });
 
-// 当props.sameTypeQuestions变化时，初始化所有题目的答案
+// 监听父组件传递的完整用户答案变化，同步到本地userAnswers对象
+watch(() => props.userAnswers, (newUserAnswers) => {
+  if (newUserAnswers && !props.singleQuestionMode) {
+    // 将父组件传递的完整用户答案同步到本地userAnswers对象
+    // 这样在切换题型时，本地就能获取到父组件中已保存的所有题目的答案
+    userAnswers.value = { ...newUserAnswers };
+    
+    // 确保所有同类型题目的键都存在于userAnswers对象中
+    if (props.sameTypeQuestions) {
+      props.sameTypeQuestions.forEach(q => {
+        if (userAnswers.value[q.id] === undefined) {
+          userAnswers.value[q.id] = [];
+        }
+      });
+    }
+  }
+}, { immediate: true, deep: true });
+
+// 当props.sameTypeQuestions变化时，确保本地userAnswers对象包含所有同类型题目的键
 watch(() => props.sameTypeQuestions, (newQuestions) => {
-  if (newQuestions) {
-    // 初始化所有题目的答案
-    const initialAnswers = {};
+  if (newQuestions && !props.singleQuestionMode) {
+    // 确保所有同类型题目的键都存在于userAnswers对象中
     newQuestions.forEach(q => {
-      initialAnswers[q.id] = Array.isArray(props.userAnswer) ? [...props.userAnswer] : [props.userAnswer];
+      if (userAnswers.value[q.id] === undefined) {
+        userAnswers.value[q.id] = [];
+      }
     });
-    userAnswers.value = initialAnswers;
   }
 }, { immediate: true, deep: true });
 
@@ -294,7 +318,8 @@ const hasOptions = (q = props.question) => {
 
 // 判断是否为单选类型
 const isSingleType = (q = props.question) => {
-  return q.type === 1 && q.answer.length === 1;
+  // 判断题（type === 0）和单选题（type === 1且答案长度为1）都视为单选类型
+  return q.type === 0;
 };
 
 // 判断选项是否被选中
@@ -313,13 +338,15 @@ const isCorrect = (value, q = props.question) => {
 };
 
 // 判断选项是否错误（用户选择了但不是正确答案）
-const isIncorrect = (value, q = props.question, questionId = props.question?.id) => {
-  return isSelected(value, questionId) && !isCorrect(value, q);
+const isIncorrect = (value, q = props.question, questionId) => {
+  const actualQuestionId = questionId ?? q.id;
+  return isSelected(value, actualQuestionId) && !isCorrect(value, q);
 };
 
 // 判断选项是否被遗漏（只用于多选题，正确答案但用户没选）
-const isMissed = (value, q = props.question, questionId = props.question?.id) => {
-  return !isSingleType(q) && !isSelected(value, questionId) && isCorrect(value, q);
+const isMissed = (value, q = props.question, questionId) => {
+  const actualQuestionId = questionId ?? q.id;
+  return !isSingleType(q) && !isSelected(value, actualQuestionId) && isCorrect(value, q);
 };
 
 // 切换选项

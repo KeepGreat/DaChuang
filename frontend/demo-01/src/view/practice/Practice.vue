@@ -10,32 +10,15 @@
     
     <div class="practice-content">
       <!-- 侧边栏组件 -->
-      <PracticeSiderbar 
-        :question-types="sidebarQuestionTypes" 
-        :active-type-id="activeType"
-        @type-change="handleTypeChange"
-      />
-      
-      <div class="main-content">
-        <!-- 题目展示容器 -->
-        <div class="question-container">
-          <QuestionDisplay 
-            :question="currentQuestion" 
-            :question-number="currentQuestionIndex + 1"
-            :show-correctness="showCorrectness"
-            :user-answer="currentQuestion ? userAnswers[currentQuestion.id] || [] : []"
-            :single-question-mode="singleQuestionMode"
-            :same-type-questions="filteredQuestions"
-            @set-show-correctness="toggleShowCorrectness"
-            @answer-submitted="handleAnswerSubmitted"
-            @answer-changed="handleAnswerChanged"
-            @previous="handlePreviousQuestion"
-            @next="handleNextQuestion"
-          />
-        </div>
+       <div style="background: #f5f7fa;">
+        <PracticeSiderbar 
+          :question-types="questionsStore.sidebarQuestionTypes" 
+          :active-type-id="activeType"
+          @type-change="handleTypeChange"
+        />
         
         <!-- 进度信息区域 -->
-        <div class="progress-info">
+        <div class="progress-info-sidebar">
           <div class="progress-bar">
             <el-progress 
               :percentage="progressPercentage" 
@@ -50,6 +33,26 @@
           </div>
         </div>
       </div>
+      
+      <div class="main-content">
+        <!-- 题目展示容器 -->
+        <div class="question-container">
+          <QuestionDisplay 
+            :question="currentQuestion" 
+            :question-number="currentQuestionIndex + 1"
+            :show-correctness="showCorrectness"
+            :user-answer="currentQuestion ? userAnswers[currentQuestion.id] || [] : []"
+            :user-answers="userAnswers"
+            :single-question-mode="singleQuestionMode"
+            :same-type-questions="filteredQuestions"
+            @set-show-correctness="toggleShowCorrectness"
+            @answer-submitted="handleAnswerSubmitted"
+            @answer-changed="handleAnswerChanged"
+            @previous="handlePreviousQuestion"
+            @next="handleNextQuestion"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -60,6 +63,10 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import PracticeNavbar from '@/components/practice/PracticeNavbar.vue';
 import PracticeSiderbar from '@/components/practice/PracticeSiderbar.vue';
 import QuestionDisplay from '@/components/practice/QuestionDisplay.vue';
+import { useQuestionsStore } from '@/store/modules/questionsStore';
+
+// 使用questions store
+const questionsStore = useQuestionsStore();
 
 // -------------------
 // 基础数据定义
@@ -77,17 +84,8 @@ const deadline = ref(new Date(Date.now() + 30 * 60 * 1000)); // 示例：当前�
 const remainingTime = ref('30:00');
 let timerInterval = null;
 
-// 题型列表配置
-const questionTypes = ref([
-  { type: -1, name: '全部题型' },
-  { type: 0, name: '判断题' },
-  { type: 1, name: '选择题' },
-  { type: 2, name: '简答题' },
-  { type: 3, name: '编程题' }
-]);
-
-// 当前激活的题型
-const activeType = ref('all');
+// 当前激活的题型，初始值设为第一个具体题型（判断题）
+const activeType = ref(0);
 
 // 用户答案存储，key为questionId，value为用户答案
 const userAnswers = ref({});
@@ -99,142 +97,12 @@ const currentQuestionIndex = ref(0);
 const showCorrectness = ref(false);
 
 // -------------------
-// 示例问题数据
-// -------------------
-const questions = ref([
-  {
-    id: 0,
-    type: 0,
-    title: 'JavaScript是一种编译型语言。',
-    content: '',
-    options: [
-      { label: 'A', value: 'true', text: '正确' },
-      { label: 'B', value: 'false', text: '错误' }
-    ],
-    answer: ['false'],
-    status: null
-  },
-  {
-    id: 1,
-    type: 0,
-    title: '在JavaScript中，null是一个对象类型。',
-    content: '',
-    options: [
-      { label: 'A', value: 'true', text: '正确' },
-      { label: 'B', value: 'false', text: '错误' }
-    ],
-    answer: ['true'],
-    status: null
-  },
-  {
-    id: 2,
-    type: 1,
-    title: '以下哪个不是JavaScript的数据类型？',
-    content: '',
-    options: [
-      { label: 'A', value: 'string', text: '字符串' },
-      { label: 'B', value: 'number', text: '数字' },
-      { label: 'C', value: 'boolean', text: '布尔值' },
-      { label: 'D', value: 'class', text: '类' }
-    ],
-    answer: ['class'],
-    status: null
-  },
-  {
-    id: 3,
-    type: 1,
-    title: 'JavaScript中，以下哪个方法可以将字符串转换为数字？',
-    content: '',
-    options: [
-      { label: 'A', value: 'parseInt()', text: 'parseInt()' },
-      { label: 'B', value: 'toString()', text: 'toString()' },
-      { label: 'C', value: 'split()', text: 'split()' },
-      { label: 'D', value: 'join()', text: 'join()' }
-    ],
-    answer: ['parseInt()'],
-    status: null
-  },
-  {
-    id: 4,
-    type: 1,
-    title: '以下哪个关键字用于声明块级作用域的变量？',
-    content: '',
-    options: [
-      { label: 'A', value: 'var', text: 'var' },
-      { label: 'B', value: 'let', text: 'let' },
-      { label: 'C', value: 'const', text: 'const' },
-      { label: 'D', value: 'function', text: 'function' }
-    ],
-    answer: ['let'],
-    status: null
-  },
-  {
-    id: 5,
-    type: 1,
-    title: '以下哪些是JavaScript的内置对象？',
-    content: '',
-    options: [
-      { label: 'A', value: 'Object', text: 'Object' },
-      { label: 'B', value: 'Array', text: 'Array' },
-      { label: 'C', value: 'String', text: 'String' },
-      { label: 'D', value: 'jQuery', text: 'jQuery' }
-    ],
-    answer: ['Object', 'Array', 'String'],
-    status: null
-  },
-  {
-    id: 6,
-    type: 1,
-    title: '以下哪些方法可以用于数组遍历？',
-    content: '',
-    options: [
-      { label: 'A', value: 'forEach()', text: 'forEach()' },
-      { label: 'B', value: 'map()', text: 'map()' },
-      { label: 'C', value: 'filter()', text: 'filter()' },
-      { label: 'D', value: 'push()', text: 'push()' }
-    ],
-    answer: ['forEach()', 'map()', 'filter()'],
-    status: null
-  },
-  {
-    id: 7,
-    type: 2,
-    title: '请简述JavaScript中事件冒泡和事件捕获的区别。',
-    content: '',
-    options: [],
-    answer: ['事件冒泡是指事件从最具体的元素开始触发，然后逐级向上传播到更不具体的元素；事件捕获则相反，事件从最不具体的元素开始触发，然后逐级向下传播到最具体的元素。'],
-    status: null
-  },
-  {
-    id: 8,
-    type: 3,
-    title: '编写一个函数，计算数组中所有元素的和。',
-    content: '请实现一个sum函数，接收一个数组作为参数，返回数组中所有元素的和。例如：sum([1, 2, 3, 4]) 应返回 10。',
-    options: [],
-    answer: ['function sum(arr) {\n  return arr.reduce((acc, curr) => acc + curr, 0);\n}'],
-    status: null
-  },
-  {
-    id: 9,
-    type: 3,
-    title: '实现一个简单的防抖函数。',
-    content: '请实现一个debounce函数，接收一个函数和延迟时间作为参数，返回一个新的函数，该函数在连续调用时，只在最后一次调用后等待指定时间才执行。',
-    options: [],
-    answer: ['function debounce(func, delay) {\n  let timer = null;\n  return function() {\n    const context = this;\n    const args = arguments;\n    clearTimeout(timer);\n    timer = setTimeout(() => {\n      func.apply(context, args);\n    }, delay);\n  };\n}'],
-    status: null
-  }
-]);
-
-// -------------------
 // 计算属性
 // -------------------
 
 // 根据题型过滤问题
 const filteredQuestions = computed(() => {
-  if (activeType.value === 'all') {
-    return questions.value;
-  }
-  return questions.value.filter(q => q.type === activeType.value);
+  return questionsStore.questions.filter(q => q.type === activeType.value);
 });
 
 // 当前显示的问题
@@ -247,17 +115,17 @@ const currentQuestion = computed(() => {
 
 // 已回答的问题数量
 const answeredCount = computed(() => {
-  return questions.value.filter(q => q.status !== null).length;
+  return questionsStore.answeredCount;
 });
 
 // 正确的问题数量
 const correctCount = computed(() => {
-  return questions.value.filter(q => q.status === 'correct').length;
+  return questionsStore.questions.filter(q => q.status === 'correct').length;
 });
 
 // 总问题数量
 const totalQuestions = computed(() => {
-  return questions.value.length;
+  return questionsStore.totalQuestions;
 });
 
 // 当前过滤后的问题数量
@@ -281,36 +149,6 @@ const progressColor = computed(() => {
   return 'linear-gradient(45deg, #2563eb, #1d4ed8)'; // 与PracticeSiderbar.vue第147行相同的渐变色
 });
 
-// 侧边栏题型统计数据
-const sidebarQuestionTypes = computed(() => {
-  // 初始化包含"全部题型"的统计数据
-  const typesWithStats = [
-    {
-      id: 'all',
-      name: '全部题型',
-      total: totalQuestions.value,
-      answered: answeredCount.value
-    }
-  ];
-  
-  // 为每种题型生成统计数据
-  questionTypes.value.forEach(type => {
-    if (type.type !== -1) { // 排除"全部题型"（已单独处理）
-      const typeQuestions = questions.value.filter(q => q.type === type.type);
-      const typeAnswered = typeQuestions.filter(q => q.status !== null).length;
-      
-      typesWithStats.push({
-        id: type.type,
-        name: type.name,
-        total: typeQuestions.length,
-        answered: typeAnswered
-      });
-    }
-  });
-  
-  return typesWithStats;
-});
-
 // -------------------
 // 方法定义
 // -------------------
@@ -318,7 +156,7 @@ const sidebarQuestionTypes = computed(() => {
 // 初始化用户答案
 const initUserAnswers = () => {
   const initialAnswers = {};
-  questions.value.forEach(question => {
+  questionsStore.questions.forEach(question => {
     initialAnswers[question.id] = []; // 为每道题初始化空数组作为答案
   });
   userAnswers.value = initialAnswers;
@@ -393,7 +231,7 @@ const handleAnswerChanged = (questionId, answer) => {
 
 // 处理答案提交
 const handleAnswerSubmitted = (result) => {
-  const question = questions.value.find(q => q.id === result.questionId);
+  const question = questionsStore.questions.find(q => q.id === result.questionId);
   if (question) {
     // 保存用户答案
     updateUserAnswer(result.questionId, result.answer);
@@ -498,6 +336,17 @@ onUnmounted(() => {
   padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 侧边栏下方的进度信息容器 */
+.progress-info-sidebar {
+  background: #fff;
+  padding: 16px;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin: 0 0 20px 0;
+  width: 240px;
+  box-sizing: border-box;
 }
 
 /* 进度条容器 */
