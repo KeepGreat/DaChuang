@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hbwl.mapper.QuestionResourceMapper;
 import com.hbwl.pojo.QuestionResource;
 import com.hbwl.service.QuestionResourceService;
+import com.hbwl.utils.QuestionResourceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -25,18 +26,18 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class QuestionResourceImpl implements QuestionResourceService {
+public class QuestionResourceServiceImpl implements QuestionResourceService {
 
     @Autowired
     private QuestionResourceMapper questionResourceMapper;
 
     @Autowired
-    private Path fileStorageLocation;
+    private QuestionResourceUtil questionResourceUtil;
 
     @Override
     public int addQuestionResource(QuestionResource questionResource, MultipartFile file) {
         if (questionResource == null || file == null) return -1;
-        String ResourceName = storeFile(file);
+        String ResourceName = questionResourceUtil.storeFile(file);
         questionResource.setName(ResourceName);
         return questionResourceMapper.insert(questionResource);
     }
@@ -45,7 +46,7 @@ public class QuestionResourceImpl implements QuestionResourceService {
     public int deleteQuestionResourceById(Integer id) {
         if (id == null) return -1;
         String ResourceName = questionResourceMapper.selectById(id).getName();
-        boolean removeFile = removeFile(ResourceName);
+        boolean removeFile = questionResourceUtil.removeFile(ResourceName);
         if (removeFile) {
             return questionResourceMapper.deleteById(id);
         }
@@ -56,8 +57,8 @@ public class QuestionResourceImpl implements QuestionResourceService {
     public int updateQuestionResourceById(QuestionResource questionResource, MultipartFile file) {
         if (questionResource == null || file == null || questionResource.getId() == null) return -1;
         String oldResourceName = questionResourceMapper.selectById(questionResource.getId()).getName();
-        removeFile(oldResourceName);
-        String newResourceName = storeFile(file);
+        questionResourceUtil.removeFile(oldResourceName);
+        String newResourceName = questionResourceUtil.storeFile(file);
         questionResource.setName(newResourceName);
         UpdateWrapper<QuestionResource> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", questionResource.getId());
@@ -97,51 +98,6 @@ public class QuestionResourceImpl implements QuestionResourceService {
     @Override
     public Resource loadQuestionResourceById(Integer id) {
         String ResourceName = questionResourceMapper.selectById(id).getName();
-        return loadFile(ResourceName);
-    }
-
-    //将文件存储到本地，返回文件名称
-    public String storeFile(MultipartFile file) {
-        try {
-            //生成唯一文件名
-            String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-            String fileExtension = "";
-            if (originalFileName.contains(".")){
-                fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            }
-            String newFileName = UUID.randomUUID() + fileExtension;
-
-            Path targetLocation = fileStorageLocation.resolve(newFileName);
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-            return newFileName;
-        } catch (IOException e) {
-            throw new RuntimeException("文件存储失败: " + file.getOriginalFilename(), e);
-        }
-    }
-
-    //根据url将文件加载为Resource
-    public Resource loadFile(String fileName) {
-        try {
-            Path filePath = fileStorageLocation.resolve(fileName).normalize();
-            Resource resource = new UrlResource(filePath.toUri());
-
-            if (resource.exists()){
-                return resource;
-            } else {
-                throw new RuntimeException("文件不存在: " + fileName);
-            }
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("文件不存在: " + fileName, e);
-        }
-    }
-
-    //根据url将文件移除
-    public boolean removeFile(String fileName) {
-        try {
-            Path filePath = fileStorageLocation.resolve(fileName).normalize();
-            return Files.deleteIfExists(filePath);
-        } catch (IOException e) {
-            throw new RuntimeException("文件删除失败: " + fileName, e);
-        }
+        return questionResourceUtil.loadFile(ResourceName);
     }
 }

@@ -16,7 +16,9 @@ public class MdContentController {
     private MdContentService mdContentService;
 
     @PostMapping
-    public String addMdContent(@RequestBody MdContent mdContent){
+    public String addMdContent(@RequestBody MdContent mdContent,
+                               @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = mdContentService.addMdContent(mdContent);
         if (row == -1) return "参数不能为空";
         if (row == 0) return "增加markdown失败";
@@ -24,14 +26,18 @@ public class MdContentController {
     }
 
     @DeleteMapping("{id}")
-    public String deleteMdContentById(@PathVariable Integer id){
+    public String deleteMdContentById(@PathVariable Integer id,
+                                      @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = mdContentService.deleteMdContentById(id);
         if (row == 0) return "删除markdown失败";
         return "删除markdown成功";
     }
 
     @PutMapping
-    public String updateMdContent(@RequestBody MdContent mdContent){
+    public String updateMdContent(@RequestBody MdContent mdContent,
+                                  @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = mdContentService.updateMdContentById(mdContent);
         if (row == -1) return "参数不能为空";
         if (row == 0) return "更新markdown失败";

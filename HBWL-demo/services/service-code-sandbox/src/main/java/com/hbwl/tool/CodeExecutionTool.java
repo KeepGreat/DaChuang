@@ -241,10 +241,25 @@ public class CodeExecutionTool {
     public String compileAndExecute(String codeLanguage,
                                     String code,
                                     String input){
-        if (codeLanguage.equals("python")) return executePython(code, input);
+        if (codeLanguage.equals("python")) return parseResult(executePython(code, input));
         else if (codeLanguage.equals("java") || codeLanguage.equals("cpp"))
-            return compileAndExecuteForOther(codeLanguage, code, input);
+            return parseResult(compileAndExecuteForOther(codeLanguage, code, input));
         else return "Unsupported code language: " + codeLanguage;
+    }
+
+    public String parseResult(String result){
+        JSONObject resultJSON = new JSONObject(result);
+        JSONObject resultFilesJSON = new JSONObject(resultJSON.get("files"));
+        JSONObject parseJSON = new JSONObject();
+        parseJSON.set("stdout", resultFilesJSON.get("stdout"));
+        parseJSON.set("stderr", resultFilesJSON.get("stderr"));
+        parseJSON.set("status", resultJSON.get("status"));
+        parseJSON.set("exitStatus", resultJSON.get("exitStatus"));
+        parseJSON.set("memory", resultJSON.get("memory"));
+        parseJSON.set("runTime", resultJSON.get("runTime"));
+        parseJSON.set("procPeak", resultJSON.get("procPeak"));
+        parseJSON.set("time", resultJSON.get("time"));
+        return JSONUtil.toJsonStr(parseJSON);
     }
 }
 //cpp运行结果[{"memory":524288,"procPeak":1,"files":{"stdout":"3","stderr":""},"time":1041000,"runTime":743535,"exitStatus":0,"status":"Accepted"}]

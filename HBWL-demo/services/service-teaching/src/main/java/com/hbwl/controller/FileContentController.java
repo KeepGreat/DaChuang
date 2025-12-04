@@ -24,7 +24,9 @@ public class FileContentController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String uploadFile(@RequestPart("fileContent") String fileContentJSON,
-                             @RequestPart("file") MultipartFile file) {
+                             @RequestPart("file") MultipartFile file,
+                             @RequestHeader("role") String role) {
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileContent fileContent = objectMapper.readValue(fileContentJSON, FileContent.class);
@@ -40,7 +42,9 @@ public class FileContentController {
 
     @DeleteMapping("/{id}")
     public String deleteFile(@PathVariable("id") Integer id,
-                             @RequestParam String fileName){
+                             @RequestParam String fileName,
+                             @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = fileContentService.deleteFileContentById(id, fileName);
         if (row == 0) return "删除文件失败";
         return "删除文件成功";
@@ -48,7 +52,9 @@ public class FileContentController {
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String updateFile(@RequestPart("fileContent") String fileContentJSON,
-                             @RequestPart("file") MultipartFile file) {
+                             @RequestPart("file") MultipartFile file,
+                             @RequestHeader("role") String role) {
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         // fileContent nullable + multipartFile
         try {
             ObjectMapper objectMapper = new ObjectMapper();

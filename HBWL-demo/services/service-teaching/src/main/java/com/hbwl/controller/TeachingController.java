@@ -17,6 +17,7 @@ public class TeachingController {
     @Autowired
     private AITeacherService aiTeacherService;
 
+    //不能用包装类传输Flux<String>
     @PostMapping("/teach")
     public Flux<String> teach(@RequestBody TeachingInput teachingInput){
         CodeSandboxInput codeSandboxInput = teachingInput.getCodeSandboxInput();

@@ -17,7 +17,9 @@ public class MaterialController {
     private MaterialService materialService;
 
     @PostMapping
-    public String addMaterial(@RequestBody Material material){
+    public String addMaterial(@RequestBody Material material,
+                              @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = materialService.addMaterial(material);
         if (row == -1) return "参数不能为空";
         if (row == 0) return "增加教材失败";
@@ -25,14 +27,18 @@ public class MaterialController {
     }
 
     @DeleteMapping("{id}")
-    public String deleteMaterialById(@PathVariable("id") Integer id){
+    public String deleteMaterialById(@PathVariable("id") Integer id,
+                                     @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = materialService.deleteMaterialById(id);
         if (row == 0) return "删除教材失败";
         return "删除教材成功";
     }
 
     @PutMapping
-    public String updateMaterial(@RequestBody Material material){
+    public String updateMaterial(@RequestBody Material material,
+                                 @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = materialService.updateMaterialById(material);
         if (row == -1) return "参数不能为空";
         if (row == 0) return "更新教材失败";

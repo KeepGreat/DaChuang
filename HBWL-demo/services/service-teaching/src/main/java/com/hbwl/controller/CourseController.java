@@ -16,7 +16,9 @@ public class CourseController {
     private CourseService courseService;
 
     @PostMapping
-    public String addCourse(@RequestBody Course course){
+    public String addCourse(@RequestBody Course course,
+                            @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = courseService.addCourse(course);
         if (row == -1) return "参数不能为空";
         if (row == 0) return "增加课程失败";
@@ -24,14 +26,18 @@ public class CourseController {
     }
 
     @DeleteMapping("{id}")
-    public String deleteCourse(@PathVariable("id") Integer id){
+    public String deleteCourse(@PathVariable("id") Integer id,
+                               @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = courseService.deleteCourseById(id);
         if (row == 0) return "删除课程失败";
         return "删除课程成功";
     }
 
     @PutMapping
-    public String updateCourse(@RequestBody Course course){
+    public String updateCourse(@RequestBody Course course,
+                               @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
         int row = courseService.updateCourseById(course);
         if (row == -1) return "参数不能为空";
         if (row == 0) return "更新课程失败";
