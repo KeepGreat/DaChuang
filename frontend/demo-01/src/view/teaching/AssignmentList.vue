@@ -9,8 +9,7 @@
         </div>
       </div>
 
-      <div class="assignment-items">
-        <el-loading :visible="componentLoading || assignmentStore.loading" text="加载中...">
+      <div class="assignment-items" v-loading="componentLoading || assignmentStore.loading" element-loading-text="加载中...">
           <div v-if="componentError || assignmentStore.error" class="error-message">
             <el-icon><Warning /></el-icon>
             加载失败，请稍后重试
@@ -57,7 +56,6 @@
               </div>
             </div>
           </div>
-        </el-loading>
       </div>
     </div>
 
@@ -141,7 +139,7 @@ import { useRouter, useRoute } from 'vue-router';
 import {
   Edit, Check, Warning, Clock
 } from '@element-plus/icons-vue';
-import { ElCard, ElButton, ElTag, ElMessage, ElLoading } from 'element-plus';
+import { ElCard, ElButton, ElTag, ElMessage } from 'element-plus';
 import { useAssignmentStore } from '@/store';
 import { useQuestionsStore } from '@/store/modules/questionsStore';
 import { getQuestionByIndex } from '@/api/modules/practice/question';
