@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
 /**
- * @import { ApiResponse } from "@/utils/types"
+ * @import { ApiResponse, ApiEmptyResponse } from "@/utils/types"
  */
 
 /**
@@ -9,7 +9,7 @@ import request from "@/utils/request";
  * @param {string} data.username - 用户名
  * @param {string} data.password - 密码
  * @param {string} data.role - 用户角色，枚举值："admin"、"student"、"teacher"
- * @returns {Promise<ApiResponse<null>>} null
+ * @returns {Promise<ApiEmptyResponse>} null
  */
 export function register(data) {
   return request({

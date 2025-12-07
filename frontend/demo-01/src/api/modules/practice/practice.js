@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
 /**
- * @import { ApiResponse, Page } from "@/utils/types"
+ * @import { ApiResponse, ApiEmptyResponse, Page } from "@/utils/types"
  */
 
 // 实体类
@@ -47,7 +47,7 @@ import request from "@/utils/request";
  * practice.name、practice.questionNum字段不能为空，
  * practiceIndex.courseId字段不能为空
  * @param {CreatePracticeRequest} data
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function createPracticeAndIndex(data) {
   return request({
@@ -60,7 +60,7 @@ export function createPracticeAndIndex(data) {
 /**
  * 根据练习ID删除练习及其关联的 PracticeIndex
  * @param {number} practiceId - 练习ID
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function deletePracticeById(practiceId) {
   return request({
@@ -74,7 +74,7 @@ export function deletePracticeById(practiceId) {
  * @param {Object} params
  * @param {number} params.courseSectionId - 课程系列ID
  * @param {number} [params.courseId] - 课程ID
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function deletePracticeByCourse(params) {
   return request({
@@ -87,7 +87,7 @@ export function deletePracticeByCourse(params) {
 /**
  * 更新练习信息
  * @param {UpdatePracticeRequest} data - 更新请求参数，id必填，其他字段可选（传递则不能为空）
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function updatePractice(data) {
   return request({

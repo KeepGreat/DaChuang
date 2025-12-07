@@ -1,12 +1,20 @@
 // 通用的类型定义
 
 /**
- * 通用API响应结构，包含code, message, data
+ * 通用API响应结构，用于有数据返回的接口
  * @template T - 响应数据的类型泛型
  * @typedef {Object} ApiResponse
  * @property {number} code - 响应状态码
  * @property {string} message - 响应消息
- * @property {T|null} data - 响应数据，某些操作可能为null
+ * @property {T} data - 响应数据，确保不为null
+ */
+
+/**
+ * 空响应API响应结构，用于无数据返回的接口，确保data为null
+ * @typedef {Object} ApiEmptyResponse
+ * @property {number} code - 响应状态码
+ * @property {string} message - 响应消息
+ * @property {null} data - 响应数据，固定为null
  */
 
 /**

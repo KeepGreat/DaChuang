@@ -2,7 +2,7 @@ import request from "@/utils/request";
 import axios from "axios";
 
 /**
- * @import { ApiResponse, Page } from "@/utils/types"
+ * @import { ApiResponse, ApiEmptyResponse, Page } from "@/utils/types"
  */
 
 // 实体类
@@ -43,7 +43,7 @@ import axios from "axios";
  * 新增问题资源
  * @param {CreateQuestionResourceRequest} questionResource - 问题资源信息，要求type、size、questionId不能为空
  * @param {File} file - 资源文件
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function createQuestionResource(questionResource, file) {
   const formData = new FormData();
@@ -64,7 +64,7 @@ export function createQuestionResource(questionResource, file) {
 /**
  * 删除问题资源
  * @param {number} id - 问题资源ID
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function deleteQuestionResource(id) {
   return request({
@@ -77,7 +77,7 @@ export function deleteQuestionResource(id) {
  * 更新问题资源
  * @param {UpdateQuestionResourceRequest} questionResource - 问题资源信息，要求id不能为空，要更新的字段不能为空
  * @param {File} file - 资源文件
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function updateQuestionResource(questionResource, file) {
   const formData = new FormData();

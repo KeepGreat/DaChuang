@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
 /**
- * @import { ApiResponse, Page } from "@/utils/types"
+ * @import { ApiResponse, ApiEmptyResponse, Page } from "@/utils/types"
  */
 
 // 实体类
@@ -35,7 +35,7 @@ import request from "@/utils/request";
 /**
  * 新增练习与课程关系
  * @param {CreatePracticeIndexRequest[]} indexList - PracticeIndex数组，要求每项元素的practiceId、courseSectionId不能为空
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function createPracticeIndex(indexList) {
   return request({
@@ -48,7 +48,7 @@ export function createPracticeIndex(indexList) {
 /**
  * 批量删除练习与课程关系
  * @param {number[]} indexIds - PracticeIndex的id数组
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function deletePracticeIndexByIds(indexIds) {
   return request({
@@ -61,7 +61,7 @@ export function deletePracticeIndexByIds(indexIds) {
 /**
  * 更新练习与课程关系
  * @param {UpdatePracticeIndexRequest} practiceIndex - 更新请求参数，id必填，其他字段可选（传递则不能为空）
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function updatePracticeIndex(practiceIndex) {
   return request({

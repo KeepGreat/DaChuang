@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
 /**
- * @import { ApiResponse, Page } from "@/utils/types"
+ * @import { ApiResponse, ApiEmptyResponse, Page } from "@/utils/types"
  */
 
 // 实体类
@@ -44,7 +44,7 @@ import request from "@/utils/request";
 /**
  * 新增问题及关联的QuestionIndex
  * @param {CreateQuestionRequest} data - 请求参数，要求question和questionIndex不能为空
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function createQuestionAndIndex(data) {
   return request({
@@ -57,7 +57,7 @@ export function createQuestionAndIndex(data) {
 /**
  * 根据问题ID删除问题及关联的QuestionIndex
  * @param {number} questionId - 问题ID
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function deleteQuestionById(questionId) {
   return request({
@@ -69,7 +69,7 @@ export function deleteQuestionById(questionId) {
 /**
  * 按练习ID批量删除问题及关联的QuestionIndex
  * @param {number} practiceId - 练习ID
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function deleteQuestionByIndex(practiceId) {
   return request({
@@ -82,7 +82,7 @@ export function deleteQuestionByIndex(practiceId) {
 /**
  * 更新问题信息
  * @param {UpdateQuestionRequest} data - 更新请求参数，id必填，其他字段可选（传递则不能为空）
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function updateQuestion(data) {
   return request({
