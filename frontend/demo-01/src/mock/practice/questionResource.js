@@ -148,363 +148,362 @@ async function generateDummyImage(filename, resourceId) {
   return Buffer.from(arrayBuffer);
 }
 
-export default [
-  // createQuestionResource - 新增问题资源
-  {
-    url: "/api/question/questionresource",
-    method: "post",
-    response: (req) => {
-      try {
-        console.log("createQuestionResource req.body keys:", Object.keys(req.body));
+// createQuestionResource - 新增问题资源
+export const createQuestionResource = {
+  url: "/api/question/questionresource",
+  method: "post",
+  response: (req) => {
+    try {
+      console.log("createQuestionResource req.body keys:", Object.keys(req.body));
 
-        let questionResourceJSON;
+      let questionResourceJSON;
 
-        // vite-plugin-mock将multipart作为对象传递，键是multipart字符串的开始
-        if (typeof req.body === "object" && Object.keys(req.body).length === 1) {
-          console.log("解析multipart对象...");
+      // vite-plugin-mock将multipart作为对象传递，键是multipart字符串的开始
+      if (typeof req.body === "object" && Object.keys(req.body).length === 1) {
+        console.log("解析multipart对象...");
 
-          // 获取唯一的键，这个键包含整个multipart内容
-          const multipartKey = Object.keys(req.body)[0];
-          const multipartString = req.body[multipartKey];
-          console.log("multipart字符串长度:", multipartString.length);
-          console.log(
-            `multipart字符串前200字符: \n\n(begin)\n${multipartString.substring(0, 200)}\n(end)\n`
-          );
+        // 获取唯一的键，这个键包含整个multipart内容
+        const multipartKey = Object.keys(req.body)[0];
+        const multipartString = req.body[multipartKey];
+        console.log("multipart字符串长度:", multipartString.length);
+        console.log(
+          `multipart字符串前200字符: \n\n(begin)\n${multipartString.substring(0, 200)}\n(end)\n`
+        );
 
-          // 取消注释可以查看实际multipart格式，如果复杂文件可能输出过多
-          // console.log("multipartString :", multipartString);
+        // 取消注释可以查看实际multipart格式，如果复杂文件可能输出过多
+        // console.log("multipartString :", multipartString);
 
-          // 使用提取的函数解析JSON
-          questionResourceJSON = extractQuestionResourceJSON(multipartString);
-          console.log("questionResourceJSON:", questionResourceJSON);
-        } else if (req.body.questionResourceJSON) {
-          // 直接传递JSON字符串的情况，非multipart请求
-          questionResourceJSON = req.body.questionResourceJSON;
-        }
+        // 使用提取的函数解析JSON
+        questionResourceJSON = extractQuestionResourceJSON(multipartString);
+        console.log("questionResourceJSON:", questionResourceJSON);
+      } else if (req.body.questionResourceJSON) {
+        // 直接传递JSON字符串的情况，非multipart请求
+        questionResourceJSON = req.body.questionResourceJSON;
+      }
 
-        if (!questionResourceJSON) {
-          return {
-            code: 400,
-            message: "questionResourceJSON字段不能为空",
-            data: null,
-          };
-        }
-
-        // 解析JSON数据
-        let questionResource;
-        try {
-          questionResource = JSON.parse(questionResourceJSON);
-          console.log("JSON解析成功, questionResource: ", questionResource);
-        } catch (e) {
-          console.error("JSON解析错误:", e);
-          return {
-            code: 400,
-            message: "questionResourceJSON格式错误",
-            data: null,
-          };
-        }
-
-        // 验证必填字段，使用 == null 判断，只处理null和undefined，如果直接用 ! 会把0也判断为false
-        if (
-          questionResource.type == null ||
-          questionResource.size == null ||
-          questionResource.questionId == null
-        ) {
-          console.log(
-            "字段验证失败 - type:",
-            questionResource.type,
-            "size:",
-            questionResource.size,
-            "questionId:",
-            questionResource.questionId
-          );
-          return {
-            code: 400,
-            message: "type、size、questionId字段不能为空",
-            data: null,
-          };
-        }
-
-        // 生成新的资源记录
-        const newResource = {
-          id: getNextId(questionResources),
-          description: questionResource.description || null,
-          name: questionResource.name || "unknown_file",
-          type: questionResource.type,
-          size: questionResource.size,
-          questionId: questionResource.questionId,
-        };
-
-        // 添加到存储
-        questionResources.push(newResource);
-
-        // 模拟文件存储
-        storedFiles.set(newResource.id, {
-          filename: newResource.name,
-          size: newResource.size,
-          uploadedAt: new Date().toISOString(),
-        });
-
-        // 输出当前数据状态
-        logResourcesAndFiles();
-
-        console.log("createQuestionResource success:", newResource);
+      if (!questionResourceJSON) {
         return {
-          code: 200,
-          message: "新增问题资源成功",
-          data: null,
-        };
-      } catch (error) {
-        console.error("createQuestionResource error:", error);
-        return {
-          code: 500,
-          message: "Internal Server Error",
+          code: 400,
+          message: "questionResourceJSON字段不能为空",
           data: null,
         };
       }
-    },
-  },
 
-  // deleteQuestionResource - 删除问题资源
-  {
-    url: "/api/question/questionresource/:id",
-    method: "delete",
-    response: (req) => {
+      // 解析JSON数据
+      let questionResource;
       try {
-        console.log("req:", req);
-        const id = Number(req.query.id || req.pathParams?.id);
+        questionResource = JSON.parse(questionResourceJSON);
+        console.log("JSON解析成功, questionResource: ", questionResource);
+      } catch (e) {
+        console.error("JSON解析错误:", e);
+        return {
+          code: 400,
+          message: "questionResourceJSON格式错误",
+          data: null,
+        };
+      }
 
-        // 验证资源是否存在
-        const resourceIndex = questionResources.findIndex((item) => item.id === id);
-        if (resourceIndex === -1) {
-          return {
+      // 验证必填字段，使用 == null 判断，只处理null和undefined，如果直接用 ! 会把0也判断为false
+      if (
+        questionResource.type == null ||
+        questionResource.size == null ||
+        questionResource.questionId == null
+      ) {
+        console.log(
+          "字段验证失败 - type:",
+          questionResource.type,
+          "size:",
+          questionResource.size,
+          "questionId:",
+          questionResource.questionId
+        );
+        return {
+          code: 400,
+          message: "type、size、questionId字段不能为空",
+          data: null,
+        };
+      }
+
+      // 生成新的资源记录
+      const newResource = {
+        id: getNextId(questionResources),
+        description: questionResource.description || null,
+        name: questionResource.name || "unknown_file",
+        type: questionResource.type,
+        size: questionResource.size,
+        questionId: questionResource.questionId,
+      };
+
+      // 添加到存储
+      questionResources.push(newResource);
+
+      // 模拟文件存储
+      storedFiles.set(newResource.id, {
+        filename: newResource.name,
+        size: newResource.size,
+        uploadedAt: new Date().toISOString(),
+      });
+
+      // 输出当前数据状态
+      logResourcesAndFiles();
+
+      console.log("createQuestionResource success:", newResource);
+      return {
+        code: 200,
+        message: "新增问题资源成功",
+        data: null,
+      };
+    } catch (error) {
+      console.error("createQuestionResource error:", error);
+      return {
+        code: 500,
+        message: "Internal Server Error",
+        data: null,
+      };
+    }
+  },
+};
+
+// deleteQuestionResource - 删除问题资源
+export const deleteQuestionResource = {
+  url: "/api/question/questionresource/:id",
+  method: "delete",
+  response: (req) => {
+    try {
+      console.log("req:", req);
+      const id = Number(req.query.id || req.pathParams?.id);
+
+      // 验证资源是否存在
+      const resourceIndex = questionResources.findIndex((item) => item.id === id);
+      if (resourceIndex === -1) {
+        return {
+          code: 404,
+          message: "问题资源不存在",
+          data: null,
+        };
+      }
+
+      // 删除资源记录和模拟文件
+      questionResources.splice(resourceIndex, 1);
+      storedFiles.delete(id);
+
+      console.log("deleteQuestionResource success:", { id });
+
+      // 输出当前数据状态
+      logResourcesAndFiles();
+
+      return {
+        code: 200,
+        message: "删除问题资源成功",
+        data: null,
+      };
+    } catch (error) {
+      console.error("deleteQuestionResource error:", error);
+      return {
+        code: 500,
+        message: "Internal Server Error",
+        data: null,
+      };
+    }
+  },
+};
+
+// updateQuestionResource - 更新问题资源
+export const updateQuestionResource = {
+  url: "/api/question/questionresource",
+  method: "put",
+  response: (req) => {
+    try {
+      console.log("updateQuestionResource req.body keys:", Object.keys(req.body));
+
+      let questionResourceJSON;
+
+      // vite-plugin-mock将multipart作为对象传递，键是multipart字符串的开始
+      if (typeof req.body === "object" && Object.keys(req.body).length === 1) {
+        console.log("解析multipart对象...");
+
+        // 获取唯一的键，这个键包含整个multipart内容
+        const multipartKey = Object.keys(req.body)[0];
+        const multipartString = req.body[multipartKey];
+        console.log("multipart字符串长度:", multipartString.length);
+
+        // 使用提取的函数解析JSON
+        questionResourceJSON = extractQuestionResourceJSON(multipartString);
+        console.log("questionResourceJSON:", questionResourceJSON);
+      } else if (req.body.questionResourceJSON) {
+        // 直接传递JSON字符串的情况，非multipart请求
+        questionResourceJSON = req.body.questionResourceJSON;
+      }
+
+      if (!questionResourceJSON) {
+        return {
+          code: 400,
+          message: "questionResourceJSON字段不能为空",
+          data: null,
+        };
+      }
+
+      // 解析JSON数据
+      let questionResource;
+      try {
+        questionResource = JSON.parse(questionResourceJSON);
+        console.log("JSON解析成功, questionResource: ", questionResource);
+      } catch (e) {
+        console.error("JSON解析错误:", e);
+        return {
+          code: 400,
+          message: "questionResourceJSON格式错误",
+          data: null,
+        };
+      }
+
+      // 验证必填字段，使用 == null 判断，只处理null和undefined
+      if (questionResource.id == null) {
+        console.log("字段验证失败 - id:", questionResource.id);
+        return {
+          code: 400,
+          message: "id字段不能为空",
+          data: null,
+        };
+      }
+
+      // 查找资源并更新
+      const resourceToUpdate = questionResources.find((item) => item.id === questionResource.id);
+      if (!resourceToUpdate) {
+        return {
+          code: 404,
+          message: "问题资源不存在",
+          data: null,
+        };
+      }
+
+      // 更新字段
+      Object.assign(resourceToUpdate, questionResource);
+
+      // 如果有文件更新，也更新storedFiles
+      if (questionResource.name || questionResource.size) {
+        const fileToUpdate = storedFiles.get(questionResource.id);
+        if (fileToUpdate) {
+          if (questionResource.name) fileToUpdate.filename = questionResource.name;
+          if (questionResource.size) fileToUpdate.size = questionResource.size;
+          fileToUpdate.uploadedAt = new Date().toISOString();
+        }
+      }
+
+      // 输出当前数据状态
+      logResourcesAndFiles();
+
+      console.log("updateQuestionResource success:", resourceToUpdate);
+      return {
+        code: 200,
+        message: "更新问题资源成功",
+        data: null,
+      };
+    } catch (error) {
+      console.error("updateQuestionResource error:", error);
+      return {
+        code: 500,
+        message: "Internal Server Error",
+        data: null,
+      };
+    }
+  },
+};
+
+// getQuestionResources - 按参数查询问题资源
+export const getQuestionResources = {
+  url: "/api/question/questionresource",
+  method: "get",
+  response: (req) => {
+    try {
+      console.log("req:", req);
+      const { id, name, type, size, questionId } = req.query;
+
+      // 筛选资源
+      let result = [...questionResources];
+      if (id) {
+        result = result.filter((item) => item.id === Number(id));
+      }
+      if (name) {
+        result = result.filter((item) => item.name.includes(name));
+      }
+      if (type) {
+        result = result.filter((item) => item.type === Number(type));
+      }
+      if (size) {
+        result = result.filter((item) => item.size === Number(size));
+      }
+      if (questionId) {
+        result = result.filter((item) => item.questionId === Number(questionId));
+      }
+
+      console.log("getQuestionResources success:", { total: result.length });
+      return {
+        code: 200,
+        message: "查询成功",
+        data: result,
+      };
+    } catch (error) {
+      console.error("getQuestionResources error:", error);
+      return {
+        code: 500,
+        message: "Internal Server Error",
+        data: null,
+      };
+    }
+  },
+};
+
+// downloadQuestionResource - 下载问题资源文件
+export const downloadQuestionResource = {
+  url: "/api/question/questionresource/download/:id",
+  method: "get",
+  rawResponse: async (req, res) => {
+    try {
+      // 解析路径参数
+      const pathParams = parsePathParams(req, 1);
+      const id = Number(pathParams.param1);
+
+      // 验证资源是否存在
+      const resource = questionResources.find((item) => item.id === id);
+      if (!resource) {
+        res.statusCode = 404;
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          JSON.stringify({
             code: 404,
             message: "问题资源不存在",
             data: null,
-          };
-        }
-
-        // 删除资源记录和模拟文件
-        questionResources.splice(resourceIndex, 1);
-        storedFiles.delete(id);
-
-        console.log("deleteQuestionResource success:", { id });
-
-        // 输出当前数据状态
-        logResourcesAndFiles();
-
-        return {
-          code: 200,
-          message: "删除问题资源成功",
-          data: null,
-        };
-      } catch (error) {
-        console.error("deleteQuestionResource error:", error);
-        return {
-          code: 500,
-          message: "Internal Server Error",
-          data: null,
-        };
+          })
+        );
+        return;
       }
-    },
-  },
 
-  // updateQuestionResource - 更新问题资源
-  {
-    url: "/api/question/questionresource",
-    method: "put",
-    response: (req) => {
-      try {
-        console.log("updateQuestionResource req.body keys:", Object.keys(req.body));
-
-        let questionResourceJSON;
-
-        // vite-plugin-mock将multipart作为对象传递，键是multipart字符串的开始
-        if (typeof req.body === "object" && Object.keys(req.body).length === 1) {
-          console.log("解析multipart对象...");
-
-          // 获取唯一的键，这个键包含整个multipart内容
-          const multipartKey = Object.keys(req.body)[0];
-          const multipartString = req.body[multipartKey];
-          console.log("multipart字符串长度:", multipartString.length);
-
-          // 使用提取的函数解析JSON
-          questionResourceJSON = extractQuestionResourceJSON(multipartString);
-          console.log("questionResourceJSON:", questionResourceJSON);
-        } else if (req.body.questionResourceJSON) {
-          // 直接传递JSON字符串的情况，非multipart请求
-          questionResourceJSON = req.body.questionResourceJSON;
-        }
-
-        if (!questionResourceJSON) {
-          return {
-            code: 400,
-            message: "questionResourceJSON字段不能为空",
-            data: null,
-          };
-        }
-
-        // 解析JSON数据
-        let questionResource;
-        try {
-          questionResource = JSON.parse(questionResourceJSON);
-          console.log("JSON解析成功, questionResource: ", questionResource);
-        } catch (e) {
-          console.error("JSON解析错误:", e);
-          return {
-            code: 400,
-            message: "questionResourceJSON格式错误",
-            data: null,
-          };
-        }
-
-        // 验证必填字段，使用 == null 判断，只处理null和undefined
-        if (questionResource.id == null) {
-          console.log("字段验证失败 - id:", questionResource.id);
-          return {
-            code: 400,
-            message: "id字段不能为空",
-            data: null,
-          };
-        }
-
-        // 查找资源并更新
-        const resourceToUpdate = questionResources.find((item) => item.id === questionResource.id);
-        if (!resourceToUpdate) {
-          return {
+      // 检查是否有模拟文件
+      const file = storedFiles.get(id);
+      if (!file) {
+        res.statusCode = 404;
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          JSON.stringify({
             code: 404,
-            message: "问题资源不存在",
+            message: "文件不存在",
             data: null,
-          };
-        }
-
-        // 更新字段
-        Object.assign(resourceToUpdate, questionResource);
-
-        // 如果有文件更新，也更新storedFiles
-        if (questionResource.name || questionResource.size) {
-          const fileToUpdate = storedFiles.get(questionResource.id);
-          if (fileToUpdate) {
-            if (questionResource.name) fileToUpdate.filename = questionResource.name;
-            if (questionResource.size) fileToUpdate.size = questionResource.size;
-            fileToUpdate.uploadedAt = new Date().toISOString();
-          }
-        }
-
-        // 输出当前数据状态
-        logResourcesAndFiles();
-
-        console.log("updateQuestionResource success:", resourceToUpdate);
-        return {
-          code: 200,
-          message: "更新问题资源成功",
-          data: null,
-        };
-      } catch (error) {
-        console.error("updateQuestionResource error:", error);
-        return {
-          code: 500,
-          message: "Internal Server Error",
-          data: null,
-        };
+          })
+        );
+        return;
       }
-    },
-  },
 
-  // getQuestionResources - 按参数查询问题资源
-  {
-    url: "/api/question/questionresource",
-    method: "get",
-    response: (req) => {
-      try {
-        console.log("req:", req);
-        const { id, name, type, size, questionId } = req.query;
+      // 根据文件类型生成不同的内容
+      let mockContent;
+      const fileExt = resource.name.split(".").pop().toLowerCase();
 
-        // 筛选资源
-        let result = [...questionResources];
-        if (id) {
-          result = result.filter((item) => item.id === Number(id));
-        }
-        if (name) {
-          result = result.filter((item) => item.name.includes(name));
-        }
-        if (type) {
-          result = result.filter((item) => item.type === Number(type));
-        }
-        if (size) {
-          result = result.filter((item) => item.size === Number(size));
-        }
-        if (questionId) {
-          result = result.filter((item) => item.questionId === Number(questionId));
-        }
-
-        console.log("getQuestionResources success:", { total: result.length });
-        return {
-          code: 200,
-          message: "查询成功",
-          data: result,
-        };
-      } catch (error) {
-        console.error("getQuestionResources error:", error);
-        return {
-          code: 500,
-          message: "Internal Server Error",
-          data: null,
-        };
-      }
-    },
-  },
-
-  // downloadQuestionResource - 下载问题资源文件
-  {
-    url: "/api/question/questionresource/download/:id",
-    method: "get",
-    rawResponse: async (req, res) => {
-      try {
-        // 解析路径参数
-        const pathParams = parsePathParams(req, 1);
-        const id = Number(pathParams.param1);
-
-        // 验证资源是否存在
-        const resource = questionResources.find((item) => item.id === id);
-        if (!resource) {
-          res.statusCode = 404;
-          res.setHeader("Content-Type", "application/json");
-          res.end(
-            JSON.stringify({
-              code: 404,
-              message: "问题资源不存在",
-              data: null,
-            })
-          );
-          return;
-        }
-
-        // 检查是否有模拟文件
-        const file = storedFiles.get(id);
-        if (!file) {
-          res.statusCode = 404;
-          res.setHeader("Content-Type", "application/json");
-          res.end(
-            JSON.stringify({
-              code: 404,
-              message: "文件不存在",
-              data: null,
-            })
-          );
-          return;
-        }
-
-        // 根据文件类型生成不同的内容
-        let mockContent;
-        const fileExt = resource.name.split(".").pop().toLowerCase();
-
-        if (["jpg", "jpeg", "png", "gif", "svg"].includes(fileExt)) {
-          // 图片文件：生成 dummyimage 图片
-          mockContent = await generateDummyImage(resource.name, resource.id);
-        } else {
-          // 文本文件：生成文本内容
-          mockContent = `# 问题资源文件
+      if (["jpg", "jpeg", "png", "gif", "svg"].includes(fileExt)) {
+        // 图片文件：生成 dummyimage 图片
+        mockContent = await generateDummyImage(resource.name, resource.id);
+      } else {
+        // 文本文件：生成文本内容
+        mockContent = `# 问题资源文件
 文件名: ${resource.name}
 资源ID: ${resource.id}
 资源类型: ${resource.type} (0:测试用例,1:用例答案,2:问题描述资料)
@@ -514,113 +513,122 @@ export default [
 生成时间: ${new Date().toISOString()}
 
 这是一个模拟的文件内容，用于测试文件下载功能。`;
-        }
-
-        // 获取 Content-Type
-        const contentType = getContentType(resource.name);
-        console.log("contentType :", contentType);
-
-        // 计算实际内容长度
-        const contentLength = Buffer.isBuffer(mockContent)
-          ? mockContent.length
-          : Buffer.byteLength(mockContent, "utf8");
-
-        console.log("downloadQuestionResource success:", {
-          id,
-          filename: resource.name,
-          size: contentLength,
-          isBuffer: Buffer.isBuffer(mockContent),
-          contentType: contentType,
-        });
-
-        // 设置响应头
-        res.statusCode = 200;
-        res.setHeader("Content-Type", contentType);
-        res.setHeader("Content-Disposition", `attachment; filename="${resource.name}"`);
-        // 不设置 Content-Length，让浏览器自动处理，否则文件会被截断
-
-        // 发送文件内容
-        // 对于二进制文件（图片等），直接发送 Buffer；对于文本文件，使用 utf-8
-        if (Buffer.isBuffer(mockContent)) {
-          // 图片等二进制文件
-          res.end(mockContent);
-        } else {
-          // 文本文件
-          res.end(mockContent, "utf8");
-        }
-      } catch (error) {
-        console.error("downloadQuestionResource error:", error);
-        res.statusCode = 500;
-        res.setHeader("Content-Type", "application/json");
-        res.end(
-          JSON.stringify({
-            code: 500,
-            message: "Internal Server Error",
-            data: null,
-          })
-        );
       }
-    },
-  },
-  // getQuestionResourcesPage - 按参数分页查询问题资源
-  // 更通用的url匹配放在后面，否则会在调用downloadQuestionResource时被匹配到getQuestionResourcesPage
-  {
-    url: "/api/question/questionresource/:pageNo/:pageSize",
-    method: "get",
-    response: (req) => {
-      try {
-        console.log("req:", req);
 
-        const pathParams = parsePathParams(req, 2);
-        const { id, name, type, size, questionId } = req.query;
-        const pageNo = Number(pathParams.param1);
-        const pageSize = Number(pathParams.param2);
+      // 获取 Content-Type
+      const contentType = getContentType(resource.name);
+      console.log("contentType :", contentType);
 
-        // 筛选资源
-        let filtered = [...questionResources];
-        if (id) {
-          filtered = filtered.filter((item) => item.id === Number(id));
-        }
-        if (name) {
-          filtered = filtered.filter((item) => item.name.includes(name));
-        }
-        if (type) {
-          filtered = filtered.filter((item) => item.type === Number(type));
-        }
-        if (size) {
-          filtered = filtered.filter((item) => item.size === Number(size));
-        }
-        if (questionId) {
-          filtered = filtered.filter((item) => item.questionId === Number(questionId));
-        }
+      // 计算实际内容长度
+      const contentLength = Buffer.isBuffer(mockContent)
+        ? mockContent.length
+        : Buffer.byteLength(mockContent, "utf8");
 
-        // 分页处理
-        const total = filtered.length;
-        const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-        const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+      console.log("downloadQuestionResource success:", {
+        id,
+        filename: resource.name,
+        size: contentLength,
+        isBuffer: Buffer.isBuffer(mockContent),
+        contentType: contentType,
+      });
 
-        const pageResult = {
-          records,
-          total,
-          current: total > 0 ? pageNo : null,
-          size: total > 0 ? pageSize : null,
-          pages,
-        };
+      // 设置响应头
+      res.statusCode = 200;
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Content-Disposition", `attachment; filename="${resource.name}"`);
+      // 不设置 Content-Length，让浏览器自动处理，否则文件会被截断
 
-        console.log("getQuestionResourcesPage success:", { ...pageResult });
-        return {
-          code: 200,
-          message: "分页查询成功",
-          data: pageResult,
-        };
-      } catch (error) {
-        console.error("getQuestionResourcesPage error:", error);
-        return {
+      // 发送文件内容
+      // 对于二进制文件（图片等），直接发送 Buffer；对于文本文件，使用 utf-8
+      if (Buffer.isBuffer(mockContent)) {
+        // 图片等二进制文件
+        res.end(mockContent);
+      } else {
+        // 文本文件
+        res.end(mockContent, "utf8");
+      }
+    } catch (error) {
+      console.error("downloadQuestionResource error:", error);
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json");
+      res.end(
+        JSON.stringify({
           code: 500,
           message: "Internal Server Error",
           data: null,
-        };
-      }
-    },
+        })
+      );
+    }
   },
+};
+
+// getQuestionResourcesPage - 按参数分页查询问题资源
+// 更通用的url匹配放在后面，否则会在调用downloadQuestionResource时被匹配到getQuestionResourcesPage
+export const getQuestionResourcesPage = {
+  url: "/api/question/questionresource/:pageNo/:pageSize",
+  method: "get",
+  response: (req) => {
+    try {
+      console.log("req:", req);
+
+      const pathParams = parsePathParams(req, 2);
+      const { id, name, type, size, questionId } = req.query;
+      const pageNo = Number(pathParams.param1);
+      const pageSize = Number(pathParams.param2);
+
+      // 筛选资源
+      let filtered = [...questionResources];
+      if (id) {
+        filtered = filtered.filter((item) => item.id === Number(id));
+      }
+      if (name) {
+        filtered = filtered.filter((item) => item.name.includes(name));
+      }
+      if (type) {
+        filtered = filtered.filter((item) => item.type === Number(type));
+      }
+      if (size) {
+        filtered = filtered.filter((item) => item.size === Number(size));
+      }
+      if (questionId) {
+        filtered = filtered.filter((item) => item.questionId === Number(questionId));
+      }
+
+      // 分页处理
+      const total = filtered.length;
+      const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
+      const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+
+      const pageResult = {
+        records,
+        total,
+        current: total > 0 ? pageNo : null,
+        size: total > 0 ? pageSize : null,
+        pages,
+      };
+
+      console.log("getQuestionResourcesPage success:", { ...pageResult });
+      return {
+        code: 200,
+        message: "分页查询成功",
+        data: pageResult,
+      };
+    } catch (error) {
+      console.error("getQuestionResourcesPage error:", error);
+      return {
+        code: 500,
+        message: "Internal Server Error",
+        data: null,
+      };
+    }
+  },
+};
+
+export default [
+  createQuestionResource,
+  deleteQuestionResource,
+  updateQuestionResource,
+  getQuestionResources,
+  downloadQuestionResource,
+  getQuestionResourcesPage,
 ];
