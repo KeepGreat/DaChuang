@@ -1,6 +1,7 @@
 package com.hbwl.test;
 
-import com.hbwl.ai.AITeacherService;
+import com.hbwl.ai.service.AITeacherService;
+import com.hbwl.ai.service.SmartCompanionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

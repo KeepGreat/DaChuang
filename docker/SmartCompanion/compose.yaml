@@ -1,0 +1,5 @@
+# docker run -d \
+#   --name my-app \
+#   -p 8000:8000 \
+#   -v $(pwd)/knowledge.db:/app/knowledge.db \
+#   my-fastapi-app

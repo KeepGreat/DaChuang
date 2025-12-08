@@ -1,6 +1,6 @@
 package com.hbwl.controller;
 
-import com.hbwl.ai.AITeacherService;
+import com.hbwl.ai.service.AITeacherService;
 import com.hbwl.codesandbox.pojo.CodeSandboxInput;
 import com.hbwl.teaching.pojo.TeachingInput;
 import org.springframework.beans.factory.annotation.Autowired;

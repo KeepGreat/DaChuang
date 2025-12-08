@@ -1,6 +1,7 @@
 package com.hbwl.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hbwl.common.Result;
 import com.hbwl.pojo.CourseSection;
 import com.hbwl.service.CourseSectionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,50 +17,54 @@ public class CourseSectionController {
     private CourseSectionService courseSectionService;
 
     @PostMapping
-    public String addCourseSection(@RequestBody CourseSection courseSection,
+    public Result addCourseSection(@RequestBody CourseSection courseSection,
                                    @RequestHeader("role") String role) {
-        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = courseSectionService.addCourseSection(courseSection);
-        if (row == -1) return "参数不能为空";
-        if (row == 0) return "增加课程系列失败";
-        return "增加课程系列成功";
+        if (row == -1) return Result.error("参数不能为空");
+        if (row == 0) return Result.error("增加课程系列失败");
+        return Result.success("增加课程系列成功");
     }
 
     @DeleteMapping("/{id}")
-    public String deleteCourseSectionById(@PathVariable("id") Integer id,
+    public Result deleteCourseSectionById(@PathVariable("id") Integer id,
                                           @RequestHeader("role") String role){
-        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = courseSectionService.deleteCourseSectionById(id);
-        if (row == 0) return "删除课程系列失败";
-        return "删除课程系列成功";
+        if (row == 0) return Result.error("删除课程系列失败");
+        return Result.success("删除课程系列成功");
     }
 
     @PutMapping
-    public String updateCourseSection(@RequestBody CourseSection courseSection,
+    public Result updateCourseSection(@RequestBody CourseSection courseSection,
                                       @RequestHeader("role") String role){
-        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = courseSectionService.updateCourseSectionById(courseSection);
-        if (row == -1) return "参数不能为空";
-        if (row == 0) return "更新课程系列失败";
-        return "更新课程系列成功";
+        if (row == -1) return Result.error("参数不能为空");
+        if (row == 0) return Result.error("更新课程系列失败");
+        return Result.success("更新课程系列成功");
     }
 
     @GetMapping
-    public List<CourseSection> getCourseSections(@RequestParam(required = false) Integer id,
+    public Result getCourseSections(@RequestParam(required = false) Integer id,
                                                  @RequestParam(required = false) String name){
         CourseSection courseSection = new CourseSection();
         courseSection.setId(id);
         courseSection.setName(name);
-        return courseSectionService.getCourseSections(courseSection);
+        List<CourseSection> list = courseSectionService.getCourseSections(courseSection);
+        if (list == null || list.isEmpty()) return Result.error("查询课程系列失败");
+        return Result.success(list, "查询课程系列成功");
     }
 
     @GetMapping("/{page}/{size}")
-    public Page<CourseSection> getCourseSectionsPage(@PathVariable("page") int pageNo, @PathVariable("size") int pageSize,
+    public Result getCourseSectionsPage(@PathVariable("page") int pageNo, @PathVariable("size") int pageSize,
                                                      @RequestParam(required = false) Integer id,
                                                      @RequestParam(required = false) String name){
         CourseSection courseSection = new CourseSection();
         courseSection.setId(id);
         courseSection.setName(name);
-        return courseSectionService.getCourseSectionsPage(pageNo, pageSize, courseSection);
+        Page<CourseSection> page = courseSectionService.getCourseSectionsPage(pageNo, pageSize, courseSection);
+        if (page == null || page.getSize() == 0) return Result.error("查询课程列表失败");
+        return Result.success(page, "查询课程列表成功");
     }
 }

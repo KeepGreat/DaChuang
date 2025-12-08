@@ -1,6 +1,7 @@
 package com.hbwl.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hbwl.common.Result;
 import com.hbwl.pojo.Material;
 import com.hbwl.service.MaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,36 +18,36 @@ public class MaterialController {
     private MaterialService materialService;
 
     @PostMapping
-    public String addMaterial(@RequestBody Material material,
+    public Result addMaterial(@RequestBody Material material,
                               @RequestHeader("role") String role){
-        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = materialService.addMaterial(material);
-        if (row == -1) return "参数不能为空";
-        if (row == 0) return "增加教材失败";
-        return "增加教材成功";
+        if (row == -1) return Result.error("参数不能为空");
+        if (row == 0) return Result.error("增加教材失败");
+        return Result.success("增加教材成功");
     }
 
     @DeleteMapping("{id}")
-    public String deleteMaterialById(@PathVariable("id") Integer id,
+    public Result deleteMaterialById(@PathVariable("id") Integer id,
                                      @RequestHeader("role") String role){
-        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = materialService.deleteMaterialById(id);
-        if (row == 0) return "删除教材失败";
-        return "删除教材成功";
+        if (row == 0) return Result.error("删除教材失败");
+        return Result.success("删除教材成功");
     }
 
     @PutMapping
-    public String updateMaterial(@RequestBody Material material,
+    public Result updateMaterial(@RequestBody Material material,
                                  @RequestHeader("role") String role){
-        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = materialService.updateMaterialById(material);
-        if (row == -1) return "参数不能为空";
-        if (row == 0) return "更新教材失败";
-        return "更新教材成功";
+        if (row == -1) return Result.error("参数不能为空");
+        if (row == 0) return Result.error("更新教材失败");
+        return Result.success("更新教材成功");
     }
 
     @GetMapping
-    public List<Material> getMaterials(@RequestParam(required = false) Integer id,
+    public Result getMaterials(@RequestParam(required = false) Integer id,
                                        @RequestParam(required = false) String type,
                                        @RequestParam(required = false) LocalDateTime createdTime,
                                        @RequestParam(required = false) LocalDateTime updatedTime,
@@ -57,11 +58,13 @@ public class MaterialController {
         material.setCreatedTime(createdTime);
         material.setUpdatedTime(updatedTime);
         material.setCourseId(courseId);
-        return materialService.getMaterials(material);
+        List<Material> list = materialService.getMaterials(material);
+        if (list == null || list.isEmpty()) return Result.error("查询资料信息失败");
+        return Result.success(list, "查询资料信息成功");
     }
 
     @GetMapping("/{page}/{size}")
-    public Page<Material> getMaterialsPage(@PathVariable("page") int pageNo, @PathVariable("size") int pageSize,
+    public Result getMaterialsPage(@PathVariable("page") int pageNo, @PathVariable("size") int pageSize,
                                            @RequestParam(required = false) Integer id,
                                            @RequestParam(required = false) String type,
                                            @RequestParam(required = false) LocalDateTime createdTime,
@@ -73,6 +76,8 @@ public class MaterialController {
         material.setCreatedTime(createdTime);
         material.setUpdatedTime(updatedTime);
         material.setCourseId(courseId);
-        return materialService.getMaterialsPage(pageNo, pageSize, material);
+        Page<Material> page = materialService.getMaterialsPage(pageNo, pageSize, material);
+        if (page == null || page.getSize() == 0) return Result.error("查询资料信息失败");
+        return Result.success(page, "查询资料信息成功");
     }
 }

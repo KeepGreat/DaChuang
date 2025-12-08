@@ -2,6 +2,7 @@ package com.hbwl.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hbwl.common.Result;
 import com.hbwl.pojo.FileContent;
 import com.hbwl.service.FileContentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,54 +24,54 @@ public class FileContentController {
     private FileContentService fileContentService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String uploadFile(@RequestPart("fileContent") String fileContentJSON,
+    public Result uploadFile(@RequestPart("fileContent") String fileContentJSON,
                              @RequestPart("file") MultipartFile file,
                              @RequestHeader("role") String role) {
-        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
+        if (!(role.equals("teacher") || role.equals("admin"))) Result.error("权限不足");
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileContent fileContent = objectMapper.readValue(fileContentJSON, FileContent.class);
 
             int row = fileContentService.addFileContent(fileContent, file);
-            if (row == -1) return "参数不能为空";
-            if (row == 0) return "文件接收成功，但在保存时失败了";
-            return "文件上传成功";
+            if (row == -1) return Result.error("参数不能为空");
+            if (row == 0) return Result.error("文件接收成功，但在保存时失败了");
+            return Result.success("文件上传成功");
         } catch (Exception e) {
-            return "文件上传失败" + e.getMessage();
+            return Result.error("文件上传失败" + e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public String deleteFile(@PathVariable("id") Integer id,
+    public Result deleteFile(@PathVariable("id") Integer id,
                              @RequestParam String fileName,
                              @RequestHeader("role") String role){
-        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
+        if (!(role.equals("teacher") || role.equals("admin"))) Result.error("权限不足");
         int row = fileContentService.deleteFileContentById(id, fileName);
-        if (row == 0) return "删除文件失败";
-        return "删除文件成功";
+        if (row == 0) return Result.error("删除文件失败");
+        return Result.success("删除文件成功");
     }
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String updateFile(@RequestPart("fileContent") String fileContentJSON,
+    public Result updateFile(@RequestPart("fileContent") String fileContentJSON,
                              @RequestPart("file") MultipartFile file,
                              @RequestHeader("role") String role) {
-        if (!(role.equals("teacher") || role.equals("admin"))) return "权限不足";
+        if (!(role.equals("teacher") || role.equals("admin"))) Result.error("权限不足");
         // fileContent nullable + multipartFile
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileContent fileContent = objectMapper.readValue(fileContentJSON, FileContent.class);
 
             int row = fileContentService.updateFileContentById(fileContent, file);
-            if (row == -1) return "参数不能为空";
-            if (row == 0) return "在更新文件时接收成功，但更新失败了";
-            return "更新文件成功";
+            if (row == -1) return Result.error("参数不能为空");
+            if (row == 0) return Result.error("在更新文件时接收成功，但更新失败了");
+            return Result.success("更新文件成功");
         } catch (Exception e) {
-            return "更新文件失败" + e.getMessage();
+            return Result.error("更新文件失败" + e.getMessage());
         }
     }
 
     @GetMapping
-    public List<FileContent> getFileContents(@RequestParam(required = false) Integer id,
+    public Result getFileContents(@RequestParam(required = false) Integer id,
                                              @RequestParam(required = false) String type,
                                              @RequestParam(required = false) String name,
                                              @RequestParam(required = false) Integer size,
@@ -81,11 +82,13 @@ public class FileContentController {
         fileContent.setType(type);
         fileContent.setName(name);
         fileContent.setSize(size);
-        return fileContentService.getFileContents(fileContent);
+        List<FileContent> list = fileContentService.getFileContents(fileContent);
+        if (list == null || list.isEmpty()) return Result.error("查询文件信息失败");
+        return Result.success(list, "查询文件信息成功");
     }
 
     @GetMapping("/{page}/{size}")
-    public Page<FileContent> getFileContentsPage(@PathVariable("page") Integer pageNo, @PathVariable("size") Integer pageSize,
+    public Result getFileContentsPage(@PathVariable("page") Integer pageNo, @PathVariable("size") Integer pageSize,
                                                  @RequestParam(required = false) Integer id,
                                                  @RequestParam(required = false) String type,
                                                  @RequestParam(required = false) String name,
@@ -97,7 +100,9 @@ public class FileContentController {
         fileContent.setType(type);
         fileContent.setName(name);
         fileContent.setSize(size);
-        return fileContentService.getFileContentsPage(pageNo, pageSize, fileContent);
+        Page<FileContent> page = fileContentService.getFileContentsPage(pageNo, pageSize, fileContent);
+        if (page == null || page.getSize() == 0) return Result.error("查询文件信息失败");
+        return Result.success(page, "查询文件信息成功");
     }
 
     @GetMapping("/download")
