@@ -1,4 +1,5 @@
-import { getNextId, parsePathParams, questionIndexes, questions } from "./mockData";
+import { getNextId, parsePathParams } from "../utils";
+import { questionIndexes, questions } from "./mockData";
 
 // createQuestionAndIndex - 新增问题及关联的QuestionIndex
 export const createQuestionAndIndex = {
@@ -165,7 +166,9 @@ export const deleteQuestionByIndex = {
       questionIndexes.splice(
         0,
         questionIndexes.length,
-        ...questionIndexes.filter((item) => !relatedIndexes.map((i) => i.id).includes(item.id))
+        ...questionIndexes.filter(
+          (item) => !relatedIndexes.map((i) => i.id).includes(item.id)
+        )
       );
 
       console.log("deleteQuestionByIndex success:", {
@@ -311,13 +314,16 @@ export const getQuestionsPage = {
         filtered = filtered.filter((item) => item.type === Number(type));
       }
       if (hasResource != null) {
-        filtered = filtered.filter((item) => item.hasResource === (hasResource === "true"));
+        filtered = filtered.filter(
+          (item) => item.hasResource === (hasResource === "true")
+        );
       }
 
       // 分页处理
       const total = filtered.length;
       const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+      const records =
+        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
 
       const pageResult = {
         records,
@@ -418,7 +424,8 @@ export const getQuestionPageByIndex = {
       // 分页处理
       const total = filtered.length;
       const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+      const records =
+        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
 
       const pageResult = {
         records,

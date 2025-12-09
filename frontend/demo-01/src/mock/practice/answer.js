@@ -1,4 +1,5 @@
-import { answers, getNextId, parsePathParams } from "./mockData";
+import { getNextId, parsePathParams } from "../utils";
+import { answers } from "./mockData";
 
 // createAnswer - 新增答案
 export const createAnswer = {
@@ -253,7 +254,8 @@ export const getAnswersPage = {
       // 分页处理
       const total = filtered.length;
       const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+      const records =
+        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
 
       const pageResult = {
         records,

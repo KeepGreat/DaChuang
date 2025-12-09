@@ -1,10 +1,5 @@
-import {
-	generateDateTime,
-	getNextId,
-	parsePathParams,
-	practiceIndexes,
-	practices,
-} from "./mockData";
+import { generateDateTime, getNextId, parsePathParams } from "../utils";
+import { practiceIndexes, practices } from "./mockData";
 
 // createPracticeAndIndex - 新增练习及关联的 PracticeIndex
 export const createPracticeAndIndex = {
@@ -177,7 +172,9 @@ export const deletePracticeByCourse = {
       practiceIndexes.splice(
         0,
         practiceIndexes.length,
-        ...practiceIndexes.filter((item) => !relatedIndexes.map((i) => i.id).includes(item.id))
+        ...practiceIndexes.filter(
+          (item) => !relatedIndexes.map((i) => i.id).includes(item.id)
+        )
       );
 
       console.log("deletePracticeByCourse success:", {
@@ -266,7 +263,8 @@ export const getPractices = {
   response: (req) => {
     try {
       console.log("req :", req);
-      const { id, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd } = req.query;
+      const { id, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd } =
+        req.query;
 
       // 筛选练习
       let result = [...practices];
@@ -280,10 +278,14 @@ export const getPractices = {
         result = result.filter((item) => item.createdAt <= createdAtEnd);
       }
       if (expiredAtStart) {
-        result = result.filter((item) => item.expiredAt && item.expiredAt >= expiredAtStart);
+        result = result.filter(
+          (item) => item.expiredAt && item.expiredAt >= expiredAtStart
+        );
       }
       if (expiredAtEnd) {
-        result = result.filter((item) => item.expiredAt && item.expiredAt <= expiredAtEnd);
+        result = result.filter(
+          (item) => item.expiredAt && item.expiredAt <= expiredAtEnd
+        );
       }
 
       console.log("searchPractices success:", { total: result.length });
@@ -312,7 +314,8 @@ export const getPracticesPage = {
       console.log("req :", req);
 
       const pathParams = parsePathParams(req, 2);
-      const { id, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd } = req.query;
+      const { id, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd } =
+        req.query;
       const pageNo = Number(pathParams.param1);
       const pageSize = Number(pathParams.param2);
 
@@ -328,16 +331,21 @@ export const getPracticesPage = {
         filtered = filtered.filter((item) => item.createdAt <= createdAtEnd);
       }
       if (expiredAtStart) {
-        filtered = filtered.filter((item) => item.expiredAt && item.expiredAt >= expiredAtStart);
+        filtered = filtered.filter(
+          (item) => item.expiredAt && item.expiredAt >= expiredAtStart
+        );
       }
       if (expiredAtEnd) {
-        filtered = filtered.filter((item) => item.expiredAt && item.expiredAt <= expiredAtEnd);
+        filtered = filtered.filter(
+          (item) => item.expiredAt && item.expiredAt <= expiredAtEnd
+        );
       }
 
       // 分页处理
       const total = filtered.length;
       const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+      const records =
+        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
 
       const pageResult = {
         records,
@@ -390,7 +398,8 @@ export const getPracticesByIndex = {
         }
         // 如果指定了courseId，则同时按courseSectionId和courseId筛选
         return (
-          item.courseSectionId === Number(courseSectionId) && item.courseId === Number(courseId)
+          item.courseSectionId === Number(courseSectionId) &&
+          item.courseId === Number(courseId)
         );
       });
       const practiceIds = [...new Set(relatedIndexes.map((item) => item.practiceId))];
@@ -443,7 +452,8 @@ export const getPracticesPageByIndex = {
         }
         // 如果指定了courseId，则同时按courseSectionId和courseId筛选
         return (
-          item.courseSectionId === Number(courseSectionId) && item.courseId === Number(courseId)
+          item.courseSectionId === Number(courseSectionId) &&
+          item.courseId === Number(courseId)
         );
       });
       const practiceIds = [...new Set(relatedIndexes.map((item) => item.practiceId))];
@@ -452,7 +462,8 @@ export const getPracticesPageByIndex = {
       // 分页处理
       const total = filtered.length;
       const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+      const records =
+        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
 
       const pageResult = {
         records,

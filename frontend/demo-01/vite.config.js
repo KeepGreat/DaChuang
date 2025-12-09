@@ -12,15 +12,16 @@ export default defineConfig({
       bundler: "vite",
       editor: "code", // 指定 IDE 为 vscode https://inspector.fe-dev.cn/api/basic.html#editor
     }),
+    // 添加 vite-plugin-mock 配置，https://www.npmjs.com/package/vite-plugin-mock/v/2.9.6
     viteMockServe({
       // 启用 mock 功能
       enable: true,
+      // 指定统一的mock入口文件
+      configPath: "./src/mock/index.js",
       // 监视 mock 文件变化
       watchFiles: true,
       // 开启日志查看拦截情况
       logger: true,
-      // mock文件目录
-      mockPath: "./src/mock",
     }),
   ],
   resolve: {

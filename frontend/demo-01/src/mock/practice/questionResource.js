@@ -1,4 +1,5 @@
-import { getNextId, parsePathParams, questionResources, storedFiles } from "./mockData";
+import { getNextId, parsePathParams } from "../utils";
+import { questionResources, storedFiles } from "./mockData";
 
 /**
  * 遍历输出问题资源和文件存储信息
@@ -167,7 +168,10 @@ export const createQuestionResource = {
         const multipartString = req.body[multipartKey];
         console.log("multipart字符串长度:", multipartString.length);
         console.log(
-          `multipart字符串前200字符: \n\n(begin)\n${multipartString.substring(0, 200)}\n(end)\n`
+          `multipart字符串前200字符: \n\n(begin)\n${multipartString.substring(
+            0,
+            200
+          )}\n(end)\n`
         );
 
         // 取消注释可以查看实际multipart格式，如果复杂文件可能输出过多
@@ -368,7 +372,9 @@ export const updateQuestionResource = {
       }
 
       // 查找资源并更新
-      const resourceToUpdate = questionResources.find((item) => item.id === questionResource.id);
+      const resourceToUpdate = questionResources.find(
+        (item) => item.id === questionResource.id
+      );
       if (!resourceToUpdate) {
         return {
           code: 404,
@@ -597,7 +603,8 @@ export const getQuestionResourcesPage = {
       // 分页处理
       const total = filtered.length;
       const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+      const records =
+        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
 
       const pageResult = {
         records,

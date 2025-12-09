@@ -1,4 +1,5 @@
-import { getNextId, parsePathParams, questionIndexes } from "./mockData";
+import { getNextId, parsePathParams } from "../utils";
+import { questionIndexes } from "./mockData";
 
 // createQuestionIndexes - 新增问题与练习关系
 export const createQuestionIndexes = {
@@ -250,7 +251,8 @@ export const getQuestionIndexesPage = {
       // 分页处理
       const total = filtered.length;
       const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+      const records =
+        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
 
       const pageResult = {
         records,

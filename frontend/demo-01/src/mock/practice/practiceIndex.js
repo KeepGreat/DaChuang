@@ -1,4 +1,5 @@
-import { getNextId, parsePathParams, practiceIndexes } from "./mockData";
+import { getNextId, parsePathParams } from "../utils";
+import { practiceIndexes } from "./mockData";
 
 // createPracticeIndex - 新增练习与课程关系
 export const createPracticeIndex = {
@@ -207,7 +208,9 @@ export const getPracticeIndexes = {
         result = result.filter((item) => item.practiceId === Number(practiceId));
       }
       if (courseSectionId) {
-        result = result.filter((item) => item.courseSectionId === Number(courseSectionId));
+        result = result.filter(
+          (item) => item.courseSectionId === Number(courseSectionId)
+        );
       }
       if (courseId) {
         result = result.filter((item) => item.courseId === Number(courseId));
@@ -249,7 +252,9 @@ export const getPracticeIndexesPage = {
         filtered = filtered.filter((item) => item.practiceId === Number(practiceId));
       }
       if (courseSectionId) {
-        filtered = filtered.filter((item) => item.courseSectionId === Number(courseSectionId));
+        filtered = filtered.filter(
+          (item) => item.courseSectionId === Number(courseSectionId)
+        );
       }
       if (courseId) {
         filtered = filtered.filter((item) => item.courseId === Number(courseId));
@@ -258,7 +263,8 @@ export const getPracticeIndexesPage = {
       // 分页处理
       const total = filtered.length;
       const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records = total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+      const records =
+        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
 
       const pageResult = {
         records,

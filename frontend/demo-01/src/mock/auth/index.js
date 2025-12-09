@@ -1,28 +1,5 @@
-import { users } from "../user/mockData";
-
-/**
- * 生成可读的日期时间格式:
- * @returns {string} - YYYY-MM-DD-HH-mm-ss格式的日期时间字符串
- */
-function getDateTimeString() {
-  const now = new Date();
-  const year = String(now.getFullYear());
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
-
-  return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
-}
-/**
- * 模拟生成JWT token
- * @param user - 用户对象，包含id属性
- * @returns {string} - 模拟的JWT token
- */
-function generateToken(user) {
-  return `mock-token-${user.username}-${user.role}-${getDateTimeString()}`;
-}
+import { users } from "./mockData";
+import { generateToken } from "../utils";
 
 export const register = {
   url: "/user/register",
