@@ -1,8 +1,8 @@
 // vite.config.js
 import vue from "@vitejs/plugin-vue";
+import { codeInspectorPlugin } from "code-inspector-plugin";
 import path from "path";
 import { defineConfig } from "vite";
-import { codeInspectorPlugin } from "code-inspector-plugin";
 import { viteMockServe } from "vite-plugin-mock";
 
 export default defineConfig({
@@ -16,8 +16,8 @@ export default defineConfig({
     viteMockServe({
       // 启用 mock 功能
       enable: true,
-      // 指定统一的mock入口文件
-      configPath: "./src/mock/index.js",
+      // mock文件目录
+      mockPath: "./src/mock",
       // 监视 mock 文件变化
       watchFiles: true,
       // 开启日志查看拦截情况
