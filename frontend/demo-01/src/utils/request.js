@@ -49,6 +49,26 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
+    // 检查响应数据是否为HTML，说明相应的Mock接口未实现
+    if (
+      typeof response.data === "string" &&
+      response.data.trim().startsWith("<!DOCTYPE html>")
+    ) {
+      console.error(
+        `${new Date().toLocaleTimeString()} Response Error: 请求的接口可能没有对应的Mock实现`,
+        `URL: ${response.config.url}`,
+        `Method: ${response.config.method?.toUpperCase()}`
+      );
+
+      // 返回一个标准的错误响应结构
+      const mockNotFoundError = new BusinessError(
+        404,
+        `未找到相应的Mock接口: ${response.config.url}`,
+        null
+      );
+      return Promise.reject(mockNotFoundError);
+    }
+
     // 记录响应信息
     console.log(`${new Date().toLocaleTimeString()} response interceptors:`, response);
     console.log("response.data :", response.data);
