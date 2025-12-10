@@ -1,17 +1,21 @@
 <template>
+  <!-- 编程题组件主容器 -->
   <div class="programming-question-container">
     <!-- 左侧：问题描述区域 -->
     <div class="left-section">
+      <!-- 问题题目卡片 -->
       <div class="section-card">
         <h3 class="section-title">问题题目</h3>
         <div class="problem-title">{{ question.title }}</div>
       </div>
-      
+
+      <!-- 问题要求卡片 -->
       <div class="section-card">
         <h3 class="section-title">问题要求</h3>
         <div class="problem-content">{{ question.content }}</div>
       </div>
-      
+
+      <!-- 问题说明卡片 -->
       <div class="section-card">
         <h3 class="section-title">问题说明</h3>
         <div class="note-content">
@@ -27,15 +31,17 @@
         </div>
       </div>
     </div>
-    
+
     <!-- 右侧：代码编写区域 -->
     <div class="right-section">
       <div class="code-card">
+        <!-- 代码卡头部 -->
         <div class="code-header">
           <span class="code-title">编写代码</span>
           <div class="code-actions">
+            <!-- 编程语言选择器 -->
             <el-select
-              v-model="language"
+              v-model="selectedLanguage"
               placeholder="选择语言"
               size="medium"
               style="width: 100px"
@@ -45,6 +51,7 @@
               <el-option label="C++" value="cpp"></el-option>
               <el-option label="JavaScript" value="javascript"></el-option>
             </el-select>
+            <!-- 查看上一次评测按钮 -->
             <el-button
               v-if="hasPreviousEvaluation"
               size="medium"
@@ -54,23 +61,24 @@
             >
           </div>
         </div>
-        
+
+        <!-- 代码输入区域 -->
         <div class="code-content">
           <textarea
-            v-model="code"
+            v-model="codeInput"
             class="code-input"
             placeholder="在此输入代码..."
             :disabled="showCorrectness"
           ></textarea>
         </div>
-        
-        <!-- 代码运行结果 -->
+
+        <!-- 代码运行结果展示 -->
         <div v-if="codeResult" class="code-result">
           <h4>运行结果：</h4>
           <pre>{{ codeResult }}</pre>
         </div>
-        
-        <!-- 正确答案展示 -->
+
+        <!-- 正确答案展示（查看答案时显示） -->
         <div v-if="showCorrectness && question.answer" class="correct-answer">
           <h4>参考答案：</h4>
           <div class="code-editor">
@@ -79,29 +87,36 @@
         </div>
       </div>
     </div>
-    
-    <!-- 评估结果对话框 -->
-    <el-dialog v-model="dialogVisible" width="80%" :before-close="handleClose">
+
+    <!-- 代码评测结果对话框 -->
+    <el-dialog
+      v-model="evaluationDialogVisible"
+      width="80%"
+      :before-close="handleDialogClose"
+    >
       <div class="evaluation-container">
         <h3 class="dialog-inner-title">代码评测结果</h3>
 
-        <div class="evaluation-content" v-loading="evaluationLoading">
+        <div class="evaluation-content" v-loading="isEvaluationLoading">
+          <!-- 评测结果内容 -->
           <div
-            v-if="evaluationText && !evaluationLoading"
+            v-if="evaluationContent && !isEvaluationLoading"
             class="evaluation-item markdown-content"
           >
-            <div v-html="parseMarkdown(evaluationText)"></div>
+            <div v-html="parseMarkdown(evaluationContent)"></div>
           </div>
 
-          <div v-else-if="!evaluationLoading" class="empty-state">
+          <!-- 无评估结果状态 -->
+          <div v-else-if="!isEvaluationLoading" class="empty-state">
             <p>暂无评估结果</p>
           </div>
         </div>
       </div>
 
+      <!-- 对话框底部按钮 -->
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">关闭</el-button>
+          <el-button @click="evaluationDialogVisible = false">关闭</el-button>
         </span>
       </template>
     </el-dialog>
@@ -109,175 +124,238 @@
 </template>
 
 <script setup>
+// 导入必要的库和组件
 import { ElMessage } from "element-plus";
 import { marked } from "marked";
 import { nextTick, onMounted, ref, watch } from "vue";
 
-// Props 定义
+// ==========================================================================
+// Props 定义：父组件传递的数据
+// ==========================================================================
 const props = defineProps({
+  // 问题信息对象
   question: {
     type: Object,
     required: true,
     default: () => ({
-      id: '',
-      title: '',
-      content: '',
-      input: '',
-      output: '',
-      note: '',
-      answer: '',
-      status: null
-    })
+      id: "",
+      title: "",
+      content: "",
+      input: "",
+      output: "",
+      note: "",
+      answer: "",
+      status: null,
+    }),
   },
+  // 是否显示答案
   showCorrectness: {
     type: Boolean,
-    default: false
+    default: false,
   },
+  // 用户已有的答案
   userAnswer: {
     type: String,
-    default: ''
-  }
+    default: "",
+  },
 });
 
-// Emits 定义
-const emit = defineEmits(['answer-submitted', 'answer-changed']);
+// ==========================================================================
+// Emits 定义：向父组件传递的事件
+// ==========================================================================
+const emit = defineEmits([
+  "answer-submitted", // 答案提交事件
+  "answer-changed", // 答案内容变化事件
+]);
 
-// 暴露提交方法给父组件
+// ==========================================================================
+// 组件暴露方法：供父组件调用
+// ==========================================================================
 defineExpose({
-  submitCode
+  submitCode, // 暴露代码提交方法
 });
 
-// 响应式数据
-const language = ref("cpp");
-const code = ref('');
-const codeResult = ref('');
+// ==========================================================================
+// 响应式状态管理
+// ==========================================================================
+// 核心状态
+const selectedLanguage = ref("cpp"); // 选中的编程语言
+const codeInput = ref(""); // 用户输入的代码
+const codeResult = ref(""); // 代码运行结果
 
-// dialog相关状态
-const dialogVisible = ref(false);
-const evaluationText = ref(""); // 使用单个字符串来存储完整的评估文本
-const evaluationLoading = ref(false);
-const hasPreviousEvaluation = ref(false);
+// 评估对话框状态
+const evaluationDialogVisible = ref(false); // 评估对话框可见性
+const evaluationContent = ref(""); // 评估内容（使用单个字符串存储完整评估文本）
+const isEvaluationLoading = ref(false); // 评估加载状态
+const hasPreviousEvaluation = ref(false); // 是否有上一次评估结果
 
-// 监听props变化，更新本地代码
-watch(() => props.question, (newQuestion) => {
-  if (newQuestion) {
-    // 初始化代码，如果userAnswer有值则使用userAnswer，否则使用空字符串
-    code.value = props.userAnswer || '';
-  }
-  codeResult.value = '';
-}, { immediate: true, deep: true });
+// ==========================================================================
+// 生命周期钩子
+// ==========================================================================
+// 组件挂载时初始化
+onMounted(() => {
+  checkForPreviousEvaluation(); // 检查是否存在上一次评估结果
+});
+
+// ==========================================================================
+// 监听逻辑：响应数据变化
+// ==========================================================================
+// 监听问题变化，更新本地代码
+watch(
+  () => props.question,
+  (newQuestion) => {
+    if (newQuestion) {
+      // 初始化代码，如果userAnswer有值则使用userAnswer，否则使用空字符串
+      codeInput.value = props.userAnswer || "";
+    }
+    codeResult.value = ""; // 清空之前的运行结果
+  },
+  { immediate: true, deep: true },
+); // immediate：立即执行，deep：深度监听
 
 // 监听代码变化，触发答案变更事件
-watch(code, (newCode) => {
-  emit('answer-changed', props.question.id, newCode);
-}, { deep: true });
+watch(
+  codeInput,
+  (newCode) => {
+    emit("answer-changed", props.question.id, newCode);
+  },
+  { deep: true },
+);
 
-// 初始化检查是否有上一次评估结果
-onMounted(() => {
-  checkPreviousEvaluation();
-});
-
-// 检查是否有上一次评估结果
-function checkPreviousEvaluation() {
+// ==========================================================================
+// 核心功能函数
+// ==========================================================================
+/**
+ * 检查是否存在上一次评估结果
+ */
+function checkForPreviousEvaluation() {
   const savedEvaluation = sessionStorage.getItem("previousEvaluation");
   hasPreviousEvaluation.value = !!savedEvaluation;
 }
 
-// 提交代码并处理flux响应
+/**
+ * 提交代码并处理评估响应
+ */
 async function submitCode() {
-  if (!code.value.trim()) {
+  // 验证代码是否为空
+  if (!codeInput.value.trim()) {
     ElMessage.error("请输入代码");
     return;
   }
 
-  // 发出答案提交事件
-  emit('answer-submitted', {
+  // 向父组件发出答案提交事件
+  emit("answer-submitted", {
     questionId: props.question.id,
-    answer: code.value,
-    isEmpty: false
+    answer: codeInput.value,
+    isEmpty: false,
   });
 
-  // 准备提交数据
-  const submission = {
-    question: props.question.title + '\n' + props.question.content,
-    codeLanguage: language.value,
-    code: code.value,
-    input: props.question.input || '',
-    output: props.question.output || ''
+  // 准备提交给后端的代码评估数据
+  const submissionData = {
+    question: `${props.question.title}\n${props.question.content}`,
+    codeLanguage: selectedLanguage.value,
+    code: codeInput.value,
+    input: props.question.input || "",
+    output: props.question.output || "",
   };
 
-  // 重置评估结果
-  evaluationText.value = "";
-  evaluationLoading.value = true;
-  dialogVisible.value = true;
+  // 重置评估相关状态并打开评估对话框
+  resetEvaluationState();
+  evaluationDialogVisible.value = true;
 
   try {
-    //发送请求并处理Flux响应
+    // 发送代码评估请求
     const response = await fetch("http://localhost:80/api/analysis/evaluate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(submission),
+      body: JSON.stringify(submissionData),
     });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    // 处理Flux响应流
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let accumulatedText = "";
-
-    // 读取流数据并实现流式展示
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) {
-        break;
-      }
-
-      // 解码接收到的数据
-      const chunk = decoder.decode(value, { stream: true });
-      accumulatedText += chunk;
-
-      // 使用nextTick确保UI能够正确更新，实现流式显示效果
-      await nextTick();
-      evaluationText.value = accumulatedText;
-    }
-
-    // 保存完整结果到sessionStorage
-    sessionStorage.setItem("previousEvaluation", accumulatedText);
-    hasPreviousEvaluation.value = true;
+    // 处理流式响应数据
+    await processFluxResponse(response);
   } catch (error) {
-    console.error("Submit code error:", error);
+    console.error("代码提交失败:", error);
     ElMessage.error("代码提交失败，请稍后重试");
   } finally {
-    evaluationLoading.value = false;
+    isEvaluationLoading.value = false;
   }
 }
 
-// 显示上一次评测结果
+/**
+ * 处理流式响应数据
+ * @param {Response} response - 服务器返回的响应对象
+ */
+async function processFluxResponse(response) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let accumulatedText = "";
+
+  // 读取流数据并实现流式展示
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) {
+      break;
+    }
+
+    // 解码接收到的数据块
+    const chunk = decoder.decode(value, { stream: true });
+    accumulatedText += chunk;
+
+    // 使用nextTick确保UI能够正确更新，实现流式显示效果
+    await nextTick();
+    evaluationContent.value = accumulatedText;
+  }
+
+  // 保存完整结果到sessionStorage，以便用户查看历史记录
+  sessionStorage.setItem("previousEvaluation", accumulatedText);
+  hasPreviousEvaluation.value = true;
+}
+
+/**
+ * 重置评估相关状态
+ */
+function resetEvaluationState() {
+  evaluationContent.value = "";
+  isEvaluationLoading.value = true;
+}
+
+/**
+ * 显示上一次的代码评测结果
+ */
 function showPreviousEvaluation() {
   const savedEvaluation = sessionStorage.getItem("previousEvaluation");
   if (savedEvaluation) {
-    try {
-      evaluationText.value = savedEvaluation;
-    } catch (error) {
-      evaluationText.value = savedEvaluation;
-    }
-    evaluationLoading.value = false;
-    dialogVisible.value = true;
+    evaluationContent.value = savedEvaluation;
+    isEvaluationLoading.value = false;
+    evaluationDialogVisible.value = true;
   }
 }
 
-// 对话框关闭前的处理
-function handleClose() {
-  dialogVisible.value = false;
+// ==========================================================================
+// 对话框相关函数
+// ==========================================================================
+/**
+ * 处理对话框关闭前的逻辑
+ */
+function handleDialogClose() {
+  evaluationDialogVisible.value = false;
 }
 
-// Markdown解析函数
+// ==========================================================================
+// 辅助函数
+// ==========================================================================
+/**
+ * 将Markdown文本解析为HTML
+ * @param {string} text - 需要解析的Markdown文本
+ * @returns {string} - 解析后的HTML内容
+ */
 function parseMarkdown(text) {
   try {
     return marked.parse(text);
@@ -442,7 +520,7 @@ function parseMarkdown(text) {
 
 .code-result pre {
   margin: 0;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.5;
   color: #67c23a;
@@ -476,7 +554,7 @@ function parseMarkdown(text) {
 
 .correct-answer pre {
   margin: 0;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.5;
   color: #333;
@@ -532,22 +610,39 @@ function parseMarkdown(text) {
   color: #333;
 }
 
-.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
   margin-top: 16px;
   margin-bottom: 8px;
   color: #1890ff;
   font-weight: 600;
 }
 
-.markdown-content h1 { font-size: 24px; }
-.markdown-content h2 { font-size: 20px; }
-.markdown-content h3 { font-size: 18px; }
+.markdown-content h1 {
+  font-size: 24px;
+}
+.markdown-content h2 {
+  font-size: 20px;
+}
+.markdown-content h3 {
+  font-size: 18px;
+}
 
-.markdown-content p { margin-bottom: 12px; margin-top: 0; }
-.markdown-content a { color: #1890ff; text-decoration: none; }
-.markdown-content a:hover { text-decoration: underline; }
+.markdown-content p {
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+.markdown-content a {
+  color: #1890ff;
+  text-decoration: none;
+}
+.markdown-content a:hover {
+  text-decoration: underline;
+}
 
-.markdown-content ul, .markdown-content ol {
+.markdown-content ul,
+.markdown-content ol {
   margin-bottom: 12px;
   padding-left: 24px;
 }
@@ -600,12 +695,12 @@ function parseMarkdown(text) {
   .programming-question-container {
     flex-direction: column;
   }
-  
+
   .left-section,
   .right-section {
     overflow: visible;
   }
-  
+
   .code-content {
     height: 400px;
   }

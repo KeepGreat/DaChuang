@@ -2,7 +2,7 @@ import request from "@/utils/request";
 import axios from "axios";
 
 /**
- * @import { ApiResponse, Page } from "@/utils/types"
+ * @import { ApiResponse, ApiEmptyResponse, Page } from "@/utils/types"
  */
 
 // 实体类
@@ -22,7 +22,7 @@ import axios from "axios";
  * 新增问题资源请求参数
  * @typedef {Object} CreateQuestionResourceRequest
  * @property {string|null} [description] - 资源描述
- * @property {string} name - 资源名称
+ * @property {string} [name] - 资源名称
  * @property {number} type - 资源类型（0:测试用例,1:用例答案,2:问题描述资料）
  * @property {number} size - 资源大小
  * @property {number} questionId - 问题ID
@@ -43,7 +43,7 @@ import axios from "axios";
  * 新增问题资源
  * @param {CreateQuestionResourceRequest} questionResource - 问题资源信息，要求type、size、questionId不能为空
  * @param {File} file - 资源文件
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function createQuestionResource(questionResource, file) {
   const formData = new FormData();
@@ -64,7 +64,7 @@ export function createQuestionResource(questionResource, file) {
 /**
  * 删除问题资源
  * @param {number} id - 问题资源ID
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function deleteQuestionResource(id) {
   return request({
@@ -77,7 +77,7 @@ export function deleteQuestionResource(id) {
  * 更新问题资源
  * @param {UpdateQuestionResourceRequest} questionResource - 问题资源信息，要求id不能为空，要更新的字段不能为空
  * @param {File} file - 资源文件
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function updateQuestionResource(questionResource, file) {
   const formData = new FormData();

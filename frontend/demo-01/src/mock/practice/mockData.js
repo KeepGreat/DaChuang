@@ -1,40 +1,3 @@
-// 生成符合格式的当前日期时间（yyyy-mm-ddThh:mm:ss）
-export function generateDateTime() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-}
-
-// 生成下一个自增ID
-export function getNextId(list) {
-  return list.length > 0 ? Math.max(...list.map((item) => item.id)) + 1 : 1;
-}
-
-/**
- * 从URL中解析路径参数，解决路径参数和查询参数混合时的问题
- * @param {Object} req - 请求对象
- * @param {number} paramCount - 路径参数数量
- * @returns {Object} - 解析后的路径参数对象
- * @example parsePathParams, params : { param1: '1', param2: '15' }
- */
-export function parsePathParams(req, paramCount) {
-  const urlWithoutQuery = req.url.split("?")[0];
-  const urlParts = urlWithoutQuery.split("/");
-
-  const params = {};
-  for (let i = 0; i < paramCount; i++) {
-    params[`param${i + 1}`] = urlParts[urlParts.length - paramCount + i];
-  }
-
-  console.log("parsePathParams, params :", params);
-  return params;
-}
-
 // 模拟练习数据
 export const practices = [
   {
@@ -123,7 +86,8 @@ export const questions = [
     id: 2,
     name: "选择题1",
     type: 1,
-    content: "以下哪个是JavaScript的数据类型？\nA. String\nB. Integer\nC. Float\nD. Character",
+    content:
+      "以下哪个是JavaScript的数据类型？\nA. String\nB. Integer\nC. Float\nD. Character",
     hasResource: true,
   },
   {
@@ -151,3 +115,251 @@ export const questionIndexes = [
   { id: 5, questionId: 1, practiceId: 4 },
   { id: 6, questionId: 2, practiceId: 5 },
 ];
+
+// 问题资源数据
+export const questionResources = [
+  {
+    id: 1,
+    description: "测试用例文件",
+    name: "test_cases.txt",
+    type: 0, // 0:测试用例
+    size: 1024,
+    questionId: 1,
+  },
+  {
+    id: 2,
+    description: "答案文件",
+    name: "answer.json",
+    type: 1, // 1:用例答案
+    size: 512,
+    questionId: 1,
+  },
+  {
+    id: 3,
+    description: "编程题目说明",
+    name: "programming_guide.pdf",
+    type: 2, // 2:问题描述资料
+    size: 2048,
+    questionId: 2,
+  },
+  {
+    id: 4,
+    description: "算法执行流程图",
+    name: "algorithm_flow.png",
+    type: 2, // 2:问题描述资料
+    size: 15360,
+    questionId: 3,
+  },
+  {
+    id: 5,
+    description: "代码结构示意图",
+    name: "code_structure.jpg",
+    type: 2, // 2:问题描述资料
+    size: 25600,
+    questionId: 4,
+  },
+  {
+    id: 6,
+    description: "数据结构示意图",
+    name: "data_structure.png",
+    type: 2, // 2:问题描述资料
+    size: 8192,
+    questionId: 2,
+  },
+  {
+    id: 7,
+    description: "编程界面示例",
+    name: "coding_interface.png",
+    type: 2, // 2:问题描述资料
+    size: 32768,
+    questionId: 4,
+  },
+  {
+    id: 8,
+    description: "系统架构图",
+    name: "system_architecture.jpg",
+    type: 2, // 2:问题描述资料
+    size: 45056,
+    questionId: 3,
+  },
+  {
+    id: 9,
+    description: "知识点关系图",
+    name: "knowledge_map.jpg",
+    type: 2, // 2:问题描述资料
+    size: 12288,
+    questionId: 2,
+  },
+  {
+    id: 10,
+    description: "练习界面原型",
+    name: "exercise_ui.png",
+    type: 2, // 2:问题描述资料
+    size: 28672,
+    questionId: 1,
+  },
+  {
+    id: 11,
+    description: "算法演示动画",
+    name: "algorithm_demo.gif",
+    type: 2, // 2:问题描述资料
+    size: 18432,
+    questionId: 4,
+  },
+  {
+    id: 12,
+    description: "函数调用关系图",
+    name: "function_calls.png",
+    type: 2, // 2:问题描述资料
+    size: 9728,
+    questionId: 3,
+  },
+  {
+    id: 13,
+    description: "程序执行时序图",
+    name: "execution_sequence.jpg",
+    type: 2, // 2:问题描述资料
+    size: 21504,
+    questionId: 2,
+  },
+  {
+    id: 14,
+    description: "状态转换图",
+    name: "state_transition.png",
+    type: 2, // 2:问题描述资料
+    size: 16384,
+    questionId: 1,
+  },
+  {
+    id: 15,
+    description: "数据库设计图",
+    name: "database_design.jpg",
+    type: 2, // 2:问题描述资料
+    size: 14336,
+    questionId: 4,
+  },
+];
+
+// 模拟文件存储
+export const storedFiles = new Map([
+  [
+    1,
+    {
+      filename: "test_cases.txt",
+      size: 1024,
+      uploadedAt: "2025-11-01T08:00:00Z",
+    },
+  ],
+  [
+    2,
+    {
+      filename: "answer.json",
+      size: 512,
+      uploadedAt: "2025-11-01T08:05:00Z",
+    },
+  ],
+  [
+    3,
+    {
+      filename: "programming_guide.pdf",
+      size: 2048,
+      uploadedAt: "2025-11-01T08:10:00Z",
+    },
+  ],
+  [
+    4,
+    {
+      filename: "algorithm_flow.png",
+      size: 15360,
+      uploadedAt: "2025-11-01T08:15:00Z",
+    },
+  ],
+  [
+    5,
+    {
+      filename: "code_structure.jpg",
+      size: 25600,
+      uploadedAt: "2025-11-01T08:20:00Z",
+    },
+  ],
+  [
+    6,
+    {
+      filename: "data_structure.png",
+      size: 8192,
+      uploadedAt: "2025-11-01T08:25:00Z",
+    },
+  ],
+  [
+    7,
+    {
+      filename: "coding_interface.png",
+      size: 32768,
+      uploadedAt: "2025-11-01T08:30:00Z",
+    },
+  ],
+  [
+    8,
+    {
+      filename: "system_architecture.jpg",
+      size: 45056,
+      uploadedAt: "2025-11-01T08:35:00Z",
+    },
+  ],
+  [
+    9,
+    {
+      filename: "knowledge_map.jpg",
+      size: 12288,
+      uploadedAt: "2025-11-01T08:40:00Z",
+    },
+  ],
+  [
+    10,
+    {
+      filename: "exercise_ui.png",
+      size: 28672,
+      uploadedAt: "2025-11-01T08:45:00Z",
+    },
+  ],
+  [
+    11,
+    {
+      filename: "algorithm_demo.gif",
+      size: 18432,
+      uploadedAt: "2025-11-01T08:50:00Z",
+    },
+  ],
+  [
+    12,
+    {
+      filename: "function_calls.png",
+      size: 9728,
+      uploadedAt: "2025-11-01T08:55:00Z",
+    },
+  ],
+  [
+    13,
+    {
+      filename: "execution_sequence.jpg",
+      size: 21504,
+      uploadedAt: "2025-11-01T09:00:00Z",
+    },
+  ],
+  [
+    14,
+    {
+      filename: "state_transition.png",
+      size: 16384,
+      uploadedAt: "2025-11-01T09:05:00Z",
+    },
+  ],
+  [
+    15,
+    {
+      filename: "database_design.jpg",
+      size: 14336,
+      uploadedAt: "2025-11-01T09:10:00Z",
+    },
+  ],
+]);

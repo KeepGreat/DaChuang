@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 
 /**
- * @import { ApiResponse, Page } from "@/utils/types"
+ * @import { ApiResponse, ApiEmptyResponse, Page } from "@/utils/types"
  */
 
 // 实体类
@@ -35,7 +35,7 @@ import request from "@/utils/request";
 /**
  * 新增答案
  * @param {CreateAnswerRequest} data - 答案信息，要求content、questionId不能为空
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function createAnswer(data) {
   return request({
@@ -48,7 +48,7 @@ export function createAnswer(data) {
 /**
  * 根据答案ID删除答案
  * @param {number} answerId - 答案ID
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function deleteAnswerById(answerId) {
   return request({
@@ -60,7 +60,7 @@ export function deleteAnswerById(answerId) {
 /**
  * 更新答案
  * @param {UpdateAnswerRequest} data - 更新请求参数，id必填，其他字段可选（传递则不能为空）
- * @returns {Promise<ApiResponse<null>>}
+ * @returns {Promise<ApiEmptyResponse>}
  */
 export function updateAnswer(data) {
   return request({

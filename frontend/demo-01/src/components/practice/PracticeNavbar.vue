@@ -1,88 +1,115 @@
 <template>
-  <!-- 顶栏 -->
+  <!-- 练习页面导航栏组件 -->
   <header class="practice-topbar">
+    <!-- 左侧区域：返回按钮和练习标题 -->
     <div class="left">
+      <!-- 返回按钮 -->
       <button class="back-btn" @click="goBack">
         <el-icon class="back-icon"><ArrowLeft /></el-icon>
       </button>
+      <!-- 练习信息 -->
       <div class="practice-info">
         <h1 class="practice-name">{{ practiceTitle }}</h1>
       </div>
     </div>
+
+    <!-- 右侧区域：单题作答切换和计时器 -->
     <div class="right">
-      <!-- 单题作答按钮 -->
+      <!-- 单题作答模式切换开关 -->
       <div class="single-question-toggle">
         <span class="toggle-label">单题作答</span>
-        <el-switch 
-          v-model="singleQuestionModeLocal" 
+        <el-switch
+          v-model="singleQuestionModeLocal"
           @change="handleSingleQuestionToggle"
           active-color="#2563eb"
           inactive-color="#bfdbfe"
         />
       </div>
+
+      <!-- 计时器显示（当有剩余时间时） -->
       <div class="timer" v-if="remainingTime">
         <el-icon class="timer-icon"><Timer /></el-icon>
         <span class="timer-text">{{ remainingTime }}</span>
       </div>
-      <button class="user-btn" @click="goToProfile">
-        <el-icon class="user-icon"><User /></el-icon>
-      </button>
     </div>
   </header>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
-import { ref, watch } from 'vue';
-import { ArrowLeft, Timer, User } from '@element-plus/icons-vue';
+// 导入依赖
+import { useRouter } from "vue-router";
+import { ref, watch } from "vue";
+import { ArrowLeft, Timer } from "@element-plus/icons-vue";
 
+// 初始化路由
 const router = useRouter();
 
-// 定义事件
-const emit = defineEmits(['update:singleQuestionMode']);
+// =============== 组件属性与事件 ===============
+// 定义组件事件
+const emit = defineEmits(["update:singleQuestionMode"]);
 
-// Props 定义
+// 定义组件属性
 const props = defineProps({
+  /**
+   * 练习标题
+   */
   practiceTitle: {
     type: String,
-    default: '基础算法练习'
+    default: "基础算法练习",
   },
+
+  /**
+   * 剩余时间
+   */
   remainingTime: {
     type: String,
-    default: '00:00'
+    default: "00:00",
   },
+
+  /**
+   * 用户信息
+   */
   userInfo: {
     type: Object,
-    default: () => ({})
+    default: () => ({}),
   },
-  // 接收父组件传递的单题作答模式值
+
+  /**
+   * 单题作答模式（父组件传递）
+   */
   singleQuestionMode: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
-// 本地单题作答模式状态
+// =============== 状态管理 ===============
+// 本地单题作答模式状态（用于双向绑定）
 const singleQuestionModeLocal = ref(props.singleQuestionMode);
 
-// 监听父组件传递的值变化，更新本地状态
-watch(() => props.singleQuestionMode, (newVal) => {
-  singleQuestionModeLocal.value = newVal;
-});
+// =============== 监听与响应 ===============
+// 监听父组件传递的单题作答模式变化，同步到本地状态
+watch(
+  () => props.singleQuestionMode,
+  (newVal) => {
+    singleQuestionModeLocal.value = newVal;
+  },
+);
 
-// 返回上一页
+// =============== 事件处理函数 ===============
+/**
+ * 返回上一页
+ */
 function goBack() {
   router.back();
 }
 
-// 跳转到个人中心
-function goToProfile() {
-  router.push('/profile');
-}
-
-// 处理单题作答开关切换
+/**
+ * 处理单题作答模式切换
+ * @param {boolean} value - 切换后的值
+ */
 function handleSingleQuestionToggle(value) {
-  emit('update:singleQuestionMode', value);
+  emit("update:singleQuestionMode", value);
 }
 </script>
 
@@ -118,7 +145,7 @@ function handleSingleQuestionToggle(value) {
   border-radius: 8px;
   cursor: pointer;
   color: #2563eb;
-  transition: all .18s ease;
+  transition: all 0.18s ease;
 }
 
 .back-btn:hover {
@@ -182,7 +209,7 @@ function handleSingleQuestionToggle(value) {
   border-radius: 8px;
   cursor: pointer;
   color: #2563eb;
-  transition: all .18s ease;
+  transition: all 0.18s ease;
 }
 
 .user-btn:hover {
@@ -211,23 +238,23 @@ function handleSingleQuestionToggle(value) {
 }
 
 /* 响应式设计 */
-@media(max-width: 768px) {
+@media (max-width: 768px) {
   .practice-topbar {
     padding: 0 14px;
   }
-  
+
   .practice-name {
     font-size: 16px;
   }
-  
+
   .right {
     gap: 16px;
   }
-  
+
   .timer {
     padding: 4px 8px;
   }
-  
+
   .timer-text {
     font-size: 12px;
   }

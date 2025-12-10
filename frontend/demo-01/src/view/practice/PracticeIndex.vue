@@ -5,16 +5,24 @@
       <div class="practice-grid">
         <!-- 注意click事件应针对每项练习 -->
         <el-card
-          v-for="(practice, index) in paginatedPractices"
-          :key="index"
+          v-for="practice in paginatedPractices"
+          :key="practice.id"
           class="practice-card"
-          @click="handleClick(index)"
+          @click="handleClick(practice)"
         >
           <div class="practice-card-content">
             <el-icon class="practice-icon"><Cpu /></el-icon>
             <h3 class="practice-name">{{ practice.name }}</h3>
           </div>
         </el-card>
+        <!-- 加载中状态 -->
+        <div v-if="loading" class="loading-container">
+          <el-skeleton :rows="3" animated />
+        </div>
+        <!-- 空数据状态 -->
+        <div v-else-if="paginatedPractices.length === 0" class="empty-container">
+          <el-empty description="暂无练习数据" />
+        </div>
       </div>
     </div>
   </div>
@@ -22,9 +30,10 @@
 
 <script setup>
 import { Compass, Cpu } from "@element-plus/icons-vue";
-import { ElCard, ElIcon } from "element-plus";
-import { computed, ref } from "vue";
+import { ElCard, ElIcon, ElMessage } from "element-plus";
+import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { getPracticesByIndex } from "@/api/modules/practice/practice";
 
 const props = defineProps({
   id: {
@@ -34,24 +43,10 @@ const props = defineProps({
 });
 
 const router = useRouter();
-// 练习任务模拟数据
-const practices = ref([
-  { id: 1, name: "基础算法练习" },
-  { id: 2, name: "数据结构入门" },
-  { id: 3, name: "排序算法实现" },
-  { id: 4, name: "查找算法练习" },
-  { id: 5, name: "递归思维训练" },
-  { id: 6, name: "动态规划初步" },
-  { id: 7, name: "贪心算法应用" },
-  { id: 8, name: "图论基础" },
-  { id: 9, name: "树结构练习" },
-  { id: 10, name: "哈希表实现" },
-  { id: 11, name: "字符串处理" },
-  { id: 12, name: "位运算技巧" },
-  { id: 13, name: "复杂度分析" },
-  { id: 14, name: "算法优化实践" },
-  { id: 15, name: "综合算法题" },
-]);
+// 练习任务数据
+const practices = ref([]);
+// 加载状态
+const loading = ref(false);
 
 // 直接返回所有练习，不进行分页
 const paginatedPractices = computed(() => {
@@ -64,9 +59,35 @@ const lab = ref({
   description: "",
 });
 
-const handleClick = (item) => {
-  router.push(`practice/${item + 1}`);
+// 获取练习列表
+const fetchPractices = async () => {
+  loading.value = true;
+  try {
+    // 假设props.id是courseSectionId
+    const response = await getPracticesByIndex({
+      courseSectionId: parseInt(props.id),
+    });
+    if (response.code === 200 && response.data) {
+      practices.value = response.data;
+    } else {
+      ElMessage.error('获取练习列表失败');
+    }
+  } catch (error) {
+    console.error('获取练习列表出错:', error);
+    ElMessage.error('获取练习列表失败');
+  } finally {
+    loading.value = false;
+  }
 };
+
+const handleClick = (practice) => {
+  router.push(`practice/${practice.id}`);
+};
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchPractices();
+});
 </script>
 
 <style scoped>
@@ -174,5 +195,18 @@ const handleClick = (item) => {
   color: #666;
   line-height: 1.6;
   margin: 0;
+}
+
+/* 加载状态样式 */
+.loading-container {
+  width: 100%;
+  padding: 20px;
+}
+
+/* 空数据状态样式 */
+.empty-container {
+  width: 100%;
+  padding: 40px 20px;
+  text-align: center;
 }
 </style>

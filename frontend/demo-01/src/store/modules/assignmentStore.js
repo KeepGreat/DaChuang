@@ -222,6 +222,8 @@ export const useAssignmentStore = defineStore('assignment', () => {
     currentAssignment.value = assignment
   }
 
+
+
   const addAssignment = (assignment) => {
     const newAssignment = {
       ...assignment,

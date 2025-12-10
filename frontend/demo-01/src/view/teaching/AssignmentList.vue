@@ -9,43 +9,53 @@
         </div>
       </div>
 
-      <div class="assignment-items">
-        <div
-          v-for="(assignment, index) in assignments"
-          :key="index"
-          class="assignment-item"
-          :class="{
-            active: selectedAssignment === index,
-            completed: assignment.status === '已提交',
-            overdue: isOverdue(assignment.deadline)
-          }"
-          @click="selectAssignment(index)"
-        >
-          <div class="assignment-icon">
-            <el-icon v-if="assignment.status === '已提交'"><Check /></el-icon>
-            <el-icon v-else-if="isOverdue(assignment.deadline)"><Warning /></el-icon>
-            <el-icon v-else><Edit /></el-icon>
+      <div class="assignment-items" v-loading="componentLoading || assignmentStore.loading" element-loading-text="加载中...">
+          <div v-if="componentError || assignmentStore.error" class="error-message">
+            <el-icon><Warning /></el-icon>
+            加载失败，请稍后重试
           </div>
-          <div class="assignment-info">
-            <h4>{{ assignment.title }}</h4>
-            <p>{{ assignment.description }}</p>
-            <div class="assignment-meta">
-              <span class="deadline">
-                <el-icon><Clock /></el-icon>
-                截止: {{ formatDeadline(assignment.deadline) }}
-              </span>
-              <el-tag
-                :type="getStatusType(assignment.status)"
-                size="small"
-              >
-                {{ assignment.status }}
-              </el-tag>
+          <div v-else-if="assignments.length === 0" class="empty-message">
+            <el-icon><Edit /></el-icon>
+            暂无作业
+          </div>
+          <div v-else>
+            <div
+              v-for="(assignment, index) in assignments"
+              :key="index"
+              class="assignment-item"
+              :class="{
+                active: selectedAssignment === index,
+                completed: assignment.status === '已提交',
+                overdue: isOverdue(assignment.deadline)
+              }"
+              @click="selectAssignment(index)"
+            >
+              <div class="assignment-icon">
+                <el-icon v-if="assignment.status === '已提交'"><Check /></el-icon>
+                <el-icon v-else-if="isOverdue(assignment.deadline)"><Warning /></el-icon>
+                <el-icon v-else><Edit /></el-icon>
+              </div>
+              <div class="assignment-info">
+                <h4>{{ assignment.title }}</h4>
+                <p>{{ assignment.description }}</p>
+                <div class="assignment-meta">
+                  <span class="deadline">
+                    <el-icon><Clock /></el-icon>
+                    截止: {{ formatDeadline(assignment.deadline) }}
+                  </span>
+                  <el-tag
+                    :type="getStatusType(assignment.status)"
+                    size="small"
+                  >
+                    {{ assignment.status }}
+                  </el-tag>
+                </div>
+              </div>
+              <div class="assignment-score" v-if="assignment.score">
+                <span>{{ assignment.score }}/{{ assignment.totalScore }}</span>
+              </div>
             </div>
           </div>
-          <div class="assignment-score" v-if="assignment.score">
-            <span>{{ assignment.score }}/{{ assignment.totalScore }}</span>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -124,26 +134,81 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import {
   Edit, Check, Warning, Clock
 } from '@element-plus/icons-vue';
-import { ElCard, ElButton, ElTag } from 'element-plus';
+import { ElCard, ElButton, ElTag, ElMessage } from 'element-plus';
 import { useAssignmentStore } from '@/store';
+import { useQuestionsStore } from '@/store/modules/questionsStore';
+import { getQuestionByIndex } from '@/api/modules/practice/question';
+import { getPracticesByIndex } from '@/api/modules/practice/practice';
 
 const router = useRouter();
 const route = useRoute();
 
 // 使用Pinia store
 const assignmentStore = useAssignmentStore();
+const questionsStore = useQuestionsStore();
 
 const selectedAssignment = ref(null);
 const submissionHistory = ref([]);
+const componentLoading = ref(false);
+const componentError = ref(null);
 
 // 计算当前课程的作业列表
 const assignments = computed(() => {
   return assignmentStore.getAssignmentsByCourseId(route.params.id);
+});
+
+// 加载作业数据
+onMounted(async () => {
+  componentLoading.value = true;
+  componentError.value = null;
+  
+  try {
+    // 注意：这里需要根据实际情况获取courseSectionId
+    // 目前暂时使用1作为默认值，后续需要根据实际路由或参数获取
+    const courseSectionId = 1;
+    
+    // 直接调用接口获取作业列表
+    const response = await getPracticesByIndex({
+      courseId: parseInt(route.params.id),
+      courseSectionId: parseInt(courseSectionId)
+    });
+    
+    // 转换API返回的Practice数据为Assignment格式
+    const fetchedAssignments = response.data.map(practice => ({
+      id: practice.id.toString(),
+      courseId: route.params.id,
+      title: practice.name,
+      description: `包含 ${practice.questionNum} 个问题的练习`,
+      requirement: '',
+      deadline: practice.expiredAt ? new Date(practice.expiredAt).toISOString() : null,
+      status: '未开始',
+      score: null,
+      totalScore: 100,
+      difficulty: 1,
+      questionNum: practice.questionNum
+    }));
+    
+    // 更新assignmentStore中的作业列表
+    // 只保留当前课程的作业
+    const otherAssignments = assignmentStore.assignments.filter(a => a.courseId !== route.params.id);
+    assignmentStore.assignments = [...otherAssignments, ...fetchedAssignments];
+    
+    // 如果获取到了作业，默认选择第一个
+    if (assignments.value.length > 0) {
+      selectAssignment(0);
+    }
+  } catch (err) {
+    componentError.value = err;
+    ElMessage.error('加载作业列表失败');
+    console.error('获取作业列表失败:', err);
+  } finally {
+    componentLoading.value = false;
+  }
 });
 
 // 计算统计
@@ -153,10 +218,26 @@ const completedCount = computed(() =>
 );
 
 // 选择作业
-const selectAssignment = (index) => {
+const selectAssignment = async (index) => {
   selectedAssignment.value = index;
-  const assignmentId = assignments.value[index].id;
+  const assignment = assignments.value[index];
+  const assignmentId = assignment.id;
   submissionHistory.value = assignmentStore.getSubmissionHistory(assignmentId);
+  
+  try {
+    // 使用作业ID作为练习ID获取问题
+    const response = await getQuestionByIndex(assignmentId);
+    if (response.code === 200 && response.data) {
+      // 将获取到的问题存入questionStore，store会自动处理结构转换
+      questionsStore.setQuestions(response.data);
+      ElMessage.success('已加载作业题目');
+    } else {
+      ElMessage.warning('获取题目失败: ' + response.message);
+    }
+  } catch (error) {
+    console.error('获取题目失败:', error);
+    ElMessage.error('获取题目失败，请稍后重试');
+  }
 };
 
 // 打开作业详情
@@ -211,6 +292,29 @@ const getSubmissionType = (status) => {
 </script>
 
 <style scoped>
+/* 加载和错误状态样式 */
+.error-message, .empty-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #666;
+  text-align: center;
+}
+
+.error-message {
+  color: #f56c6c;
+}
+
+.error-message .el-icon, .empty-message .el-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.error-message span, .empty-message span {
+  font-size: 14px;
+}
 .assignment-list {
   display: flex;
   gap: 20px;
