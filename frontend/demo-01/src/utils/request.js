@@ -69,9 +69,16 @@ request.interceptors.response.use(
       return Promise.reject(mockNotFoundError);
     }
 
-    // 记录响应信息
+    // 记录响应信息和调用堆栈
     console.log(`${new Date().toLocaleTimeString()} response interceptors:`, response);
     console.log("response.data :", response.data);
+
+    // 取消注释可以查看接口的调用堆栈
+    /* console.trace(
+      `调用堆栈 - 接口: ${
+        response.config.url
+      }, 方法: ${response.config.method?.toUpperCase()}`
+    ); */
 
     // 获取data结构
     const res = response.data;
