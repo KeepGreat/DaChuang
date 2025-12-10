@@ -4,8 +4,11 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hbwl.analysis.pojo.AnalysisInput;
+import com.hbwl.analysis.pojo.AnalysisOutput;
 import com.hbwl.codesandbox.pojo.CodeSandboxInput;
 import com.hbwl.codesandbox.pojo.CodeSandboxOutput;
+import com.hbwl.feign.AnalysisFeignClient;
 import com.hbwl.feign.CodeSandboxFeignClient;
 import com.hbwl.mapper.AnswerMapper;
 import com.hbwl.mapper.QuestionMapper;
@@ -52,6 +55,9 @@ public class UserAnswerServiceImpl implements UserAnswerService {
     @Autowired
     private CodeSandboxFeignClient codeSandboxFeignClient;
 
+    @Autowired
+    private AnalysisFeignClient analysisFeignClient;
+
     @Override
     public int addUserAnswer(UserAnswer userAnswer) {
         if (userAnswer == null ||
@@ -84,6 +90,7 @@ public class UserAnswerServiceImpl implements UserAnswerService {
         if (userAnswer.getUserId() != null) updateWrapper.set("user_id", userAnswer.getUserId());
         if (userAnswer.getQuestionId() != null) updateWrapper.set("question_id", userAnswer.getQuestionId());
         if (userAnswer.getScore() != null) updateWrapper.set("score", userAnswer.getScore());
+        if (userAnswer.getComment() != null) updateWrapper.set("comment", userAnswer.getComment());
         return userAnswerMapper.update(null, updateWrapper);
     }
 
@@ -136,6 +143,7 @@ public class UserAnswerServiceImpl implements UserAnswerService {
         UpdateWrapper<UserAnswer> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", userAnswer.getId());
         updateWrapper.set("score", userAnswer.getScore());
+        if (userAnswer.getComment() != null) updateWrapper.set("comment", userAnswer.getComment());
         return userAnswerMapper.update(null, updateWrapper);
     }
 
@@ -163,6 +171,14 @@ public class UserAnswerServiceImpl implements UserAnswerService {
             codeSandboxInput.setInput(input);
             String execute = codeSandboxFeignClient.execute(codeSandboxInput);
             CodeSandboxOutput codeSandboxOutput = JSONUtil.toBean(execute, CodeSandboxOutput.class);
+            //调用analysis模块对用户代码进行分析
+            AnalysisInput analysisInput = new AnalysisInput();
+            analysisInput.setCode(codeSandboxInput.getCode());
+            analysisInput.setCodeLanguage(codeSandboxInput.getCodeLanguage());
+            analysisInput.setQuestion(question.getContent());
+            analysisInput.setCodeSandboxOutput(codeSandboxOutput);
+            AnalysisOutput analysisOutput = analysisFeignClient.analyze(analysisInput);
+            userAnswer.setComment(analysisOutput.getAnalysis());
             //代码运行错误
             if (!codeSandboxOutput.getStatus().equals("Accepted")){
                 userAnswerOutputDTO.setCodeSandboxOutput(codeSandboxOutput);
@@ -185,6 +201,7 @@ public class UserAnswerServiceImpl implements UserAnswerService {
             else userAnswer.setScore(0);
             userAnswerOutputDTO.setUserAnswer(userAnswer);
             userAnswerOutputDTO.setCodeSandboxOutput(codeSandboxOutput);
+            userAnswerOutputDTO.setAnalysisOutput(analysisOutput);
             return userAnswerOutputDTO;
         } catch (IOException e){
             throw new IOException(e.getMessage());

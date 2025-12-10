@@ -42,7 +42,7 @@ public class CodeExecutionTool {
         restTemplate = new RestTemplate(simpleClientHttpRequestFactory);
     }
 
-    public JSONArray run(String url, JSONObject param){
+    private JSONArray run(String url, JSONObject param){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(JSONUtil.toJsonStr(param), headers);
@@ -60,7 +60,7 @@ public class CodeExecutionTool {
         return null;
     }
 
-    public void deleteCached(String fileId){
+    private void deleteCached(String fileId){
         try {
             restTemplate.delete(SANDBOX_BASE_URL + "/file/{0}", fileId);
         } catch (RestClientResponseException ex) {
@@ -88,7 +88,7 @@ public class CodeExecutionTool {
         COMPILE_FILES.put(stderr);
     }
 
-    public JSONArray compile(String codeLanguage, String code){
+    private JSONArray compile(String codeLanguage, String code){
         JSONObject cmd = new JSONObject();
 
         //python是解释型语言，不需要编译
@@ -123,11 +123,17 @@ public class CodeExecutionTool {
         JSONObject param = new JSONObject();
         param.set("cmd", new JSONArray().put(cmd));
 
-        JSONArray result = run("/run", param);
-        return result;
+        return run("/run", param);
     }
 
-    public String getFileId(JSONArray compileResult, String codeLanguage){
+    private Boolean checkCompileValid(JSONArray compile){
+        //ok:[{"memory":42033152,"fileIds":{"a":"T24PEC3F"},"procPeak":3,"files":{"stdout":"","stderr":""},"time":168268000,"runTime":168798545,"exitStatus":0,"status":"Accepted"}]
+        //error[{"memory":40730624,"fileError":[{"type":"CopyOutOpen","message":"open a: no such file or directory","name":"a"}],"procPeak":2,"files":{"stdout":"","stderr":"a.cpp:1:19: error: missing terminating > character\n    1 | #include<iostream\n      |               ^\n"},"time":132219000,"runTime":132321190,"exitStatus":1,"status":"Nonzero Exit Status"}]
+        JSONObject compileResult = compile.getJSONObject(0);
+        return compileResult.get("status").equals("Accepted");
+    }
+
+    private String getFileId(JSONArray compileResult, String codeLanguage){
         JSONObject result = compileResult.getJSONObject(0);
         JSONObject fileIds = result.getJSONObject("fileIds");
         if (codeLanguage.equals("java")) return fileIds.getStr("Main.class");
@@ -135,7 +141,7 @@ public class CodeExecutionTool {
         else return null;
     }
 
-    public JSONArray execute(String codeLanguage, String input, String fileID){
+    private JSONArray execute(String codeLanguage, String input, String fileID){
         JSONObject cmd = new JSONObject();
 
         List<String> args;
@@ -184,7 +190,7 @@ public class CodeExecutionTool {
         return result;
     }
 
-    public JSONArray executeForPython(String code, String input){
+    private JSONArray executeForPython(String code, String input){
         JSONObject cmd = new JSONObject();
 
         List<String> args = List.of("/usr/bin/python3", "a.py");
@@ -225,29 +231,24 @@ public class CodeExecutionTool {
         return result;
     }
 
-    public String compileAndExecuteForOther(String codeLanguage, String code, String input){
+    private String compileAndExecuteForOther(String codeLanguage, String code, String input){
         JSONArray compile = compile(codeLanguage, code);
+        if (!checkCompileValid(compile)){
+            return "Compile Error"; //这里在parseResult中做特殊化处理
+        }
         String fileId = getFileId(compile, codeLanguage);
         JSONArray execute = execute(codeLanguage, input, fileId);
         deleteCached(fileId);
         return execute.getJSONObject(0).toString();
     }
 
-    public String executePython(String code, String input){
+    private String executePython(String code, String input){
         JSONArray execute = executeForPython(code, input);
         return execute.getJSONObject(0).toString();
     }
 
-    public String compileAndExecute(String codeLanguage,
-                                    String code,
-                                    String input){
-        if (codeLanguage.equals("python")) return parseResult(executePython(code, input));
-        else if (codeLanguage.equals("java") || codeLanguage.equals("cpp"))
-            return parseResult(compileAndExecuteForOther(codeLanguage, code, input));
-        else return "Unsupported code language: " + codeLanguage;
-    }
-
-    public String parseResult(String result){
+    private String parseResult(String result){
+        if (result.equals("Compile Error")) return "{\"memory\":0,\"stdout\":\"\",\"stderr\":\"\",\"procPeak\":0,\"runTime\":0,\"time\":0,\"exitStatus\":1,\"status\":\"Compile Error\"}";
         JSONObject resultJSON = new JSONObject(result);
         JSONObject resultFilesJSON = new JSONObject(resultJSON.get("files"));
         JSONObject parseJSON = new JSONObject();
@@ -260,6 +261,15 @@ public class CodeExecutionTool {
         parseJSON.set("procPeak", resultJSON.get("procPeak"));
         parseJSON.set("time", resultJSON.get("time"));
         return JSONUtil.toJsonStr(parseJSON);
+    }
+
+    public String compileAndExecute(String codeLanguage,
+                                    String code,
+                                    String input){
+        if (codeLanguage.equals("python")) return parseResult(executePython(code, input));
+        else if (codeLanguage.equals("java") || codeLanguage.equals("cpp"))
+            return parseResult(compileAndExecuteForOther(codeLanguage, code, input));
+        else return "Unsupported code language: " + codeLanguage;
     }
 }
 //cpp运行结果[{"memory":524288,"procPeak":1,"files":{"stdout":"3","stderr":""},"time":1041000,"runTime":743535,"exitStatus":0,"status":"Accepted"}]

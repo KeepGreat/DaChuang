@@ -14,4 +14,5 @@ public class UserAnswer {
     private Integer questionId;
     private Integer questionType;
     private Integer score;
+    private String comment;
 }

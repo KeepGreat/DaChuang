@@ -36,7 +36,9 @@ public class UserAnswerController {
     }
 
     @DeleteMapping("/userid")
-    public Result deleteUserAnswerByUserId(@RequestParam String userId){
+    public Result deleteUserAnswerByUserId(@RequestParam String userId,
+                                           @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = userAnswerService.deleteUserAnswerByUserId(userId);
         if (row == -1) return Result.error("参数不能为空");
         if (row == 0) return Result.error("删除用户答案失败");
@@ -99,7 +101,9 @@ public class UserAnswerController {
     //手动判题，判断常规题中的简答题，教师在前端输入好分数后传给后端存入数据库
     //id和score不能为空
     @PostMapping("/judge/manual")
-    public Result judgeAnswerManual(@RequestBody UserAnswer userAnswer){
+    public Result judgeAnswerManual(@RequestBody UserAnswer userAnswer,
+                                    @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = userAnswerService.judgeAnswerManual(userAnswer);
         if (row == -1) return Result.error("参数不能为空");
         if (row == 0) return Result.error("手动判题结果存储失败");

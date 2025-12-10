@@ -47,7 +47,7 @@ public class MdContentController {
 
     @GetMapping
     public Result getMdContents(@RequestParam(required = false) Integer id,
-                                         @RequestParam(required = false) Integer matId){
+                                @RequestParam(required = false) Integer matId){
         MdContent mdContent = new MdContent();
         mdContent.setId(id);
         mdContent.setMatId(matId);
@@ -58,8 +58,8 @@ public class MdContentController {
 
     @GetMapping("/{page}/{size}")
     public Result getMdContentsPage(@PathVariable("page") int pageNo, @PathVariable("size") int pageSize,
-                                             @RequestParam(required = false) Integer id,
-                                             @RequestParam(required = false) Integer matId){
+                                    @RequestParam(required = false) Integer id,
+                                    @RequestParam(required = false) Integer matId){
         MdContent mdContent = new MdContent();
         mdContent.setId(id);
         mdContent.setMatId(matId);

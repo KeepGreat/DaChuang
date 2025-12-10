@@ -46,6 +46,17 @@ public class JwtTokenUtil {
         return userId;
     }
 
+    public String getUsernameFromToken(String token) {
+        String username;
+        try {
+            Claims claims = getClaimsFromToken(token);
+            username = (String) claims.get("username");
+        } catch (Exception e){
+            username = null;
+        }
+        return username;
+    }
+
     public String getUserRoleFromToken(String token) {
         String userRole;
         try {

@@ -47,8 +47,8 @@ public class CourseController {
 
     @GetMapping
     public Result getCourses(@RequestParam(required = false) Integer id,
-                                   @RequestParam(required = false) String name,
-                                   @RequestParam(required = false) Integer sectionId){
+                             @RequestParam(required = false) String name,
+                             @RequestParam(required = false) Integer sectionId){
         Course course = new Course();
         course.setId(id);
         course.setName(name);
@@ -60,9 +60,9 @@ public class CourseController {
 
     @GetMapping("/{page}/{size}")
     public Result getCoursesPage(@PathVariable("page") int pageNo, @PathVariable("size") int pageSize,
-                                       @RequestParam(required = false) Integer id,
-                                       @RequestParam(required = false) String name,
-                                       @RequestParam(required = false) Integer sectionId){
+                                 @RequestParam(required = false) Integer id,
+                                 @RequestParam(required = false) String name,
+                                 @RequestParam(required = false) Integer sectionId){
         Course course = new Course();
         course.setId(id);
         course.setName(name);

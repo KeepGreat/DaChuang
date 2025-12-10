@@ -48,35 +48,35 @@ public class MaterialController {
 
     @GetMapping
     public Result getMaterials(@RequestParam(required = false) Integer id,
-                                       @RequestParam(required = false) String type,
-                                       @RequestParam(required = false) LocalDateTime createdTime,
-                                       @RequestParam(required = false) LocalDateTime updatedTime,
-                                       @RequestParam(required = false) Integer courseId){
+                               @RequestParam(required = false) String type,
+                               @RequestParam(required = false) LocalDateTime createdAtStart,
+                               @RequestParam(required = false) LocalDateTime createdAtEnd,
+                               @RequestParam(required = false) LocalDateTime updatedAtStart,
+                               @RequestParam(required = false) LocalDateTime updatedAtEnd,
+                               @RequestParam(required = false) Integer courseId){
         Material material = new Material();
         material.setId(id);
         material.setType(type);
-        material.setCreatedTime(createdTime);
-        material.setUpdatedTime(updatedTime);
         material.setCourseId(courseId);
-        List<Material> list = materialService.getMaterials(material);
+        List<Material> list = materialService.getMaterials(material, createdAtStart, createdAtEnd, updatedAtStart, updatedAtEnd);
         if (list == null || list.isEmpty()) return Result.error("查询资料信息失败");
         return Result.success(list, "查询资料信息成功");
     }
 
     @GetMapping("/{page}/{size}")
     public Result getMaterialsPage(@PathVariable("page") int pageNo, @PathVariable("size") int pageSize,
-                                           @RequestParam(required = false) Integer id,
-                                           @RequestParam(required = false) String type,
-                                           @RequestParam(required = false) LocalDateTime createdTime,
-                                           @RequestParam(required = false) LocalDateTime updatedTime,
-                                           @RequestParam(required = false) Integer courseId){
+                                   @RequestParam(required = false) Integer id,
+                                   @RequestParam(required = false) String type,
+                                   @RequestParam(required = false) LocalDateTime createdAtStart,
+                                   @RequestParam(required = false) LocalDateTime createdAtEnd,
+                                   @RequestParam(required = false) LocalDateTime updatedAtStart,
+                                   @RequestParam(required = false) LocalDateTime updatedAtEnd,
+                                   @RequestParam(required = false) Integer courseId){
         Material material = new Material();
         material.setId(id);
         material.setType(type);
-        material.setCreatedTime(createdTime);
-        material.setUpdatedTime(updatedTime);
         material.setCourseId(courseId);
-        Page<Material> page = materialService.getMaterialsPage(pageNo, pageSize, material);
+        Page<Material> page = materialService.getMaterialsPage(pageNo, pageSize, material, createdAtStart, createdAtEnd, updatedAtStart, updatedAtEnd);
         if (page == null || page.getSize() == 0) return Result.error("查询资料信息失败");
         return Result.success(page, "查询资料信息成功");
     }

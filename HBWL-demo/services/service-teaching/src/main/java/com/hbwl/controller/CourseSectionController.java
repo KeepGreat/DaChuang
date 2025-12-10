@@ -47,7 +47,7 @@ public class CourseSectionController {
 
     @GetMapping
     public Result getCourseSections(@RequestParam(required = false) Integer id,
-                                                 @RequestParam(required = false) String name){
+                                    @RequestParam(required = false) String name){
         CourseSection courseSection = new CourseSection();
         courseSection.setId(id);
         courseSection.setName(name);

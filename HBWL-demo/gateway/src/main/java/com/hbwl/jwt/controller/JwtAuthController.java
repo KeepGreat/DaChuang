@@ -60,13 +60,16 @@ public class JwtAuthController {
 
     //刷新token
     @PostMapping("/refreshtoken")
-    public Mono<ResponseEntity<Result>> refreshToken(@RequestBody Map<String, Object> map){
-        String oldToken = (String) map.get("token");
-        String userId = (String) map.get("userId");
-        if (oldToken == null || userId == null || oldToken.isEmpty()){
+    public Mono<ResponseEntity<Result>> refreshToken(@RequestBody String oldToken){
+        String usernameFromToken = jwtTokenUtil.getUsernameFromToken(oldToken);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", usernameFromToken);
+        User user = userMapper.selectOne(queryWrapper);
+        String localId = user.getId();
+        if (oldToken == null || oldToken.isEmpty()){
             return buildFailureResponse("参数不能为空");
         }
-        if (!userId.equals(jwtTokenUtil.getUserIdFromToken(oldToken))){
+        if (!localId.equals(jwtTokenUtil.getUserIdFromToken(oldToken))){
             return buildFailureResponse("token信息出错！");
         }
         return buildSuccessResponse(jwtTokenUtil.refreshToken(oldToken));
@@ -74,13 +77,16 @@ public class JwtAuthController {
 
     //获取用户权限role
     @PostMapping("/identify")
-    public Mono<ResponseEntity<Result>> identify(@RequestBody Map<String, Object> map){
-        String token = (String) map.get("token");
-        String userId = (String) map.get("userId");
-        if (token == null || userId == null || token.isEmpty()){
+    public Mono<ResponseEntity<Result>> identify(@RequestBody String token){
+        if (token == null || token.isEmpty()){
             return buildFailureResponse("参数不能为空");
         }
-        if (!userId.equals(jwtTokenUtil.getUserIdFromToken(token))){
+        String usernameFromToken = jwtTokenUtil.getUsernameFromToken(token);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", usernameFromToken);
+        User user = userMapper.selectOne(queryWrapper);
+        String localId = user.getId();
+        if (!localId.equals(jwtTokenUtil.getUserIdFromToken(token))){
             return buildFailureResponse("token信息出错！");
         }
         return buildSuccessResponse(jwtTokenUtil.getUserRoleFromToken(token));

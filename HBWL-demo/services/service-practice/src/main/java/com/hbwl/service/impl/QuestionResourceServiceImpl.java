@@ -97,6 +97,7 @@ public class QuestionResourceServiceImpl implements QuestionResourceService {
 
     @Override
     public Resource loadQuestionResourceById(Integer id) {
+        if (id == null) return null;
         String ResourceName = questionResourceMapper.selectById(id).getName();
         return questionResourceUtil.loadFile(ResourceName);
     }

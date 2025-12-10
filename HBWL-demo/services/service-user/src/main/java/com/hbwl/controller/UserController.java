@@ -45,9 +45,9 @@ public class UserController {
 
     @GetMapping
     public Result getUsers(@RequestParam(required = false) String id,
-                               @RequestParam(required = false) String username,
-                               @RequestParam(required = false) String userRole,
-                               @RequestHeader("role") String role){
+                           @RequestParam(required = false) String username,
+                           @RequestParam(required = false) String userRole,
+                           @RequestHeader("role") String role){
         if (!role.equals("admin")) return Result.error("权限不足");
         User user = new User();
         user.setId(id);

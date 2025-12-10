@@ -43,10 +43,9 @@ public class FileContentController {
 
     @DeleteMapping("/{id}")
     public Result deleteFile(@PathVariable("id") Integer id,
-                             @RequestParam String fileName,
                              @RequestHeader("role") String role){
         if (!(role.equals("teacher") || role.equals("admin"))) Result.error("权限不足");
-        int row = fileContentService.deleteFileContentById(id, fileName);
+        int row = fileContentService.deleteFileContentById(id);
         if (row == 0) return Result.error("删除文件失败");
         return Result.success("删除文件成功");
     }
@@ -72,10 +71,10 @@ public class FileContentController {
 
     @GetMapping
     public Result getFileContents(@RequestParam(required = false) Integer id,
-                                             @RequestParam(required = false) String type,
-                                             @RequestParam(required = false) String name,
-                                             @RequestParam(required = false) Integer size,
-                                             @RequestParam(required = false) Integer matId){
+                                  @RequestParam(required = false) String type,
+                                  @RequestParam(required = false) String name,
+                                  @RequestParam(required = false) Integer size,
+                                  @RequestParam(required = false) Integer matId){
         FileContent fileContent = new FileContent();
         fileContent.setId(id);
         fileContent.setMatId(matId);
@@ -89,11 +88,11 @@ public class FileContentController {
 
     @GetMapping("/{page}/{size}")
     public Result getFileContentsPage(@PathVariable("page") Integer pageNo, @PathVariable("size") Integer pageSize,
-                                                 @RequestParam(required = false) Integer id,
-                                                 @RequestParam(required = false) String type,
-                                                 @RequestParam(required = false) String name,
-                                                 @RequestParam(required = false) Integer size,
-                                                 @RequestParam(required = false) Integer matId){
+                                      @RequestParam(required = false) Integer id,
+                                      @RequestParam(required = false) String type,
+                                      @RequestParam(required = false) String name,
+                                      @RequestParam(required = false) Integer size,
+                                      @RequestParam(required = false) Integer matId){
         FileContent fileContent = new FileContent();
         fileContent.setId(id);
         fileContent.setMatId(matId);
@@ -106,9 +105,9 @@ public class FileContentController {
     }
 
     @GetMapping("/download")
-    public ResponseEntity<Resource> downloadFile(@RequestParam String fileName){
+    public ResponseEntity<Resource> downloadFile(@RequestParam Integer id){
         try {
-            Resource resource = fileContentService.loadFileContent(fileName);
+            Resource resource = fileContentService.loadFileContent(id);
 
             // 使用Spring的MediaTypeFactory获取MIME类型
             String contentType = MediaTypeFactory.getMediaType(resource)
