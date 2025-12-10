@@ -35,16 +35,21 @@ export function generateDateTime() {
  * @returns {number} - 下一个可用的ID
  */
 export function getNextId(list) {
-  return list.length > 0 ? Math.max(...list.map((item) => item.id)) + 1 : 1;
-}
-
-/**
- * 模拟生成JWT token
- * @param {Object} user - 用户对象，包含username和role属性
- * @returns {string} - 模拟的JWT token
- */
-export function generateToken(user) {
-  return `mock-token-${user.username}-${user.role}-${getDateTimeString()}`;
+  let maxId = 0;
+  for (const item of list) {
+    if (item.id == null) {
+      throw new Error(`Invalid item: item 缺少 id 属性`);
+    }
+    if (typeof item.id !== "number" || !Number.isInteger(item.id) || item.id < 0) {
+      throw new Error(
+        `Invalid id: id 必须是非负整数, 但得到 ${item.id} (${typeof item.id})`
+      );
+    }
+    if (item.id > maxId) {
+      maxId = item.id;
+    }
+  }
+  return maxId + 1;
 }
 
 /**
@@ -65,4 +70,55 @@ export function parsePathParams(req, paramCount) {
 
   console.log("parsePathParams, params :", params);
   return params;
+}
+
+/**
+ * 模拟生成JWT token
+ * @param {Object} user - 用户对象，包含username和role属性
+ * @returns {string} - 模拟的JWT token
+ */
+export function generateToken(user) {
+  return `${user.username}-${user.role}-${getDateTimeString()}`;
+}
+
+/**
+ * 验证token并获取用户信息
+ * @param {string} token - JWT token
+ * @param {Array} users - 用户数据数组
+ * @returns {Object|null} 用户信息或null
+ */
+export function validateToken(token, users) {
+  if (!token) return null;
+
+  // 从token中解析用户信息
+  // 格式: username-role-YYYY-MM-DD-HH-mm-ss
+  const match = token.match(/^(\w+)-(\w+)-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}$/);
+  if (!match) return null;
+
+  const username = match[1];
+  const role = match[2];
+
+  return users.find((user) => user.username === username && user.role === role) || null;
+}
+
+/**
+ * 创建分页结果对象
+ * @param {Array} data - 要分页的数据数组
+ * @param {number} pageNo - 当前页码
+ * @param {number} pageSize - 每页大小
+ * @returns {Object} - 分页结果对象，包含records、total、current、size、pages
+ */
+export function createPageResult(data, pageNo, pageSize) {
+  const total = data.length;
+  const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
+  const records = total > 0 ? data.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
+
+  const pageResult = {
+    records,
+    total,
+    current: total > 0 ? pageNo : null,
+    size: total > 0 ? pageSize : null,
+    pages,
+  };
+  return pageResult;
 }

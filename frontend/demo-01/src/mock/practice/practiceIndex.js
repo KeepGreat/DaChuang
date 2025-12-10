@@ -1,4 +1,4 @@
-import { getNextId, parsePathParams } from "../utils";
+import { createPageResult, getNextId, parsePathParams } from "../utils";
 import { practiceIndexes } from "./mockData";
 
 // createPracticeIndex - 新增练习与课程关系
@@ -261,18 +261,7 @@ export const getPracticeIndexesPage = {
       }
 
       // 分页处理
-      const total = filtered.length;
-      const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records =
-        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
-
-      const pageResult = {
-        records,
-        total,
-        current: total > 0 ? pageNo : null,
-        size: total > 0 ? pageSize : null,
-        pages,
-      };
+      const pageResult = createPageResult(filtered, pageNo, pageSize);
 
       console.log("getPracticeIndexesPage success:", { ...pageResult });
       return {

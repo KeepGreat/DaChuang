@@ -1,4 +1,4 @@
-import { getNextId, parsePathParams } from "../utils";
+import { createPageResult, getNextId, parsePathParams } from "../utils";
 import { answers } from "./mockData";
 
 // createAnswer - 新增答案
@@ -30,14 +30,14 @@ export const createAnswer = {
       // 添加到数据中
       answers.push(newAnswer);
 
-      console.log("addAnswer success:", { newAnswer });
+      console.log("createAnswer success:", { newAnswer });
       return {
         code: 200,
         message: "新增答案成功",
         data: null,
       };
     } catch (error) {
-      console.error("addAnswer error:", error);
+      console.error("createAnswer error:", error);
       return {
         code: 500,
         message: "Internal Server Error",
@@ -252,18 +252,7 @@ export const getAnswersPage = {
       }
 
       // 分页处理
-      const total = filtered.length;
-      const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records =
-        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
-
-      const pageResult = {
-        records,
-        total,
-        current: total > 0 ? pageNo : null,
-        size: total > 0 ? pageSize : null,
-        pages,
-      };
+      const pageResult = createPageResult(filtered, pageNo, pageSize);
 
       console.log("getAnswersPage success:", { ...pageResult });
       return {

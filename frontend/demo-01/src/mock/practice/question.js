@@ -1,4 +1,4 @@
-import { getNextId, parsePathParams } from "../utils";
+import { createPageResult, getNextId, parsePathParams } from "../utils";
 import { questionIndexes, questions } from "./mockData";
 
 // createQuestionAndIndex - 新增问题及关联的QuestionIndex
@@ -320,18 +320,7 @@ export const getQuestionsPage = {
       }
 
       // 分页处理
-      const total = filtered.length;
-      const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records =
-        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
-
-      const pageResult = {
-        records,
-        total,
-        current: total > 0 ? pageNo : null,
-        size: total > 0 ? pageSize : null,
-        pages,
-      };
+      const pageResult = createPageResult(filtered, pageNo, pageSize);
 
       console.log("getQuestionsPage success:", { ...pageResult });
       return {
@@ -422,18 +411,7 @@ export const getQuestionPageByIndex = {
       const filtered = questions.filter((item) => questionIds.includes(item.id));
 
       // 分页处理
-      const total = filtered.length;
-      const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records =
-        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
-
-      const pageResult = {
-        records,
-        total,
-        current: total > 0 ? pageNo : null,
-        size: total > 0 ? pageSize : null,
-        pages,
-      };
+      const pageResult = createPageResult(filtered, pageNo, pageSize);
 
       console.log("getQuestionPageByIndex success:", { ...pageResult });
       return {

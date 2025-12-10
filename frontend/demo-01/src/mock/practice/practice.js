@@ -1,4 +1,4 @@
-import { generateDateTime, getNextId, parsePathParams } from "../utils";
+import { createPageResult, generateDateTime, getNextId, parsePathParams } from "../utils";
 import { practiceIndexes, practices } from "./mockData";
 
 // createPracticeAndIndex - 新增练习及关联的 PracticeIndex
@@ -342,18 +342,7 @@ export const getPracticesPage = {
       }
 
       // 分页处理
-      const total = filtered.length;
-      const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records =
-        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
-
-      const pageResult = {
-        records,
-        total,
-        current: total > 0 ? pageNo : null,
-        size: total > 0 ? pageSize : null,
-        pages,
-      };
+      const pageResult = createPageResult(filtered, pageNo, pageSize);
 
       console.log("searchPracticesPage success:", { ...pageResult });
       return {
@@ -460,18 +449,7 @@ export const getPracticesPageByIndex = {
       const filtered = practices.filter((item) => practiceIds.includes(item.id));
 
       // 分页处理
-      const total = filtered.length;
-      const pages = total > 0 ? Math.ceil(total / pageSize) : 0;
-      const records =
-        total > 0 ? filtered.slice((pageNo - 1) * pageSize, pageNo * pageSize) : [];
-
-      const pageResult = {
-        records,
-        total,
-        current: total > 0 ? pageNo : null,
-        size: total > 0 ? pageSize : null,
-        pages,
-      };
+      const pageResult = createPageResult(filtered, pageNo, pageSize);
 
       console.log("getPracticesPageByIndex success:", { ...pageResult });
       return {
