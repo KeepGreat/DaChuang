@@ -1,5 +1,5 @@
+import { generateToken, getNextId, validateToken } from "../utils";
 import { users } from "./mockData";
-import { generateToken } from "../utils";
 
 export const register = {
   url: "/user/register",
@@ -22,7 +22,7 @@ export const register = {
 
       // 创建新用户
       const newUser = {
-        id: users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1,
+        id: getNextId(users),
         username,
         password,
         role,
@@ -95,33 +95,75 @@ export const login = {
   },
 };
 
+export const getUserRole = {
+  url: "/identify",
+  method: "post",
+  response: (req) => {
+    try {
+      console.log("req:", req);
+      const { token } = req.body;
+
+      if (!token) {
+        return {
+          code: 400,
+          message: "token 不能为空",
+          data: null,
+        };
+      }
+
+      const user = validateToken(token, users);
+
+      if (!user) {
+        return {
+          code: 401,
+          message: "无效的token",
+          data: null,
+        };
+      }
+
+      return {
+        code: 200,
+        message: "获取用户权限成功",
+        data: user.role,
+      };
+    } catch (error) {
+      console.error("identify error:", error);
+      return {
+        code: 500,
+        message: "Internal Server Error",
+        data: null,
+      };
+    }
+  },
+};
+
 export const refreshToken = {
   url: "/refreshtoken",
   method: "post",
   response: (req) => {
     try {
       console.log("req:", req);
-      const { token, userId } = req.body;
+      const { oldToken } = req.body;
 
-      if (!token || !userId) {
+      if (!oldToken) {
         return {
           code: 400,
-          message: "token 和 userId 不能为空",
+          message: "oldToken 不能为空",
           data: null,
         };
       }
 
-      // 简单验证：userId 是否存在
-      const user = users.find((u) => u.id === Number(userId));
+      // 验证旧token是否有效
+      const user = validateToken(oldToken, users);
       if (!user) {
         return {
-          code: 404,
-          message: "用户不存在",
+          code: 401,
+          message: "无效的token",
           data: null,
         };
       }
 
-      // 模拟token刷新
+      // 生成新token
       const newToken = generateToken(user);
 
       return {
@@ -140,4 +182,4 @@ export const refreshToken = {
   },
 };
 
-export default [register, login, refreshToken];
+export default [register, login, getUserRole, refreshToken];
