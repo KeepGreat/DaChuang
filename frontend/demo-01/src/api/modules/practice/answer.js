@@ -4,7 +4,7 @@ import request from "@/utils/request";
  * @import { ApiResponse, ApiEmptyResponse, Page } from "@/utils/types"
  */
 
-// 实体类
+// model
 /**
  * 答案实体类
  * @typedef {Object} Answer
