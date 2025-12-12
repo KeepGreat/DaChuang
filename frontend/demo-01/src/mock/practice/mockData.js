@@ -1,4 +1,11 @@
-// 模拟练习数据
+/**
+ * @import { QuestionResource, Practice, PracticeIndex, Answer, Question, QuestionIndex, UserAnswer } from "@/api"
+ */
+
+/**
+ * 模拟练习数据
+ * @type {Practice[]}
+ */
 export const practices = [
   {
     id: 1,
@@ -23,7 +30,10 @@ export const practices = [
   },
 ];
 
-// 练习索引数据（用于关联课程）
+/**
+ * 练习索引数据（用于关联课程）
+ * @type {PracticeIndex[]}
+ */
 export const practiceIndexes = [
   { id: 1, practiceId: 1, courseSectionId: 101, courseId: 1001 },
   { id: 2, practiceId: 2, courseSectionId: 101, courseId: 1002 },
@@ -33,7 +43,10 @@ export const practiceIndexes = [
   { id: 6, practiceId: 6, courseSectionId: 104, courseId: 1005 },
 ];
 
-// 答案数据
+/**
+ * 答案数据
+ * @type {Answer[]}
+ */
 export const answers = [
   {
     id: 1,
@@ -73,7 +86,10 @@ export const answers = [
   },
 ];
 
-// 问题数据
+/**
+ * 问题数据
+ * @type {Question[]}
+ */
 export const questions = [
   {
     id: 1,
@@ -106,7 +122,10 @@ export const questions = [
   },
 ];
 
-// 问题索引数据（用于关联练习）
+/**
+ * 问题索引数据（用于关联练习）
+ * @type {QuestionIndex[]}
+ */
 export const questionIndexes = [
   { id: 1, questionId: 1, practiceId: 1 },
   { id: 2, questionId: 2, practiceId: 1 },
@@ -116,7 +135,10 @@ export const questionIndexes = [
   { id: 6, questionId: 2, practiceId: 5 },
 ];
 
-// 问题资源数据
+/**
+ * 问题资源数据
+ * @type {QuestionResource[]}
+ */
 export const questionResources = [
   {
     id: 1,
@@ -363,3 +385,88 @@ export const storedFiles = new Map([
     },
   ],
 ]);
+
+/**
+ * 用户答案数据
+ * @type {UserAnswer[]}
+ */
+export const userAnswers = [
+  {
+    id: 1,
+    content: "True",
+    userId: "2",
+    questionId: 1,
+    questionType: 0, // 0:判断，1:选择，2:简答，3:编程
+    score: 5, // 得分应小于等于问题分值，-1代表未批改
+  },
+  {
+    id: 2,
+    content: "A",
+    userId: "2",
+    questionId: 2,
+    questionType: 1,
+    score: 10,
+  },
+  {
+    id: 3,
+    content:
+      "Vue 3的Composition API具有更好的逻辑复用性、代码组织更灵活、类型推导更完善等优势。",
+    userId: "2",
+    questionId: 3,
+    questionType: 2,
+    score: -1, // 未批改
+  },
+  {
+    id: 4,
+    content: `function uniqueArray(arr) {
+      return [...new Set(arr)];
+    }`,
+    userId: "2",
+    questionId: 4,
+    questionType: 3,
+    score: 15,
+  },
+  {
+    id: 5,
+    content: "False",
+    userId: "2",
+    questionId: 1,
+    questionType: 0,
+    score: 0, // 答错得0分
+  },
+  {
+    id: 6,
+    content: "C",
+    userId: "2",
+    questionId: 2,
+    questionType: 1,
+    score: 0,
+  },
+  {
+    id: 7,
+    content:
+      "Composition API通过setup函数和响应式API，实现了更好的代码组织方式，特别是对于复杂组件。",
+    userId: "2",
+    questionId: 3,
+    questionType: 2,
+    score: 8,
+  },
+  {
+    id: 8,
+    content: `function removeDuplicates(arr) {
+      const result = [];
+      const seen = new Set();
+      for (const item of arr) {
+        if (!seen.has(item)) {
+          seen.add(item);
+          result.push(item);
+        }
+      }
+      return result;
+    }`,
+    userId: "2",
+    questionId: 4,
+    questionType: 3,
+    score: 12,
+  },
+];

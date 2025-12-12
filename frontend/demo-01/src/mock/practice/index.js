@@ -4,6 +4,7 @@ import practiceIndexMocks from "./practiceIndex";
 import questionMocks from "./question";
 import questionIndexMocks from "./questionIndex";
 import questionResourceMocks from "./questionResource";
+import userAnswerMocks from "./userAnswer";
 
 export default [
   ...answerMocks,
@@ -12,4 +13,5 @@ export default [
   ...questionMocks,
   ...questionIndexMocks,
   ...questionResourceMocks,
+  ...userAnswerMocks,
 ];
