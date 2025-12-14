@@ -137,6 +137,48 @@ export const getUserRole = {
   },
 };
 
+export const getUserId = {
+  url: "/identity",
+  method: "post",
+  response: (req) => {
+    try {
+      console.log("req:", req);
+      const { token } = req.body;
+
+      if (!token) {
+        return {
+          code: 400,
+          message: "token 不能为空",
+          data: null,
+        };
+      }
+
+      const user = validateToken(token, users);
+
+      if (!user) {
+        return {
+          code: 401,
+          message: "无效的token",
+          data: null,
+        };
+      }
+
+      return {
+        code: 200,
+        message: "获取用户ID成功",
+        data: String(user.id),
+      };
+    } catch (error) {
+      console.error("getUserId error:", error);
+      return {
+        code: 500,
+        message: "Internal Server Error",
+        data: null,
+      };
+    }
+  },
+};
+
 export const refreshToken = {
   url: "/refreshtoken",
   method: "post",
@@ -182,4 +224,4 @@ export const refreshToken = {
   },
 };
 
-export default [register, login, getUserRole, refreshToken];
+export default [register, login, getUserRole, getUserId, refreshToken];

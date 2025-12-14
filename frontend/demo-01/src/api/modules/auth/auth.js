@@ -57,6 +57,22 @@ export function getUserRole(data) {
 
 /**
  * @param {Object} data
+ * @param {string} data.token - JWT token
+ * @returns {Promise<ApiResponse<string>>} 用户ID
+ */
+export function getUserId(data) {
+  return request({
+    url: "/identity",
+    method: "POST",
+    data: data,
+    headers: {
+      JwtToken: "no-auth",
+    },
+  });
+}
+
+/**
+ * @param {Object} data
  * @param {string} data.oldToken - 当前有效的token
  * @returns {Promise<ApiResponse<string>>} 新的JWT token
  */
