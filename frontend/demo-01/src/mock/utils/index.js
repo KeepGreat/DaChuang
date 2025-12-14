@@ -32,24 +32,39 @@ export function generateDateTime() {
 /**
  * 生成下一个自增ID
  * @param {Array} list - 包含id属性的对象数组
- * @returns {number} - 下一个可用的ID
+ * @param {string} [defaultType='number'] - 当列表为空时的默认ID类型，可选值：'number' | 'string'
+ * @returns {number|string} - 下一个可用的ID，类型与第一个元素的id类型保持一致，返回相同类型
  */
-export function getNextId(list) {
+export function getNextId(list, defaultType = "number") {
+  // 若长度为0，则返回1作为第一个id，类型由defaultType决定
+  if (list.length === 0) {
+    return defaultType === "string" ? "1" : 1;
+  }
+
+  // 记录第一个元素的id类型
+  let idType = typeof list[0].id;
   let maxId = 0;
+
   for (const item of list) {
     if (item.id == null) {
       throw new Error(`Invalid item: item 缺少 id 属性`);
     }
-    if (typeof item.id !== "number" || !Number.isInteger(item.id) || item.id < 0) {
+
+    // 转换为number进行比较
+    const numId = typeof item.id === "string" ? parseInt(item.id) : item.id;
+    if (isNaN(numId) || !Number.isInteger(numId) || numId < 0) {
       throw new Error(
-        `Invalid id: id 必须是非负整数, 但得到 ${item.id} (${typeof item.id})`
+        `Invalid id: id 必须是非负整数字符串或数字, 但得到 ${item.id} (${typeof item.id})`
       );
     }
-    if (item.id > maxId) {
-      maxId = item.id;
+    if (numId > maxId) {
+      maxId = numId;
     }
   }
-  return maxId + 1;
+
+  const nextId = maxId + 1;
+  // 根据第一个元素的id类型返回相应类型
+  return idType === "string" ? String(nextId) : nextId;
 }
 
 /**
