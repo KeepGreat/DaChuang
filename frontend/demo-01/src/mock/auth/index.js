@@ -20,9 +20,9 @@ export const register = {
         };
       }
 
-      // 创建新用户
+      // 创建新用户，用户ID使用string类型
       const newUser = {
-        id: getNextId(users),
+        id: getNextId(users, "string"),
         username,
         password,
         role,
@@ -121,6 +121,8 @@ export const getUserRole = {
         };
       }
 
+      console.log(`用户 ${user.username} 的角色是 ${user.role}`);
+
       return {
         code: 200,
         message: "获取用户权限成功",
@@ -166,7 +168,7 @@ export const getUserId = {
       return {
         code: 200,
         message: "获取用户ID成功",
-        data: String(user.id),
+        data: user.id,
       };
     } catch (error) {
       console.error("getUserId error:", error);
