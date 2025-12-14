@@ -39,6 +39,7 @@ export const practiceIndexes = [
   { id: 2, practiceId: 2, courseSectionId: 101, courseId: 1002 },
   { id: 3, practiceId: 3, courseSectionId: 102, courseId: 1003 },
   { id: 4, practiceId: 4, courseSectionId: 103, courseId: 0 },
+  { id: 4, practiceId: 2, courseSectionId: 3, courseId: 0 },
   { id: 5, practiceId: 5, courseSectionId: 104, courseId: 1004 },
   { id: 6, practiceId: 6, courseSectionId: 104, courseId: 1005 },
 ];

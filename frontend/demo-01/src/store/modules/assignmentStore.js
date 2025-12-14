@@ -359,6 +359,10 @@ public class Main {
     submissionHistory.value = {}
   }
 
+  const resetAssignments = (newAssignments) => {
+    assignments.value = newAssignments
+  }
+
   return {
     // State
     assignments,
@@ -383,7 +387,8 @@ public class Main {
     getCodeTemplate,
     submitAssignment,
     importAssignments,
-    clearAll
+    clearAll,
+    resetAssignments
   }
 }, {
   persist: {

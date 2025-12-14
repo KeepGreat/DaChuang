@@ -9,7 +9,7 @@ export const useCourseStore = defineStore(
     // 原始课程数据（永远不会被修改）
     const originalCourses = ref([
       {
-        id: "1",
+        id: "101",
         name: "Python编程基础",
         description: "从零开始学习Python编程语言，掌握基础语法和编程思维",
         image: null,
@@ -18,7 +18,7 @@ export const useCourseStore = defineStore(
         updateTime: "2024-01-15",
       },
       {
-        id: "2",
+        id: "102",
         name: "数据结构与算法",
         description: "学习常用的数据结构和算法，提高编程能力和解决问题的效率",
         image: null,
@@ -27,7 +27,7 @@ export const useCourseStore = defineStore(
         updateTime: "2024-01-20",
       },
       {
-        id: "3",
+        id: "103",
         name: "Web前端开发",
         description: "掌握HTML、CSS、JavaScript等前端技术，构建现代化的Web应用",
         image: null,
@@ -36,7 +36,7 @@ export const useCourseStore = defineStore(
         updateTime: "2024-01-25",
       },
       {
-        id: "4",
+        id: "104",
         name: "Java企业级开发",
         description: "学习Java编程语言及企业级开发框架，成为Java开发工程师",
         image: null,
@@ -45,7 +45,7 @@ export const useCourseStore = defineStore(
         updateTime: "2024-02-01",
       },
       {
-        id: "5",
+        id: "105",
         name: "机器学习入门",
         description: "了解机器学习的基本概念和常用算法，入门人工智能领域",
         image: null,

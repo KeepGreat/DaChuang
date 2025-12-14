@@ -128,6 +128,12 @@
 import { ElMessage } from "element-plus";
 import { marked } from "marked";
 import { nextTick, onMounted, ref, watch } from "vue";
+import { useUserAnswerStore } from "@/store";
+
+// ==========================================================================
+// Store 初始化
+// ==========================================================================
+const userAnswerStore = useUserAnswerStore(); // 管理用户答案
 
 // ==========================================================================
 // Props 定义：父组件传递的数据
@@ -165,7 +171,6 @@ const props = defineProps({
 // ==========================================================================
 const emit = defineEmits([
   "answer-submitted", // 答案提交事件
-  "answer-changed", // 答案内容变化事件
 ]);
 
 // ==========================================================================
@@ -205,19 +210,20 @@ watch(
   () => props.question,
   (newQuestion) => {
     if (newQuestion) {
-      // 初始化代码，如果userAnswer有值则使用userAnswer，否则使用空字符串
-      codeInput.value = props.userAnswer || "";
+      // 初始化代码，从store中获取用户答案
+      const storedAnswer = userAnswerStore.getUserAnswerByQuestionId(newQuestion.id);
+      codeInput.value = storedAnswer || "";
     }
     codeResult.value = ""; // 清空之前的运行结果
   },
   { immediate: true, deep: true },
 ); // immediate：立即执行，deep：深度监听
 
-// 监听代码变化，触发答案变更事件
+// 监听代码变化，更新store中的用户答案
 watch(
   codeInput,
   (newCode) => {
-    emit("answer-changed", props.question.id, newCode);
+    userAnswerStore.updateUserAnswerByQuestionId(props.question.id, newCode);
   },
   { deep: true },
 );

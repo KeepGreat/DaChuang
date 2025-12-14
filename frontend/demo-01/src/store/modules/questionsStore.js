@@ -140,7 +140,6 @@ export const useQuestionsStore = defineStore(
     ]);
 
     const questionTypes = ref([
-      { type: -1, name: '全部题型' },
       { type: 0, name: '判断题' },
       { type: 1, name: '选择题' },
       { type: 2, name: '简答题' },

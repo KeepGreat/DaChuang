@@ -11,6 +11,8 @@ import { useDiscussionStore } from "./modules/discussionStore";
 import { useResourceStore } from "./modules/resourceStore";
 import { useExamStore } from "./modules/examStore";
 import { useQuestionsStore } from "./modules/questionsStore";
+import { useAnswerStore } from "./modules/answerStore";
+import { useUserAnswerStore } from "./modules/userAnswerStore";
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
@@ -30,5 +32,7 @@ export {
   useDiscussionStore,
   useResourceStore,
   useExamStore,
-  useQuestionsStore
+  useQuestionsStore,
+  useAnswerStore,
+  useUserAnswerStore
 }

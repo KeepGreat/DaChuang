@@ -9,53 +9,57 @@
         </div>
       </div>
 
-      <div class="assignment-items" v-loading="componentLoading || assignmentStore.loading" element-loading-text="加载中...">
-          <div v-if="componentError || assignmentStore.error" class="error-message">
-            <el-icon><Warning /></el-icon>
-            加载失败，请稍后重试
-          </div>
-          <div v-else-if="assignments.length === 0" class="empty-message">
-            <el-icon><Edit /></el-icon>
-            暂无作业
-          </div>
-          <div v-else>
-            <div
-              v-for="(assignment, index) in assignments"
-              :key="index"
-              class="assignment-item"
-              :class="{
-                active: selectedAssignment === index,
-                completed: assignment.status === '已提交',
-                overdue: isOverdue(assignment.deadline)
-              }"
-              @click="selectAssignment(index)"
-            >
-              <div class="assignment-icon">
-                <el-icon v-if="assignment.status === '已提交'"><Check /></el-icon>
-                <el-icon v-else-if="isOverdue(assignment.deadline)"><Warning /></el-icon>
-                <el-icon v-else><Edit /></el-icon>
-              </div>
-              <div class="assignment-info">
-                <h4>{{ assignment.title }}</h4>
-                <p>{{ assignment.description }}</p>
-                <div class="assignment-meta">
-                  <span class="deadline">
-                    <el-icon><Clock /></el-icon>
-                    截止: {{ formatDeadline(assignment.deadline) }}
-                  </span>
-                  <el-tag
-                    :type="getStatusType(assignment.status)"
-                    size="small"
-                  >
-                    {{ assignment.status }}
-                  </el-tag>
-                </div>
-              </div>
-              <div class="assignment-score" v-if="assignment.score">
-                <span>{{ assignment.score }}/{{ assignment.totalScore }}</span>
+      <div class="assignment-items" v-loading="componentLoading || assignmentStore.loading"
+        element-loading-text="加载中...">
+        <div v-if="componentError || assignmentStore.error" class="error-message">
+          <el-icon>
+            <Warning />
+          </el-icon>
+          加载失败，请稍后重试
+        </div>
+        <div v-else-if="assignments.length === 0" class="empty-message">
+          <el-icon>
+            <Edit />
+          </el-icon>
+          暂无作业
+        </div>
+        <div v-else>
+          <div v-for="(assignment, index) in assignments" :key="index" class="assignment-item" :class="{
+            active: selectedAssignment === index,
+            completed: assignment.status === '已提交',
+            overdue: isOverdue(assignment.deadline)
+          }" @click="selectAssignment(index)">
+            <div class="assignment-icon">
+              <el-icon v-if="assignment.status === '已提交'">
+                <Check />
+              </el-icon>
+              <el-icon v-else-if="isOverdue(assignment.deadline)">
+                <Warning />
+              </el-icon>
+              <el-icon v-else>
+                <Edit />
+              </el-icon>
+            </div>
+            <div class="assignment-info">
+              <h4>{{ assignment.title }}</h4>
+              <p>{{ assignment.description }}</p>
+              <div class="assignment-meta">
+                <span class="deadline">
+                  <el-icon>
+                    <Clock />
+                  </el-icon>
+                  截止: {{ formatDeadline(assignment.deadline) }}
+                </span>
+                <el-tag :type="getStatusType(assignment.status)" size="small">
+                  {{ assignment.status }}
+                </el-tag>
               </div>
             </div>
+            <div class="assignment-score" v-if="assignment.score">
+              <span>{{ assignment.score }}/{{ assignment.totalScore }}</span>
+            </div>
           </div>
+        </div>
       </div>
     </div>
 
@@ -66,10 +70,7 @@
           <template #header>
             <div class="preview-header">
               <h4>{{ assignments[selectedAssignment].title }}</h4>
-              <el-button
-                type="primary"
-                @click="openAssignmentDetail"
-              >
+              <el-button type="primary" @click="openAssignmentDetail">
                 开始做题
               </el-button>
             </div>
@@ -108,11 +109,7 @@
           <template #header>
             <h5>最近提交</h5>
           </template>
-          <div
-            v-for="(record, index) in submissionHistory.slice(0, 3)"
-            :key="index"
-            class="history-item"
-          >
+          <div v-for="(record, index) in submissionHistory.slice(0, 3)" :key="index" class="history-item">
             <div class="history-time">{{ record.submitTime }}</div>
             <el-tag :type="getSubmissionType(record.status)" size="small">
               {{ record.status }}
@@ -126,7 +123,9 @@
 
       <!-- 空状态 -->
       <div v-else class="empty-preview">
-        <el-icon size="60"><Edit /></el-icon>
+        <el-icon size="60">
+          <Edit />
+        </el-icon>
         <p>请选择作业查看详情</p>
       </div>
     </div>
@@ -140,10 +139,8 @@ import {
   Edit, Check, Warning, Clock
 } from '@element-plus/icons-vue';
 import { ElCard, ElButton, ElTag, ElMessage } from 'element-plus';
-import { useAssignmentStore } from '@/store';
-import { useQuestionsStore } from '@/store/modules/questionsStore';
-import { getQuestionByIndex } from '@/api/modules/practice/question';
-import { getPracticesByIndex } from '@/api/modules/practice/practice';
+import { useAssignmentStore, useQuestionsStore } from '@/store';
+import { getQuestionByIndex, getPracticesByIndex } from '@/api';
 
 const router = useRouter();
 const route = useRoute();
@@ -166,18 +163,16 @@ const assignments = computed(() => {
 onMounted(async () => {
   componentLoading.value = true;
   componentError.value = null;
-  
+
   try {
-    // 注意：这里需要根据实际情况获取courseSectionId
-    // 目前暂时使用1作为默认值，后续需要根据实际路由或参数获取
-    const courseSectionId = 1;
-    
+    // 从路由参数中获取课程章节ID，如果没有则使用默认值1
+    const courseSectionId = parseInt(route.params.id || 1);
+
     // 直接调用接口获取作业列表
     const response = await getPracticesByIndex({
-      courseId: parseInt(route.params.id),
       courseSectionId: parseInt(courseSectionId)
     });
-    
+
     // 转换API返回的Practice数据为Assignment格式
     const fetchedAssignments = response.data.map(practice => ({
       id: practice.id.toString(),
@@ -192,12 +187,11 @@ onMounted(async () => {
       difficulty: 1,
       questionNum: practice.questionNum
     }));
-    
+
     // 更新assignmentStore中的作业列表
-    // 只保留当前课程的作业
-    const otherAssignments = assignmentStore.assignments.filter(a => a.courseId !== route.params.id);
-    assignmentStore.assignments = [...otherAssignments, ...fetchedAssignments];
-    
+    // 直接重置整个作业列表，而不是合并
+    assignmentStore.resetAssignments(fetchedAssignments);
+
     // 如果获取到了作业，默认选择第一个
     if (assignments.value.length > 0) {
       selectAssignment(0);
@@ -223,14 +217,13 @@ const selectAssignment = async (index) => {
   const assignment = assignments.value[index];
   const assignmentId = assignment.id;
   submissionHistory.value = assignmentStore.getSubmissionHistory(assignmentId);
-  
+
   try {
     // 使用作业ID作为练习ID获取问题
     const response = await getQuestionByIndex(assignmentId);
     if (response.code === 200 && response.data) {
       // 将获取到的问题存入questionStore，store会自动处理结构转换
       questionsStore.setQuestions(response.data);
-      ElMessage.success('已加载作业题目');
     } else {
       ElMessage.warning('获取题目失败: ' + response.message);
     }
@@ -293,7 +286,8 @@ const getSubmissionType = (status) => {
 
 <style scoped>
 /* 加载和错误状态样式 */
-.error-message, .empty-message {
+.error-message,
+.empty-message {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -307,14 +301,17 @@ const getSubmissionType = (status) => {
   color: #f56c6c;
 }
 
-.error-message .el-icon, .empty-message .el-icon {
+.error-message .el-icon,
+.empty-message .el-icon {
   font-size: 32px;
   margin-bottom: 12px;
 }
 
-.error-message span, .empty-message span {
+.error-message span,
+.empty-message span {
   font-size: 14px;
 }
+
 .assignment-list {
   display: flex;
   gap: 20px;
@@ -325,7 +322,7 @@ const getSubmissionType = (status) => {
 /* 左侧作业列表面板 */
 .assignment-panel {
   flex: 0 0 350px;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   padding: 20px;
   overflow-y: auto;
@@ -457,7 +454,7 @@ const getSubmissionType = (status) => {
 /* 右侧预览面板 */
 .preview-panel {
   flex: 1;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   padding: 20px;
   overflow-y: auto;
@@ -472,7 +469,7 @@ const getSubmissionType = (status) => {
 .preview-card,
 .history-card {
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .preview-header {
