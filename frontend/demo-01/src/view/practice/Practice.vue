@@ -26,10 +26,9 @@
         <!-- 题目展示容器 -->
         <div class="question-container">
           <QuestionDisplay :question="currentQuestion" :question-number="currentQuestionIndex + 1"
-            :show-correctness="showCorrectness"
-            :single-question-mode="singleQuestionMode" :same-type-questions="filteredQuestions"
-            @set-show-correctness="toggleShowCorrectness" @answer-submitted="handleAnswerSubmitted"
-            @previous="handlePreviousQuestion" @next="handleNextQuestion" />
+            :show-correctness="showCorrectness" :single-question-mode="singleQuestionMode"
+            :same-type-questions="filteredQuestions" @set-show-correctness="toggleShowCorrectness"
+            @answer-submitted="handleAnswerSubmitted" @previous="handlePreviousQuestion" @next="handleNextQuestion" />
         </div>
       </div>
     </div>
@@ -42,19 +41,48 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import PracticeNavbar from '@/components/practice/PracticeNavbar.vue';
 import PracticeSiderbar from '@/components/practice/PracticeSiderbar.vue';
 import QuestionDisplay from '@/components/practice/QuestionDisplay.vue';
-import { useQuestionsStore, useAnswerStore, useUserAnswerStore, useAssignmentStore } from '@/store';
-import { getAnswersByQuestionIds } from '@/api';
-import { createUserAnswer, updateUserAnswerById, getUserAnswers } from '@/api/modules/practice/userAnswer';
+import { useQuestionsStore, useAnswerStore, useUserAnswerStore, useAssignmentStore, useQuestionResourceStore, useUserStore } from '@/store';
+import { getAnswersByQuestionIds, createUserAnswer, updateUserAnswerById, getUserAnswers, getQuestionResources, getUserId } from '@/api';
 
 // 使用store
 const questionsStore = useQuestionsStore();
 const answerStore = useAnswerStore(); // 管理标准答案
 const userAnswerStore = useUserAnswerStore(); // 管理用户答案
 const assignmentStore = useAssignmentStore(); // 管理作业数据
+const questionResourceStore = useQuestionResourceStore(); // 管理问题资源
+const userStore = useUserStore(); // 管理用户状态
 
 // -------------------
 // 基础数据定义
 // -------------------
+
+// 从token获取用户ID
+const fetchUserIdFromToken = async () => {
+  try {
+    if (!userStore.token) {
+      console.error('用户未登录，无法获取token');
+      return null;
+    }
+
+    const response = await getUserId({ token: userStore.token });
+
+    if (response && response.code === 200 && response.data) {
+      const fetchedUserId = response.data;
+      console.log('成功获取用户ID:', fetchedUserId);
+      // 存储用户ID
+      userId.value = fetchedUserId;
+      // 更新用户信息
+      userInfo.value.id = fetchedUserId;
+      return fetchedUserId;
+    } else {
+      console.error('获取用户ID失败:', response?.message || '未知错误');
+      return null;
+    }
+  } catch (error) {
+    console.error('获取用户ID异常:', error);
+    return null;
+  }
+};
 
 // 练习基本信息 - 从assignmentStore中获取
 const practiceTitle = computed(() => {
@@ -65,6 +93,9 @@ const practiceTitle = computed(() => {
   // 如果没有作业数据，返回默认标题
   return 'JavaScript基础练习';
 });
+
+// 用户ID，从token获取
+const userId = ref(null);
 const userInfo = ref({ name: '张三', avatar: '' });
 
 // 单题作答模式，默认为false
@@ -172,11 +203,15 @@ const fetchUserAnswersFromApi = async () => {
       return;
     }
 
-    // 获取用户ID，如果没有则使用默认值
-    const userId = userInfo.value.id || 'default_user';
+    // 使用存储的用户ID
+    if (!userId.value) {
+      console.error('用户ID未初始化，无法获取用户答案');
+      userAnswerStore.setLoading(false);
+      return;
+    }
 
     // 调用API获取用户答案数据
-    const response = await getUserAnswers({ userId });
+    const response = await getUserAnswers({ userId: userId.value });
 
     if (response && response.code === 200 && response.data) {
       // 处理API返回的用户答案数据
@@ -196,7 +231,7 @@ const fetchUserAnswersFromApi = async () => {
           console.error(`解析问题 ${answer.questionId} 的答案失败:`, e);
           parsedAnswer = [];
         }
-        
+
         userAnswerMap[answer.questionId] = parsedAnswer;
       });
 
@@ -256,6 +291,42 @@ const fetchStandardAnswersFromApi = async () => {
   }
 };
 
+// 从API获取问题资源数据
+const fetchQuestionResourcesFromApi = async () => {
+  try {
+    // 获取所有hasResource为true的问题ID
+    const questionsWithResources = questionsStore.questions.filter(q => q.hasResource === true);
+
+    if (questionsWithResources.length === 0) {
+      console.log('没有需要获取资源的问题');
+      return;
+    }
+
+    console.log(`开始获取 ${questionsWithResources.length} 个问题的资源`);
+
+    // 为每个问题获取资源
+    for (const question of questionsWithResources) {
+      try {
+        const response = await getQuestionResources({ questionId: question.id });
+
+        if (response && response.code === 200 && response.data) {
+          // 将获取到的资源添加到store中
+          questionResourceStore.addResources(response.data);
+          console.log(`成功获取问题 ${question.id} 的资源: ${response.data.length} 条`);
+        } else {
+          console.error(`获取问题 ${question.id} 的资源失败:`, response?.message || '未知错误');
+        }
+      } catch (error) {
+        console.error(`获取问题 ${question.id} 的资源异常:`, error);
+      }
+    }
+
+    console.log('问题资源获取完成，总计资源数量:', questionResourceStore.getAllResources.length);
+  } catch (error) {
+    console.error('获取问题资源数据异常:', error);
+  }
+};
+
 // 更新用户答案
 const updateUserAnswer = (questionId, answer) => {
   // 确保只更新用户答案，不影响标准答案
@@ -279,17 +350,23 @@ const submitUserAnswerToBackend = async (questionId, answer) => {
       return;
     }
 
+    // 使用存储的用户ID
+    if (!userId.value) {
+      console.error('用户ID未初始化，无法提交答案');
+      return;
+    }
+
     // 准备答案数据
     const answerData = {
       content: Array.isArray(answer) ? answer.join(',') : String(answer),
-      userId: userInfo.value.id || 'default_user', // 使用实际的用户ID
+      userId: userId.value,
       questionId: questionId,
       questionType: question.type,
     };
 
     // 检查是否已存在该问题的答案
-    const existingAnswers = await getUserAnswers({ questionId, userId: answerData.userId });
-    
+    const existingAnswers = await getUserAnswers({ questionId: questionId, userId: answerData.userId });
+
     if (existingAnswers && existingAnswers.data && existingAnswers.data.length > 0) {
       // 更新现有答案
       const existingAnswerId = existingAnswers.data[0].id;
@@ -386,14 +463,23 @@ const validateDataSeparation = () => {
   console.log('用户答案数量:', userAnswerStore.getUserAnswers.length);
   console.log('标准答案存储位置: answerStore');
   console.log('标准答案数量:', answerStore.getAnswers.length);
+  console.log('问题资源存储位置: questionResourceStore');
+  console.log('问题资源数量:', questionResourceStore.getAllResources.length);
   console.log('数据存储分离验证完成\n');
 };
 
 // 组件挂载时初始化
 onMounted(async () => {
+  // 首先确保用户已登录并获取用户ID
+  const fetchedUserId = await fetchUserIdFromToken();
+  if (!fetchedUserId) {
+    console.error('用户未登录或无法获取用户ID，部分功能可能受限');
+  }
+
   initUserAnswers(); // 初始化用户答案
   await fetchUserAnswersFromApi(); // 从API获取用户答案数据
   await fetchStandardAnswersFromApi(); // 从API获取标准答案数据
+  await fetchQuestionResourcesFromApi(); // 从API获取问题资源数据
 
   // 添加延迟确保数据加载完成后进行验证
   setTimeout(() => {

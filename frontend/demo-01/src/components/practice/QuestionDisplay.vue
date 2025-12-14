@@ -71,56 +71,66 @@
                 </div>
               </div>
             </div>
+
+            <!-- 问题资源展示 -->
+            <QuestionResources v-if="question.hasResource" :question-id="question.id" />
           </div>
         </div>
 
         <!-- 多题模式 -->
         <div v-else class="all-questions-wrapper">
           <div v-for="(q, index) in sameTypeQuestions" :key="q.id" class="single-question-container">
-            <div class="question-header">
-              <div class="question-info">
-                <span class="question-type">{{
-                  getQuestionTypeLabel(q)
-                }}</span>
-                <span class="question-number">第 {{ index + 1 }} 题</span>
-              </div>
-              <div class="question-status" v-if="q.status">
-                <el-tag :type="getStatusType(q.status)">{{
-                  getStatusText(q.status)
-                }}</el-tag>
-              </div>
-            </div>
-
-            <div class="question-content">
-              <h3 class="question-title">{{ q.content }}</h3>
-
-              <!-- 选择题/判断题选项 -->
-              <div v-if="hasOptions(q)" class="question-options">
-                <div v-for="(option, optIndex) in q.options" :key="optIndex" class="option-item"
-                  :class="getOptionClasses(option.value, q, q.id)" @click="handleOptionSelection(option.value, q.id)">
-                  <div class="option-label">{{ option.label }}</div>
-                  <div class="option-content">{{ option.text }}</div>
+            <div class="question-content-wrapper">
+              <div class="question-header">
+                <div class="question-info">
+                  <span class="question-type">{{
+                    getQuestionTypeLabel(q)
+                  }}</span>
+                  <span class="question-number">第 {{ index + 1 }} 题</span>
+                </div>
+                <div class="question-status" v-if="q.status">
+                  <el-tag :type="getStatusType(q.status)">{{
+                    getStatusText(q.status)
+                  }}</el-tag>
                 </div>
               </div>
-            </div>
 
-            <!-- 简答题答题区域 -->
-            <div v-if="isShortAnswerQuestion(q)" class="answer-section">
-              <el-input :model-value="getUserAnswer(q.id)" type="textarea" :rows="4" placeholder="请输入您的答案..."
-                :disabled="showCorrectness" class="short-answer-input"
-                @update:model-value="val => updateUserAnswer(q.id, val)"
-                @blur="handleShortAnswerBlur(q.id, getUserAnswer(q.id))"></el-input>
+              <div class="question-content-wrapper">
+                <div class="question-content">
+                  <h3 class="question-title">{{ q.content }}</h3>
 
-              <!-- 正确答案展示 -->
-              <div v-if="showCorrectness" class="correct-answer">
-                <h4>参考答案：</h4>
-                <div class="answer-content" v-html="getQuestionStandardAnswer(q.id)?.content || q.answer"></div>
-
-                <!-- 答案解析 -->
-                <div v-if="getQuestionStandardAnswer(q.id)?.analysis" class="answer-analysis">
-                  <h4>答案解析：</h4>
-                  <div class="analysis-content" v-html="getQuestionStandardAnswer(q.id).analysis"></div>
+                  <!-- 选择题/判断题选项 -->
+                  <div v-if="hasOptions(q)" class="question-options">
+                    <div v-for="(option, optIndex) in q.options" :key="optIndex" class="option-item"
+                      :class="getOptionClasses(option.value, q, q.id)" @click="handleOptionSelection(option.value, q.id)">
+                      <div class="option-label">{{ option.label }}</div>
+                      <div class="option-content">{{ option.text }}</div>
+                    </div>
+                  </div>
                 </div>
+
+                <!-- 简答题答题区域 -->
+                <div v-if="isShortAnswerQuestion(q)" class="answer-section">
+                  <el-input :model-value="getUserAnswer(q.id)" type="textarea" :rows="4" placeholder="请输入您的答案..."
+                    :disabled="showCorrectness" class="short-answer-input"
+                    @update:model-value="val => updateUserAnswer(q.id, val)"
+                    @blur="handleShortAnswerBlur(q.id, getUserAnswer(q.id))"></el-input>
+
+                  <!-- 正确答案展示 -->
+                  <div v-if="showCorrectness" class="correct-answer">
+                    <h4>参考答案：</h4>
+                    <div class="answer-content" v-html="getQuestionStandardAnswer(q.id)?.content || q.answer"></div>
+
+                    <!-- 答案解析 -->
+                    <div v-if="getQuestionStandardAnswer(q.id)?.analysis" class="answer-analysis">
+                      <h4>答案解析：</h4>
+                      <div class="analysis-content" v-html="getQuestionStandardAnswer(q.id).analysis"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 问题资源展示 -->
+                <QuestionResources v-if="q.hasResource" :question-id="q.id" />
               </div>
             </div>
           </div>
@@ -149,12 +159,15 @@
 import { ref, computed, watch } from "vue";
 import { ElMessage } from "element-plus";
 import ProgrammingQuestion from "./ProgrammingQuestion.vue";
+import QuestionResources from "./QuestionResources.vue";
 import { useAnswerStore } from "@/store";
 import { useUserAnswerStore } from "@/store/modules/userAnswerStore";
+import { useQuestionResourceStore } from "@/store/modules/questionResourceStore";
 
 // 初始化答案store
 const answerStore = useAnswerStore(); // 管理标准答案
 const userAnswerStore = useUserAnswerStore(); // 管理用户答案
+const questionResourceStore = useQuestionResourceStore(); // 管理问题资源
 
 // Props 定义
 const props = defineProps({
@@ -496,6 +509,7 @@ const nextQuestion = () => {
   padding: 24px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  max-height: calc(100vh - 120px);
 }
 
 .question-header {
@@ -700,9 +714,10 @@ const nextQuestion = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 32px;
+  margin-top: auto;
   padding-top: 24px;
   border-top: 1px solid #ebeef5;
+  flex-shrink: 0;
 }
 
 /* 右侧按钮容器 */
@@ -715,6 +730,7 @@ const nextQuestion = () => {
 .single-question-wrapper {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 /* 所有题目展示样式 */
@@ -722,15 +738,35 @@ const nextQuestion = () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-bottom: 16px;
+}
+
+/* 滚动条样式 */
+.all-questions-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.all-questions-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.all-questions-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.all-questions-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .single-question-container {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
   margin-bottom: 20px;
-  border: 1px solid #ebeef5;
 }
 
 .single-question-container .question-header {

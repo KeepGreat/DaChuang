@@ -27,7 +27,7 @@
       </div>
 
       <!-- 计时器显示（当有剩余时间时） -->
-      <div class="timer" v-if="remainingTime">
+      <div class="timer" :class="{ 'timer-urgent': isTimeUrgent }" v-if="remainingTime">
         <el-icon class="timer-icon"><Timer /></el-icon>
         <span class="timer-text">{{ remainingTime }}</span>
       </div>
@@ -89,6 +89,7 @@ const singleQuestionModeLocal = ref(props.singleQuestionMode);
 
 // 倒计时相关状态
 const remainingTime = ref('30:00');
+const isTimeUrgent = ref(false); // 是否紧急（少于30分钟）
 let timerInterval = null;
 
 // =============== 计算属性 ===============
@@ -110,15 +111,36 @@ const formatTime = (seconds) => {
   if (seconds <= 0) {
     return '00:00';
   }
-  const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+  
+  // 计算天数
+  const days = Math.floor(seconds / (24 * 60 * 60));
+  
+  // 如果剩余时间大于1天，显示天数
+  if (days > 0) {
+    return `${days}天`;
+  }
+  
+  // 否则显示时:分:秒
+  const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+  const mins = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
   const secs = (seconds % 60).toString().padStart(2, '0');
-  return `${mins}:${secs}`;
+  
+  // 如果小时为0，只显示分:秒
+  if (hours === '00') {
+    return `${mins}:${secs}`;
+  }
+  
+  return `${hours}:${mins}:${secs}`;
 };
 
 // 更新剩余时间
 const updateRemainingTime = () => {
   const seconds = calculateRemainingSeconds();
   remainingTime.value = formatTime(seconds);
+  
+  // 判断是否少于30分钟（1800秒）
+  isTimeUrgent.value = seconds > 0 && seconds < 1800;
+  
   return seconds;
 };
 
@@ -265,6 +287,12 @@ function handleSingleQuestionToggle(value) {
   border-radius: 10px;
   font-weight: 600;
   color: #2563eb;
+}
+
+.timer-urgent {
+  background: linear-gradient(180deg, #fff, #fef2f2);
+  border: 1px solid #fecaca;
+  color: #dc2626;
 }
 
 .timer-icon {
