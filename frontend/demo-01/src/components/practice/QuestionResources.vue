@@ -76,9 +76,9 @@
 
 <script setup>
 import { computed } from 'vue';
-import { downloadQuestionResource } from '@/api/modules/practice/questionResource';
+import { downloadQuestionResource } from '@/api';
 import { ElMessage } from 'element-plus';
-import { useQuestionResourceStore } from '@/store/modules/questionResourceStore';
+import { useQuestionResourceStore } from '@/store';
 
 // 初始化store
 const questionResourceStore = useQuestionResourceStore();

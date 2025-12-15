@@ -33,12 +33,12 @@
         </div>
         <div
           class="nav-item"
-          :class="{ active: activeModule === 'assignment' }"
-          @click="switchModule('assignment')"
-          :title="'作业'"
+          :class="{ active: activeModule === 'practice' }"
+          @click="switchModule('practice')"
+          :title="'练习'"
         >
           <el-icon><Edit /></el-icon>
-          <span class="nav-tooltip">作业</span>
+          <span class="nav-tooltip">练习</span>
         </div>
         <div
           class="nav-item"
@@ -117,8 +117,8 @@ const switchModule = (module) => {
     case 'task':
       router.push(`/teaching/course/${courseId}/task`);
       break;
-    case 'assignment':
-      router.push(`/teaching/course/${courseId}/assignment`);
+    case 'practice':
+      router.push(`/teaching/course/${courseId}/practice`);
       break;
     case 'exam':
       router.push(`/teaching/course/${courseId}/exam`);
@@ -147,8 +147,8 @@ const initModule = () => {
     activeModule.value = 'course';
   } else if (path.includes('/task')) {
     activeModule.value = 'task';
-  } else if (path.includes('/assignment')) {
-    activeModule.value = 'assignment';
+  } else if (path.includes('/practice')) {
+    activeModule.value = 'practice';
   } else if (path.includes('/exam')) {
     activeModule.value = 'exam';
   } else if (path.includes('/resource')) {

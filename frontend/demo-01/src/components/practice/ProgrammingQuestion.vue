@@ -30,6 +30,9 @@
           </div>
         </div>
       </div>
+
+      <!-- 问题资源 -->
+      <QuestionResources v-if="question.hasResource" :question-id="question.id" />
     </div>
 
     <!-- 右侧：代码编写区域 -->
@@ -129,6 +132,7 @@ import { ElMessage } from "element-plus";
 import { marked } from "marked";
 import { nextTick, onMounted, ref, watch } from "vue";
 import { useUserAnswerStore } from "@/store";
+import QuestionResources from "./QuestionResources.vue";
 
 // ==========================================================================
 // Store 初始化
