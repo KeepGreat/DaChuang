@@ -39,9 +39,9 @@ export const practiceIndexes = [
   { id: 2, practiceId: 2, courseSectionId: 101, courseId: 1002 },
   { id: 3, practiceId: 3, courseSectionId: 102, courseId: 1003 },
   { id: 4, practiceId: 4, courseSectionId: 103, courseId: 0 },
-  { id: 4, practiceId: 2, courseSectionId: 3, courseId: 0 },
   { id: 5, practiceId: 5, courseSectionId: 104, courseId: 1004 },
   { id: 6, practiceId: 6, courseSectionId: 104, courseId: 1005 },
+  { id: 7, practiceId: 2, courseSectionId: 3, courseId: 0 },
 ];
 
 /**
@@ -134,6 +134,7 @@ export const questionIndexes = [
   { id: 4, questionId: 4, practiceId: 3 },
   { id: 5, questionId: 1, practiceId: 4 },
   { id: 6, questionId: 2, practiceId: 5 },
+  { id: 7, questionId: 2, practiceId: 2 }
 ];
 
 /**

@@ -190,8 +190,13 @@ export const useQuestionsStore = defineStore(
           { label: 'B', value: 'false', text: '错误' }
         ];
       } else if (apiQuestion.type === 1) { // 选择题
-        // 默认空选项，实际应用中应从API获取
-        defaultOptions = [];
+        // 设置ABCD四种默认选项
+        defaultOptions = [
+          { label: 'A', value: 'A', text: '选项A' },
+          { label: 'B', value: 'B', text: '选项B' },
+          { label: 'C', value: 'C', text: '选项C' },
+          { label: 'D', value: 'D', text: '选项D' }
+        ];
       }
       
       // 转换为store所需的结构

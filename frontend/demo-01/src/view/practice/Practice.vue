@@ -425,13 +425,25 @@ const handlePreviousQuestion = () => {
     currentQuestionIndex.value--;
   } else {
     // 当前是当前题型的第一题，切换到上一类题型的最后一题
-    const currentTypeIndex = questionsStore.sidebarQuestionTypes.value.findIndex(type => type.id === activeType.value);
+    const sidebarTypes = questionsStore.sidebarQuestionTypes;
+    console.log('sidebarTypes:', sidebarTypes);
+    if (!sidebarTypes || !Array.isArray(sidebarTypes) || sidebarTypes.length === 0) {
+      console.warn('题型数据未准备好，无法切换题型');
+      return;
+    }
+    
+    const currentTypeIndex = sidebarTypes.findIndex(type => type.id === activeType.value);
     if (currentTypeIndex > 0) {
-      const prevType = questionsStore.sidebarQuestionTypes.value[currentTypeIndex - 1];
+      const prevType = sidebarTypes[currentTypeIndex - 1];
       activeType.value = prevType.id;
       // 设置为上一类题型的最后一题
-      const prevTypeQuestions = prevType.id === 'all' ? questionsStore.questions.value : questionsStore.questions.value.filter(q => q.type === prevType.id);
-      currentQuestionIndex.value = prevTypeQuestions.length - 1;
+      const questions = questionsStore.questions?.value || [];
+      if (!Array.isArray(questions)) {
+        console.warn('题目数据格式错误，无法切换到上一题型');
+        return;
+      }
+      const prevTypeQuestions = prevType.id === 'all' ? questions : questions.filter(q => q.type === prevType.id);
+      currentQuestionIndex.value = prevTypeQuestions.length > 0 ? prevTypeQuestions.length - 1 : 0;
     }
   }
 };
@@ -443,9 +455,16 @@ const handleNextQuestion = () => {
     currentQuestionIndex.value++;
   } else {
     // 当前是当前题型的最后一题，切换到下一类题型的第一题
-    const currentTypeIndex = questionsStore.sidebarQuestionTypes.value.findIndex(type => type.id === activeType.value);
-    if (currentTypeIndex < questionsStore.sidebarQuestionTypes.value.length - 1) {
-      const nextType = questionsStore.sidebarQuestionTypes.value[currentTypeIndex + 1];
+    const sidebarTypes = questionsStore.sidebarQuestionTypes;
+    console.log('sidebarTypes:', sidebarTypes);
+    if (!sidebarTypes || !Array.isArray(sidebarTypes) || sidebarTypes.length === 0) {
+      console.warn('题型数据未准备好，无法切换题型');
+      return;
+    }
+    
+    const currentTypeIndex = sidebarTypes.findIndex(type => type.id === activeType.value);
+    if (currentTypeIndex < sidebarTypes.length - 1) {
+      const nextType = sidebarTypes[currentTypeIndex + 1];
       activeType.value = nextType.id;
       currentQuestionIndex.value = 0; // 设置为下一类题型的第一题
     }

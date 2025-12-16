@@ -50,6 +50,12 @@
                   <div class="option-content">{{ option.text }}</div>
                 </div>
               </div>
+
+              <!-- 判断题/选择题答案解析 -->
+              <div v-if="showCorrectness && currentStandardAnswer?.analysis" class="answer-analysis">
+                <h4>答案解析：</h4>
+                <div class="analysis-content" v-html="currentStandardAnswer.analysis"></div>
+              </div>
             </div>
 
             <!-- 简答题答题区域 -->
@@ -106,6 +112,12 @@
                       <div class="option-label">{{ option.label }}</div>
                       <div class="option-content">{{ option.text }}</div>
                     </div>
+                  </div>
+
+                  <!-- 判断题/选择题答案解析 -->
+                  <div v-if="showCorrectness && getQuestionStandardAnswer(q.id)?.analysis" class="answer-analysis">
+                    <h4>答案解析：</h4>
+                    <div class="analysis-content" v-html="getQuestionStandardAnswer(q.id).analysis"></div>
                   </div>
                 </div>
 
@@ -731,6 +743,9 @@ const nextQuestion = () => {
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-bottom: 16px;
 }
 
 /* 所有题目展示样式 */
@@ -742,6 +757,44 @@ const nextQuestion = () => {
   overflow-y: auto;
   padding-right: 8px;
   margin-bottom: 16px;
+}
+
+/* 单题模式滚动条样式 */
+.single-question-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.single-question-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.single-question-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.single-question-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 单题模式滚动条样式 */
+.single-question-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.single-question-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.single-question-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.single-question-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 /* 滚动条样式 */
