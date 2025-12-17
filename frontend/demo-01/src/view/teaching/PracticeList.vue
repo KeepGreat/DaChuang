@@ -103,22 +103,6 @@
             </div>
           </div>
         </el-card>
-
-        <!-- 提交历史卡片 -->
-        <el-card class="history-card" v-if="submissionHistory.length > 0">
-          <template #header>
-            <h5>最近提交</h5>
-          </template>
-          <div v-for="(record, index) in submissionHistory.slice(0, 3)" :key="index" class="history-item">
-            <div class="history-time">{{ record.submitTime }}</div>
-            <el-tag :type="getSubmissionType(record.status)" size="small">
-              {{ record.status }}
-            </el-tag>
-            <span v-if="record.score" class="history-score">
-              {{ record.score }}分
-            </span>
-          </div>
-        </el-card>
       </div>
 
       <!-- 空状态 -->
@@ -213,6 +197,11 @@ const completedCount = computed(() =>
 
 // 选择练习
 const selectPractice = async (index) => {
+  // 如果选择的练习与当前已选练习相同，则不需要重新获取数据
+  if (selectedPractice.value === index) {
+    return;
+  }
+  
   selectedPractice.value = index;
   const practice = practices.value[index];
   const practiceId = practice.id;
