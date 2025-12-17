@@ -134,7 +134,7 @@ const router = createRouter({
         {
           path: "prac",
           name: "Practice",
-          component: () => import("@/view/Practice.vue"),
+          component: () => import("@/view/practice/Practice.vue"),
         },
 
         // 其他页面

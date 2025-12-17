@@ -190,10 +190,11 @@ import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getPractices } from "@/api/modules/practice/practice";
 import { getQuestionByIndex } from "@/api/modules/practice/question";
-import { useQuestionsStore } from "@/store";
+import { useQuestionsStore, usePracticeStore } from "@/store";
 
 const router = useRouter();
 const questionsStore = useQuestionsStore();
+const practiceStore = usePracticeStore();
 
 // 选中状态
 const selectedPractice = ref(null);
@@ -365,7 +366,39 @@ const formatDeadline = (deadline) => {
 const handleClick = (item) => {
   switch (item) {
     case "practice":
-      router.push("/prac");
+      // 获取当前选中的练习数据
+      if (selectedPractice.value !== null && paginatedPractices.value[selectedPractice.value]) {
+        const selectedPracticeData = paginatedPractices.value[selectedPractice.value];
+        
+        // 将练习数据存储到 practiceStore 中，使用 resetPractices 方法
+        practiceStore.resetPractices([{
+          id: selectedPracticeData.id,
+          title: selectedPracticeData.name,
+          deadline: selectedPracticeData.expiredAt,
+          questionNum: selectedPracticeData.questionNum,
+          // 添加必要的字段以符合 practiceStore 的数据结构
+          courseId: '1', // 默认课程ID
+          description: `练习：${selectedPracticeData.name}`,
+          requirement: `<p>请完成本练习的所有题目。</p>`,
+          status: '未开始',
+          score: null,
+          totalScore: 100,
+          difficulty: 1,
+          createTime: new Date().toISOString()
+        }]);
+        
+        // 导航到练习页面，传递练习ID
+        router.push({
+          name: "Practice",
+          query: {
+            practiceId: selectedPracticeData.id,
+            practiceName: selectedPracticeData.name
+          }
+        });
+      } else {
+        // 如果没有选中练习，使用默认跳转
+        router.push("/prac");
+      }
       break;
     case "experiment":
       router.push("/exp");

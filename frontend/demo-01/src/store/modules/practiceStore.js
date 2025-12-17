@@ -169,6 +169,7 @@ export const usePracticeStore = defineStore('practice', () => {
   ])
 
   const currentPractice = ref(null)
+  const selectedPractice = ref(null)
   const submissionHistory = ref({
     '2': [
       {
@@ -220,6 +221,14 @@ export const usePracticeStore = defineStore('practice', () => {
   // Actions
   const setCurrentPractice = (practice) => {
     currentPractice.value = practice
+  }
+
+  const setSelectedPractice = (index) => {
+    selectedPractice.value = index
+  }
+
+  const clearSelectedPractice = () => {
+    selectedPractice.value = null
   }
 
   const addPractice = (practice) => {
@@ -350,10 +359,13 @@ public class Main {
       addPractice(practice)
     })
   }
-
+// 更新practiceStore中的练习列表
+// 直接重置整个练习列表，而不是合并
+practiceStore.resetPractices(fetchedPractices);
   const clearAll = () => {
     practices.value = []
     currentPractice.value = null
+    selectedPractice.value = null
     submissionHistory.value = {}
   }
 
@@ -365,6 +377,7 @@ public class Main {
     // State
     practices,
     currentPractice,
+    selectedPractice,
     submissionHistory,
     loading,
 
@@ -376,6 +389,8 @@ public class Main {
 
     // Actions
     setCurrentPractice,
+    setSelectedPractice,
+    clearSelectedPractice,
     addPractice,
     updatePractice,
     updatePracticeStatus,
