@@ -41,7 +41,7 @@ export const practiceIndexes = [
   { id: 4, practiceId: 4, courseSectionId: 103, courseId: 0 },
   { id: 5, practiceId: 5, courseSectionId: 104, courseId: 1004 },
   { id: 6, practiceId: 6, courseSectionId: 104, courseId: 1005 },
-  { id: 7, practiceId: 2, courseSectionId: 3, courseId: 0 }
+  { id: 7, practiceId: 2, courseSectionId: 3, courseId: 0 },
 ];
 
 /**
@@ -429,48 +429,5 @@ export const userAnswers = [
     questionId: 4,
     questionType: 3,
     score: 15,
-  },
-  {
-    id: 5,
-    content: "False",
-    userId: "2",
-    questionId: 1,
-    questionType: 0,
-    score: 0, // 答错得0分
-  },
-  {
-    id: 6,
-    content: "C",
-    userId: "2",
-    questionId: 2,
-    questionType: 1,
-    score: 0,
-  },
-  {
-    id: 7,
-    content:
-      "Composition API通过setup函数和响应式API，实现了更好的代码组织方式，特别是对于复杂组件。",
-    userId: "2",
-    questionId: 3,
-    questionType: 2,
-    score: 8,
-  },
-  {
-    id: 8,
-    content: `function removeDuplicates(arr) {
-      const result = [];
-      const seen = new Set();
-      for (const item of arr) {
-        if (!seen.has(item)) {
-          seen.add(item);
-          result.push(item);
-        }
-      }
-      return result;
-    }`,
-    userId: "2",
-    questionId: 4,
-    questionType: 3,
-    score: 12,
   },
 ];
