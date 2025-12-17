@@ -54,8 +54,18 @@ const router = createRouter({
           children: [
             {
               path: "learn",
-              name: "CourseContent",
-              component: () => import("@/view/teaching/CourseContent.vue"),
+              name: "CourseList",
+              component: () => import("@/view/teaching/CourseList.vue"),
+            },
+            {
+              path: "learn/series/:seriesId",
+              name: "CourseSeriesDetail",
+              component: () => import("@/view/teaching/CourseSeriesDetail.vue"),
+            },
+            {
+              path: "learn/content/:contentId",
+              name: "CourseContentDetail",
+              component: () => import("@/view/teaching/CourseContentDetail.vue"),
             },
             {
               path: "task",

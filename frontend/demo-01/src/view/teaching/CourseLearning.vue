@@ -18,44 +18,39 @@
           </el-icon>
           <span class="nav-tooltip">课程学习</span>
         </div>
-        <div class="nav-item" :class="{ active: activeModule === 'task' }" @click="switchModule('task')" :title="'任务'">
+        <!-- <div class="nav-item" :class="{ active: activeModule === 'task' }" @click="switchModule('task')" :title="'任务'">
           <el-icon>
             <Bell />
           </el-icon>
           <span class="nav-tooltip">任务</span>
-        </div>
-        <!-- <div
-          class="nav-item"
-          :class="{ active: activeModule === 'assignment' }"
-          @click="switchModule('assignment')"
-          :title="'作业'"
-        >
-          <el-icon><Edit /></el-icon>
+        </div> -->
+        <div class="nav-item" :class="{ active: activeModule === 'assignment' }" @click="switchModule('assignment')"
+          :title="'作业'">
+          <el-icon>
+            <Edit />
+          </el-icon>
           <span class="nav-tooltip">作业</span>
-        </div> -->
-        <!-- <div
-          class="nav-item"
-          :class="{ active: activeModule === 'exam' }"
-          @click="switchModule('exam')"
-          :title="'考试'"
-        >
-          <el-icon><Document /></el-icon>
+        </div>
+        <div class="nav-item" :class="{ active: activeModule === 'exam' }" @click="switchModule('exam')" :title="'考试'">
+          <el-icon>
+            <Document />
+          </el-icon>
           <span class="nav-tooltip">考试</span>
-        </div> -->
-        <div class="nav-item" :class="{ active: activeModule === 'resource' }" @click="switchModule('resource')"
+        </div>
+        <!-- <div class="nav-item" :class="{ active: activeModule === 'resource' }" @click="switchModule('resource')"
           :title="'资料'">
           <el-icon>
             <FolderOpened />
           </el-icon>
           <span class="nav-tooltip">资料</span>
-        </div>
-        <div class="nav-item" :class="{ active: activeModule === 'discussion' }" @click="switchModule('discussion')"
+        </div> -->
+        <!-- <div class="nav-item" :class="{ active: activeModule === 'discussion' }" @click="switchModule('discussion')"
           :title="'讨论'">
           <el-icon>
             <ChatDotRound />
           </el-icon>
           <span class="nav-tooltip">讨论</span>
-        </div>
+        </div> -->
         <div class="nav-item" :class="{ active: activeModule === 'knowledge' }" @click="switchModule('knowledge')"
           :title="'知识图谱'">
           <el-icon>
@@ -156,7 +151,7 @@ watch(() => route.path, () => {
 // 初始化
 initModule();
 
-// 如果访问的是 /teaching/course/:id（没有子路径），默认跳转到学习页面
+// 如果访问的是 /teaching/course/:id（没有子路径），默认跳转到课程列表页面
 if (route.path.match(/^\/teaching\/course\/\w+$/)) {
   const courseId = route.params.id;
   router.replace(`/teaching/course/${courseId}/learn`);
