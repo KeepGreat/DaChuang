@@ -25,7 +25,7 @@
         </div>
         <div v-else>
           <div v-for="(practice, index) in practices" :key="index" class="practice-item" :class="{
-            active: selectedPractice === index,
+            active: practiceStore.selectedPractice === index,
             completed: practice.status === '已提交',
             overdue: isOverdue(practice.deadline)
           }" @click="selectPractice(index)">
@@ -65,11 +65,11 @@
 
     <!-- 右侧练习详情预览 -->
     <div class="preview-panel">
-      <div v-if="selectedPractice !== null" class="practice-preview">
+      <div v-if="practiceStore.selectedPractice !== null" class="practice-preview">
         <el-card class="preview-card">
           <template #header>
             <div class="preview-header">
-              <h4>{{ practices[selectedPractice].title }}</h4>
+              <h4>{{ practices[practiceStore.selectedPractice].title }}</h4>
               <el-button type="primary" @click="openPracticeDetail">
                 开始做题
               </el-button>
@@ -79,12 +79,12 @@
           <div class="preview-content">
             <div class="preview-section">
               <h5>练习说明</h5>
-              <p>{{ practices[selectedPractice].description }}</p>
+              <p>{{ practices[practiceStore.selectedPractice].description }}</p>
             </div>
 
             <div class="preview-section">
               <h5>练习要求</h5>
-              <div v-html="practices[selectedPractice].requirement"></div>
+              <div v-html="practices[practiceStore.selectedPractice].requirement"></div>
             </div>
 
             <div class="preview-section">
@@ -99,24 +99,8 @@
 
             <div class="preview-section">
               <h5>测试用例概览</h5>
-              <p>共 {{ practices[selectedPractice].testCases?.length || 0 }} 个测试用例</p>
+              <p>共 {{ practices[practiceStore.selectedPractice].testCases?.length || 0 }} 个测试用例</p>
             </div>
-          </div>
-        </el-card>
-
-        <!-- 提交历史卡片 -->
-        <el-card class="history-card" v-if="submissionHistory.length > 0">
-          <template #header>
-            <h5>最近提交</h5>
-          </template>
-          <div v-for="(record, index) in submissionHistory.slice(0, 3)" :key="index" class="history-item">
-            <div class="history-time">{{ record.submitTime }}</div>
-            <el-tag :type="getSubmissionType(record.status)" size="small">
-              {{ record.status }}
-            </el-tag>
-            <span v-if="record.score" class="history-score">
-              {{ record.score }}分
-            </span>
           </div>
         </el-card>
       </div>
@@ -149,15 +133,12 @@ const route = useRoute();
 const practiceStore = usePracticeStore();
 const questionsStore = useQuestionsStore();
 
-const selectedPractice = ref(null);
 const submissionHistory = ref([]);
 const componentLoading = ref(false);
 const componentError = ref(null);
 
 // 计算当前课程的练习列表
-const practices = computed(() => {
-  return practiceStore.getPracticesByCourseId(route.params.id);
-});
+const practices = computed(() => practiceStore.getPracticesByCourseId(route.params.id));
 
 // 加载练习数据
 onMounted(async () => {
@@ -213,7 +194,12 @@ const completedCount = computed(() =>
 
 // 选择练习
 const selectPractice = async (index) => {
-  selectedPractice.value = index;
+  // 如果选择的练习与当前已选练习相同，则不需要重新获取数据
+  if (practiceStore.selectedPractice === index) {
+    return;
+  }
+  
+  practiceStore.setSelectedPractice(index);
   const practice = practices.value[index];
   const practiceId = practice.id;
   submissionHistory.value = practiceStore.getSubmissionHistory(practiceId);
@@ -235,7 +221,7 @@ const selectPractice = async (index) => {
 
 // 打开练习详情
 const openPracticeDetail = () => {
-  const practiceId = practices.value[selectedPractice.value].id;
+  const practiceId = practices.value[practiceStore.selectedPractice].id;
   const courseId = route.params.id;
   router.push(`/teaching/course/${courseId}/practice/${practiceId}`);
 };

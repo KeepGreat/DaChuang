@@ -7,9 +7,14 @@
 
     <template v-else>
       <!-- 编程题展示 -->
-      <ProgrammingQuestion v-if="isProgrammingQuestion" ref="programmingQuestionRef" :question="question"
-        :show-correctness="showCorrectness" :user-answer="currentUserAnswer"
-        @answer-submitted="handleProgrammingAnswerSubmitted" />
+      <ProgrammingQuestion
+        v-if="isProgrammingQuestion"
+        ref="programmingQuestionRef"
+        :question="question"
+        :show-correctness="showCorrectness"
+        :user-answer="currentUserAnswer"
+        @answer-submitted="handleProgrammingAnswerSubmitted"
+      />
 
       <!-- 非编程题展示 -->
       <template v-else>
@@ -20,9 +25,7 @@
             <div class="question-header">
               <!-- 题型和题号信息 -->
               <div class="question-info">
-                <span class="question-type">{{
-                  getQuestionTypeLabel(question)
-                }}</span>
+                <span class="question-type">{{ getQuestionTypeLabel(question) }}</span>
                 <!-- 题型标签 -->
                 <span class="question-number">第 {{ questionNumber }} 题</span>
                 <!-- 当前题号 -->
@@ -44,36 +47,59 @@
 
               <!-- 选择题/判断题选项 -->
               <div v-if="hasOptions(question)" class="question-options">
-                <div v-for="(option, index) in question.options" :key="index" class="option-item"
-                  :class="getOptionClasses(option.value, question)" @click="handleOptionSelection(option.value)">
+                <div
+                  v-for="(option, index) in question.options"
+                  :key="index"
+                  class="option-item"
+                  :class="getOptionClasses(option.value, question)"
+                  @click="handleOptionSelection(option.value)"
+                >
                   <div class="option-label">{{ option.label }}</div>
                   <div class="option-content">{{ option.text }}</div>
                 </div>
               </div>
 
               <!-- 判断题/选择题答案解析 -->
-              <div v-if="showCorrectness && currentStandardAnswer?.analysis" class="answer-analysis">
+              <div
+                v-if="showCorrectness && currentStandardAnswer?.analysis"
+                class="answer-analysis"
+              >
                 <h4>答案解析：</h4>
-                <div class="analysis-content" v-html="currentStandardAnswer.analysis"></div>
+                <div
+                  class="analysis-content"
+                  v-html="currentStandardAnswer.analysis"
+                ></div>
               </div>
             </div>
 
             <!-- 简答题答题区域 -->
             <div v-if="isShortAnswerQuestion(question)" class="answer-section">
-              <el-input :model-value="getUserAnswer(question.id)" type="textarea" :rows="6" placeholder="请输入您的答案..."
-                :disabled="showCorrectness" class="short-answer-input"
-                @update:model-value="val => updateUserAnswer(question.id, val)"
-                @blur="handleShortAnswerBlur(question.id, getUserAnswer(question.id))"></el-input>
+              <el-input
+                :model-value="getUserAnswer(question.id)"
+                type="textarea"
+                :rows="6"
+                placeholder="请输入您的答案..."
+                :disabled="showCorrectness"
+                class="short-answer-input"
+                @update:model-value="(val) => updateUserAnswer(question.id, val)"
+                @blur="handleShortAnswerBlur(question.id, getUserAnswer(question.id))"
+              ></el-input>
 
               <!-- 正确答案展示 -->
               <div v-if="showCorrectness" class="correct-answer">
                 <h4>参考答案：</h4>
-                <div class="answer-content" v-html="currentStandardAnswer?.content || question.answer"></div>
+                <div
+                  class="answer-content"
+                  v-html="currentStandardAnswer?.content || question.answer"
+                ></div>
 
                 <!-- 答案解析 -->
                 <div v-if="currentStandardAnswer?.analysis" class="answer-analysis">
                   <h4>答案解析：</h4>
-                  <div class="analysis-content" v-html="currentStandardAnswer.analysis"></div>
+                  <div
+                    class="analysis-content"
+                    v-html="currentStandardAnswer.analysis"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -85,13 +111,15 @@
 
         <!-- 多题模式 -->
         <div v-else class="all-questions-wrapper">
-          <div v-for="(q, index) in sameTypeQuestions" :key="q.id" class="single-question-container">
+          <div
+            v-for="(q, index) in sameTypeQuestions"
+            :key="q.id"
+            class="single-question-container"
+          >
             <div class="question-content-wrapper">
               <div class="question-header">
                 <div class="question-info">
-                  <span class="question-type">{{
-                    getQuestionTypeLabel(q)
-                  }}</span>
+                  <span class="question-type">{{ getQuestionTypeLabel(q) }}</span>
                   <span class="question-number">第 {{ index + 1 }} 题</span>
                 </div>
                 <div class="question-status" v-if="q.status">
@@ -107,36 +135,62 @@
 
                   <!-- 选择题/判断题选项 -->
                   <div v-if="hasOptions(q)" class="question-options">
-                    <div v-for="(option, optIndex) in q.options" :key="optIndex" class="option-item"
-                      :class="getOptionClasses(option.value, q, q.id)" @click="handleOptionSelection(option.value, q.id)">
+                    <div
+                      v-for="(option, optIndex) in q.options"
+                      :key="optIndex"
+                      class="option-item"
+                      :class="getOptionClasses(option.value, q, q.id)"
+                      @click="handleOptionSelection(option.value, q.id)"
+                    >
                       <div class="option-label">{{ option.label }}</div>
                       <div class="option-content">{{ option.text }}</div>
                     </div>
                   </div>
 
                   <!-- 判断题/选择题答案解析 -->
-                  <div v-if="showCorrectness && getQuestionStandardAnswer(q.id)?.analysis" class="answer-analysis">
+                  <div
+                    v-if="showCorrectness && getQuestionStandardAnswer(q.id)?.analysis"
+                    class="answer-analysis"
+                  >
                     <h4>答案解析：</h4>
-                    <div class="analysis-content" v-html="getQuestionStandardAnswer(q.id).analysis"></div>
+                    <div
+                      class="analysis-content"
+                      v-html="getQuestionStandardAnswer(q.id).analysis"
+                    ></div>
                   </div>
                 </div>
 
                 <!-- 简答题答题区域 -->
                 <div v-if="isShortAnswerQuestion(q)" class="answer-section">
-                  <el-input :model-value="getUserAnswer(q.id)" type="textarea" :rows="4" placeholder="请输入您的答案..."
-                    :disabled="showCorrectness" class="short-answer-input"
-                    @update:model-value="val => updateUserAnswer(q.id, val)"
-                    @blur="handleShortAnswerBlur(q.id, getUserAnswer(q.id))"></el-input>
+                  <el-input
+                    :model-value="getUserAnswer(q.id)"
+                    type="textarea"
+                    :rows="4"
+                    placeholder="请输入您的答案..."
+                    :disabled="showCorrectness"
+                    class="short-answer-input"
+                    @update:model-value="(val) => updateUserAnswer(q.id, val)"
+                    @blur="handleShortAnswerBlur(q.id, getUserAnswer(q.id))"
+                  ></el-input>
 
                   <!-- 正确答案展示 -->
                   <div v-if="showCorrectness" class="correct-answer">
                     <h4>参考答案：</h4>
-                    <div class="answer-content" v-html="getQuestionStandardAnswer(q.id)?.content || q.answer"></div>
+                    <div
+                      class="answer-content"
+                      v-html="getQuestionStandardAnswer(q.id)?.content || q.answer"
+                    ></div>
 
                     <!-- 答案解析 -->
-                    <div v-if="getQuestionStandardAnswer(q.id)?.analysis" class="answer-analysis">
+                    <div
+                      v-if="getQuestionStandardAnswer(q.id)?.analysis"
+                      class="answer-analysis"
+                    >
                       <h4>答案解析：</h4>
-                      <div class="analysis-content" v-html="getQuestionStandardAnswer(q.id).analysis"></div>
+                      <div
+                        class="analysis-content"
+                        v-html="getQuestionStandardAnswer(q.id).analysis"
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -160,7 +214,9 @@
           <el-button type="primary" @click="submitAnswer" :disabled="showCorrectness">
             提交答案
           </el-button>
-          <el-button v-if="singleQuestionMode" type="success" @click="nextQuestion">下一题</el-button>
+          <el-button v-if="singleQuestionMode" type="success" @click="nextQuestion"
+            >下一题</el-button
+          >
         </div>
       </div>
     </template>
@@ -168,13 +224,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { useAnswerStore, useQuestionResourceStore, useUserAnswerStore } from "@/store";
 import { ElMessage } from "element-plus";
+import { computed, ref } from "vue";
 import ProgrammingQuestion from "./ProgrammingQuestion.vue";
 import QuestionResources from "./QuestionResources.vue";
-import { useAnswerStore } from "@/store";
-import { useUserAnswerStore } from "@/store/modules/userAnswerStore";
-import { useQuestionResourceStore } from "@/store/modules/questionResourceStore";
 
 // 初始化答案store
 const answerStore = useAnswerStore(); // 管理标准答案
@@ -308,10 +362,8 @@ const getOptionClasses = (value, q, questionId = q.id) => {
   return {
     selected: isOptionSelected(value, questionId), // 是否被用户选中
     correct: isOptionCorrect(value, q) && shouldShowOptionCorrectness(q), // 是否为正确选项且应显示
-    incorrect:
-      isOptionIncorrect(value, q, questionId) && shouldShowOptionCorrectness(q), // 是否为错误选项且应显示
-    missed:
-      isOptionMissed(value, q, questionId) && shouldShowOptionCorrectness(q), // 是否为漏选选项且应显示
+    incorrect: isOptionIncorrect(value, q, questionId) && shouldShowOptionCorrectness(q), // 是否为错误选项且应显示
+    missed: isOptionMissed(value, q, questionId) && shouldShowOptionCorrectness(q), // 是否为漏选选项且应显示
   };
 };
 
@@ -334,9 +386,7 @@ const isOptionIncorrect = (value, q, questionId) => {
 // 判断选项是否被遗漏（正确但未选中，仅多选题）
 const isOptionMissed = (value, q, questionId) => {
   return (
-    !isSingleType(q) &&
-    !isOptionSelected(value, questionId) &&
-    isOptionCorrect(value, q)
+    !isSingleType(q) && !isOptionSelected(value, questionId) && isOptionCorrect(value, q)
   );
 };
 
@@ -390,8 +440,12 @@ const handleOptionSelection = (value, questionId = props.question?.id) => {
 
 // 统一的答案提交处理
 const handleAnswerSubmit = (questionId, answer) => {
-  const isEmpty = checkAnswerEmpty(answer, props.singleQuestionMode ? props.question :
-    props.sameTypeQuestions.find(q => q.id === questionId));
+  const isEmpty = checkAnswerEmpty(
+    answer,
+    props.singleQuestionMode
+      ? props.question
+      : props.sameTypeQuestions.find((q) => q.id === questionId)
+  );
 
   if (isEmpty) {
     // 答案为空时的处理

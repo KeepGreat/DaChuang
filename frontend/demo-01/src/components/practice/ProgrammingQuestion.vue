@@ -46,7 +46,7 @@
             <el-select
               v-model="selectedLanguage"
               placeholder="选择语言"
-              size="medium"
+              size="default"
               style="width: 100px"
             >
               <el-option label="Python" value="python"></el-option>
@@ -57,7 +57,7 @@
             <!-- 查看上一次评测按钮 -->
             <el-button
               v-if="hasPreviousEvaluation"
-              size="medium"
+              size="default"
               style="margin-left: 10px"
               @click="showPreviousEvaluation"
               >查看上一次评测</el-button
@@ -128,16 +128,18 @@
 
 <script setup>
 // 导入必要的库和组件
+import { getUserAnswers, getUserId, judgeCodeAnswer } from "@/api";
+import { useUserAnswerStore, useUserStore } from "@/store";
 import { ElMessage } from "element-plus";
 import { marked } from "marked";
-import { nextTick, onMounted, ref, watch } from "vue";
-import { useUserAnswerStore } from "@/store";
+import { onMounted, ref, watch } from "vue";
 import QuestionResources from "./QuestionResources.vue";
 
 // ==========================================================================
 // Store 初始化
 // ==========================================================================
 const userAnswerStore = useUserAnswerStore(); // 管理用户答案
+const userStore = useUserStore(); // 管理用户状态
 
 // ==========================================================================
 // Props 定义：父组件传递的数据
@@ -215,12 +217,13 @@ watch(
   (newQuestion) => {
     if (newQuestion) {
       // 初始化代码，从store中获取用户答案
-      const storedAnswer = userAnswerStore.getUserAnswerByQuestionId(newQuestion.id);
-      codeInput.value = storedAnswer || "";
+      const userAnswer = userAnswerStore.getUserAnswerByQuestionId(newQuestion.id);
+      // 确保 codeInput 始终是字符串类型
+      codeInput.value = typeof userAnswer === "string" ? userAnswer : "";
     }
     codeResult.value = ""; // 清空之前的运行结果
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 ); // immediate：立即执行，deep：深度监听
 
 // 监听代码变化，更新store中的用户答案
@@ -229,7 +232,7 @@ watch(
   (newCode) => {
     userAnswerStore.updateUserAnswerByQuestionId(props.question.id, newCode);
   },
-  { deep: true },
+  { deep: true }
 );
 
 // ==========================================================================
@@ -253,6 +256,22 @@ async function submitCode() {
     return;
   }
 
+  // 获取用户ID
+  let userId = null;
+  try {
+    if (!userStore.token) {
+      ElMessage.error("用户未登录，无法提交代码");
+      return;
+    }
+
+    const res = await getUserId({ token: userStore.token });
+    userId = res.data;
+  } catch (error) {
+    console.error("获取用户ID异常:", error);
+    ElMessage.error("获取用户信息失败，请重新登录");
+    return;
+  }
+
   // 向父组件发出答案提交事件
   emit("answer-submitted", {
     questionId: props.question.id,
@@ -260,13 +279,47 @@ async function submitCode() {
     isEmpty: false,
   });
 
-  // 准备提交给后端的代码评估数据
-  const submissionData = {
-    question: `${props.question.title}\n${props.question.content}`,
-    codeLanguage: selectedLanguage.value,
-    code: codeInput.value,
-    input: props.question.input || "",
-    output: props.question.output || "",
+  // 查询现有的用户答案记录，获取id
+  let existingAnswerId = null;
+  try {
+    const existingAnswers = await getUserAnswers({
+      questionId: props.question.id,
+      userId: userId,
+    });
+
+    if (existingAnswers?.data?.length > 0) {
+      const answers = existingAnswers.data;
+      if (answers.length === 1) {
+        // 只有一条记录，直接使用
+        existingAnswerId = answers[0].id;
+        console.log(`找到现有答案记录，id: ${existingAnswerId}`);
+      } else {
+        // 有多条记录，取最新的一条作为兜底处理
+        const sortedAnswers = answers.sort((a, b) => b.id - a.id);
+        existingAnswerId = sortedAnswers[0].id;
+        console.log(`找到多条现有答案记录，取最新的一条，id: ${existingAnswerId}`);
+      }
+    }
+  } catch (error) {
+    console.error("查询现有答案失败:", error);
+    // 查询失败不影响后续流程，继续执行
+  }
+
+  // 准备提交给后端的代码判题数据，按照JudgeCodeRequest结构
+  const judgeCodeRequest = {
+    codeSandboxInput: {
+      codeLanguage: selectedLanguage.value,
+      code: codeInput.value,
+      input: props.question.codeInput,
+    },
+    userAnswer: {
+      content: codeInput.value,
+      userId: userId,
+      questionId: props.question.id,
+      questionType: 3, // 3代表编程题
+      // 如果找到现有记录，传递id，否则不传id
+      ...(existingAnswerId && { id: existingAnswerId }),
+    },
   };
 
   // 重置评估相关状态并打开评估对话框
@@ -274,58 +327,21 @@ async function submitCode() {
   evaluationDialogVisible.value = true;
 
   try {
-    // 发送代码评估请求
-    const response = await fetch("http://localhost:80/api/analysis/evaluate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(submissionData),
-    });
+    // 调用代码判题API
+    const res = await judgeCodeAnswer(judgeCodeRequest);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    // 从响应中提取评估结果
+    evaluationContent.value = res.data.analysisOutput.analysis;
 
-    // 处理流式响应数据
-    await processFluxResponse(response);
+    // 保存完整结果到sessionStorage，以便用户查看历史记录
+    sessionStorage.setItem("previousEvaluation", res.data.analysisOutput.analysis);
+    hasPreviousEvaluation.value = true;
   } catch (error) {
     console.error("代码提交失败:", error);
     ElMessage.error("代码提交失败，请稍后重试");
   } finally {
     isEvaluationLoading.value = false;
   }
-}
-
-/**
- * 处理流式响应数据
- * @param {Response} response - 服务器返回的响应对象
- */
-async function processFluxResponse(response) {
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let accumulatedText = "";
-
-  // 读取流数据并实现流式展示
-  while (true) {
-    const { done, value } = await reader.read();
-
-    if (done) {
-      break;
-    }
-
-    // 解码接收到的数据块
-    const chunk = decoder.decode(value, { stream: true });
-    accumulatedText += chunk;
-
-    // 使用nextTick确保UI能够正确更新，实现流式显示效果
-    await nextTick();
-    evaluationContent.value = accumulatedText;
-  }
-
-  // 保存完整结果到sessionStorage，以便用户查看历史记录
-  sessionStorage.setItem("previousEvaluation", accumulatedText);
-  hasPreviousEvaluation.value = true;
 }
 
 /**

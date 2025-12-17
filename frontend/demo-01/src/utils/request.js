@@ -3,10 +3,12 @@ import axios from "axios";
 import { BusinessError } from "./error.js";
 
 const request = axios.create({
-  // 后端接口地址
+  // 本地后端接口地址
   // baseURL: "http://localhost:80",
   // Mock 接口地址
   baseURL: "http://localhost:5173",
+  // 后端接口地址
+  // baseURL: "http://192.168.42.88:80",
   timeout: 50000,
 });
 
