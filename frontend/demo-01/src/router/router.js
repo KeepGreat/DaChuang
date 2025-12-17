@@ -68,13 +68,13 @@ const router = createRouter({
               component: () => import("@/view/teaching/TaskDetail.vue"),
             },
             {
-              path: "assignment",
-              name: "AssignmentList",
-              component: () => import("@/view/teaching/AssignmentList.vue"),
+              path: "practice",
+              name: "PracticeList",
+              component: () => import("@/view/teaching/PracticeList.vue"),
             },
             {
-              path: "assignment/:assignmentId",
-              name: "AssignmentDetail",
+              path: "practice/:practiceId",
+              name: "PracticeDetail",
               component: () => import("@/view/practice/Practice.vue"),
             },
             {

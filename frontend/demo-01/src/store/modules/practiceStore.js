@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-export const useAssignmentStore = defineStore('assignment', () => {
+export const usePracticeStore = defineStore('practice', () => {
   // State
-  const assignments = ref([
-    // Python编程基础课程的作业
+  const practices = ref([
+    // Python编程基础课程的练习
     {
       id: '1',
       courseId: '1',
-      title: '作业1：Python基础语法',
+      title: '练习1：Python基础语法',
       description: '练习Python变量、数据类型和基本运算符',
       requirement: `<p>请完成以下任务：</p>
         <ul>
@@ -27,7 +27,7 @@ export const useAssignmentStore = defineStore('assignment', () => {
     {
       id: '2',
       courseId: '1',
-      title: '作业2：条件语句与循环',
+      title: '练习2：条件语句与循环',
       description: '使用if-else语句和循环结构解决实际问题',
       requirement: `<p>请完成以下任务：</p>
         <ul>
@@ -44,7 +44,7 @@ export const useAssignmentStore = defineStore('assignment', () => {
     {
       id: '3',
       courseId: '1',
-      title: '作业3：函数与模块',
+      title: '练习3：函数与模块',
       description: '学习函数的定义和调用，模块的使用',
       requirement: `<p>请完成以下任务：</p>
         <ul>
@@ -59,11 +59,11 @@ export const useAssignmentStore = defineStore('assignment', () => {
       difficulty: 2
     },
 
-    // 数据结构与算法课程的作业
+    // 数据结构与算法课程的练习
     {
       id: '4',
       courseId: '2',
-      title: '作业1：数组操作',
+      title: '练习1：数组操作',
       description: '实现数组的常用操作算法',
       requirement: `<p>请完成以下任务：</p>
         <ul>
@@ -80,7 +80,7 @@ export const useAssignmentStore = defineStore('assignment', () => {
     {
       id: '5',
       courseId: '2',
-      title: '作业2：链表实现',
+      title: '练习2：链表实现',
       description: '手动实现链表数据结构及相关操作',
       requirement: `<p>请完成以下任务：</p>
         <ul>
@@ -95,11 +95,11 @@ export const useAssignmentStore = defineStore('assignment', () => {
       difficulty: 4
     },
 
-    // Web前端开发课程的作业
+    // Web前端开发课程的练习
     {
       id: '6',
       courseId: '3',
-      title: '作业1：HTML页面构建',
+      title: '练习1：HTML页面构建',
       description: '使用HTML5语义化标签构建网页结构',
       requirement: `<p>请创建一个个人主页，包含以下元素：</p>
         <ul>
@@ -116,7 +116,7 @@ export const useAssignmentStore = defineStore('assignment', () => {
     {
       id: '7',
       courseId: '3',
-      title: '作业2：CSS样式设计',
+      title: '练习2：CSS样式设计',
       description: '使用CSS3美化网页，实现响应式设计',
       requirement: `<p>请完成以下样式任务：</p>
         <ul>
@@ -131,11 +131,11 @@ export const useAssignmentStore = defineStore('assignment', () => {
       difficulty: 2
     },
 
-    // Java企业级开发课程的作业
+    // Java企业级开发课程的练习
     {
       id: '8',
       courseId: '4',
-      title: '作业1：面向对象编程',
+      title: '练习1：面向对象编程',
       description: '使用Java实现面向对象编程的核心概念',
       requirement: `<p>请完成以下任务：</p>
         <ul>
@@ -152,7 +152,7 @@ export const useAssignmentStore = defineStore('assignment', () => {
     {
       id: '9',
       courseId: '4',
-      title: '作业2：Spring Boot入门',
+      title: '练习2：Spring Boot入门',
       description: '使用Spring Boot框架创建RESTful API',
       requirement: `<p>请完成以下任务：</p>
         <ul>
@@ -168,7 +168,7 @@ export const useAssignmentStore = defineStore('assignment', () => {
     }
   ])
 
-  const currentAssignment = ref(null)
+  const currentPractice = ref(null)
   const submissionHistory = ref({
     '2': [
       {
@@ -195,101 +195,99 @@ export const useAssignmentStore = defineStore('assignment', () => {
   const loading = ref(false)
 
   // Getters
-  const getAssignmentsByCourseId = computed(() => {
-    return (courseId) => assignments.value.filter(assignment => assignment.courseId === courseId)
+  const getPracticesByCourseId = computed(() => {
+    return (courseId) => practices.value.filter(practice => practice.courseId === courseId)
   })
 
-  const assignmentCount = computed(() => assignments.value.length)
+  const practiceCount = computed(() => practices.value.length)
 
-  const getAssignmentById = computed(() => {
-    return (assignmentId) => assignments.value.find(assignment => assignment.id === assignmentId)
+  const getPracticeById = computed(() => {
+    return (practiceId) => practices.value.find(practice => practice.id === practiceId)
   })
 
-  const getAssignmentStats = computed(() => {
+  const getPracticeStats = computed(() => {
     return (courseId) => {
-      const courseAssignments = assignments.value.filter(a => a.courseId === courseId)
-      const completed = courseAssignments.filter(a => a.status === '已提交' || a.status === '部分正确').length
+      const coursePractices = practices.value.filter(p => p.courseId === courseId)
+      const completed = coursePractices.filter(p => p.status === '已提交' || p.status === '部分正确').length
       return {
-        total: courseAssignments.length,
+        total: coursePractices.length,
         completed,
-        pending: courseAssignments.length - completed
+        pending: coursePractices.length - completed
       }
     }
   })
 
   // Actions
-  const setCurrentAssignment = (assignment) => {
-    currentAssignment.value = assignment
+  const setCurrentPractice = (practice) => {
+    currentPractice.value = practice
   }
 
-
-
-  const addAssignment = (assignment) => {
-    const newAssignment = {
-      ...assignment,
+  const addPractice = (practice) => {
+    const newPractice = {
+      ...practice,
       id: Date.now().toString(),
       status: '未开始',
       score: null,
       createTime: new Date().toISOString()
     }
-    assignments.value.unshift(newAssignment)
-    return newAssignment
+    practices.value.unshift(newPractice)
+    return newPractice
   }
 
-  const updateAssignment = (assignmentId, updates) => {
-    const index = assignments.value.findIndex(a => a.id === assignmentId)
+  const updatePractice = (practiceId, updates) => {
+    const index = practices.value.findIndex(p => p.id === practiceId)
     if (index !== -1) {
-      assignments.value[index] = { ...assignments.value[index], ...updates }
-      if (currentAssignment.value?.id === assignmentId) {
-        currentAssignment.value = assignments.value[index]
+      practices.value[index] = { ...practices.value[index], ...updates }
+      if (currentPractice.value?.id === practiceId) {
+        currentPractice.value = practices.value[index]
       }
-      return assignments.value[index]
+      return practices.value[index]
     }
     return null
   }
 
-  const updateAssignmentStatus = (assignmentId, status, score = null) => {
-    const assignment = assignments.value.find(a => a.id === assignmentId)
-    if (assignment) {
-      assignment.status = status
+  const updatePracticeStatus = (practiceId, status, score = null) => {
+    const practice = practices.value.find(p => p.id === practiceId)
+    if (practice) {
+      practice.status = status
       if (score !== null) {
-        assignment.score = score
+        practice.score = score
       }
-      assignment.updateTime = new Date().toISOString()
+      practice.updateTime = new Date().toISOString()
     }
   }
 
-  const deleteAssignment = (assignmentId) => {
-    const index = assignments.value.findIndex(a => a.id === assignmentId)
+  const deletePractice = (practiceId) => {
+    const index = practices.value.findIndex(p => p.id === practiceId)
     if (index !== -1) {
-      assignments.value.splice(index, 1)
-      if (currentAssignment.value?.id === assignmentId) {
-        currentAssignment.value = null
+      practices.value.splice(index, 1)
+      if (currentPractice.value?.id === practiceId) {
+        currentPractice.value = null
       }
       // 删除相关的提交历史
-      delete submissionHistory.value[assignmentId]
+      delete submissionHistory.value[practiceId]
       return true
     }
     return false
   }
 
-  const addSubmissionHistory = (assignmentId, submission) => {
-    if (!submissionHistory.value[assignmentId]) {
-      submissionHistory.value[assignmentId] = []
+  const addSubmissionHistory = (practiceId, submission) => {
+    if (!submissionHistory.value[practiceId]) {
+      submissionHistory.value[practiceId] = []
     }
-    submissionHistory.value[assignmentId].unshift(submission)
+    submissionHistory.value[practiceId].unshift(submission)
 
     // 限制历史记录数量，最多保留10条
-    if (submissionHistory.value[assignmentId].length > 10) {
-      submissionHistory.value[assignmentId] = submissionHistory.value[assignmentId].slice(0, 10)
+    if (submissionHistory.value[practiceId].length > 10) {
+      submissionHistory.value[practiceId] = submissionHistory.value[practiceId].slice(0, 10)
     }
   }
 
-  const getSubmissionHistoryById = (assignmentId) => {
-    return submissionHistory.value[assignmentId] || []
+  const getSubmissionHistoryById = (practiceId) => {
+    return submissionHistory.value[practiceId] || []
   }
 
-  const getCodeTemplate = (assignmentId, language) => {
+  const getCodeTemplate = (practiceId, language) => {
     const templates = {
       cpp: `#include <iostream>
 using namespace std;
@@ -317,7 +315,7 @@ public class Main {
     return templates[language] || templates.python
   }
 
-  const submitAssignment = async (assignmentId, code, language) => {
+  const submitPractice = async (practiceId, code, language) => {
     loading.value = true
     try {
       // 模拟提交过程
@@ -333,62 +331,67 @@ public class Main {
       }
 
       // 添加提交历史
-      addSubmissionHistory(assignmentId, submission)
+      addSubmissionHistory(practiceId, submission)
 
-      // 更新作业状态
-      updateAssignmentStatus(assignmentId, '已提交')
+      // 更新练习状态
+      updatePracticeStatus(practiceId, '已提交')
 
       return submission
     } catch (error) {
-      console.error('提交作业失败:', error)
+      console.error('提交练习失败:', error)
       throw error
     } finally {
       loading.value = false
     }
   }
 
-  const importAssignments = (assignmentsList) => {
-    assignmentsList.forEach(assignment => {
-      addAssignment(assignment)
+  const importPractices = (practicesList) => {
+    practicesList.forEach(practice => {
+      addPractice(practice)
     })
   }
 
   const clearAll = () => {
-    assignments.value = []
-    currentAssignment.value = null
+    practices.value = []
+    currentPractice.value = null
     submissionHistory.value = {}
+  }
+
+  const resetPractices = (newPractices) => {
+    practices.value = newPractices
   }
 
   return {
     // State
-    assignments,
-    currentAssignment,
+    practices,
+    currentPractice,
     submissionHistory,
     loading,
 
     // Getters
-    getAssignmentsByCourseId,
-    assignmentCount,
-    getAssignmentById,
-    getAssignmentStats,
+    getPracticesByCourseId,
+    practiceCount,
+    getPracticeById,
+    getPracticeStats,
 
     // Actions
-    setCurrentAssignment,
-    addAssignment,
-    updateAssignment,
-    updateAssignmentStatus,
-    deleteAssignment,
+    setCurrentPractice,
+    addPractice,
+    updatePractice,
+    updatePracticeStatus,
+    deletePractice,
     addSubmissionHistory,
     getSubmissionHistory: getSubmissionHistoryById,
     getCodeTemplate,
-    submitAssignment,
-    importAssignments,
-    clearAll
+    submitPractice,
+    importPractices,
+    clearAll,
+    resetPractices
   }
 }, {
   persist: {
-    key: 'assignment-store',
+    key: 'practice-store',
     storage: localStorage,
-    paths: ['assignments', 'submissionHistory']
+    paths: ['practices', 'submissionHistory']
   }
 })

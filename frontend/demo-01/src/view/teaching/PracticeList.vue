@@ -1,75 +1,76 @@
 <template>
-  <div class="assignment-list">
-    <!-- 中间作业列表 -->
-    <div class="assignment-panel">
+  <div class="practice-list">
+    <!-- 中间练习列表 -->
+    <div class="practice-panel">
       <div class="panel-header">
-        <h3>作业列表</h3>
+        <h3>练习列表</h3>
         <div class="stats">
           <span>已完成: {{ completedCount }}/{{ totalCount }}</span>
         </div>
       </div>
 
-      <div class="assignment-items" v-loading="componentLoading || assignmentStore.loading" element-loading-text="加载中...">
-          <div v-if="componentError || assignmentStore.error" class="error-message">
-            <el-icon><Warning /></el-icon>
-            加载失败，请稍后重试
-          </div>
-          <div v-else-if="assignments.length === 0" class="empty-message">
-            <el-icon><Edit /></el-icon>
-            暂无作业
-          </div>
-          <div v-else>
-            <div
-              v-for="(assignment, index) in assignments"
-              :key="index"
-              class="assignment-item"
-              :class="{
-                active: selectedAssignment === index,
-                completed: assignment.status === '已提交',
-                overdue: isOverdue(assignment.deadline)
-              }"
-              @click="selectAssignment(index)"
-            >
-              <div class="assignment-icon">
-                <el-icon v-if="assignment.status === '已提交'"><Check /></el-icon>
-                <el-icon v-else-if="isOverdue(assignment.deadline)"><Warning /></el-icon>
-                <el-icon v-else><Edit /></el-icon>
-              </div>
-              <div class="assignment-info">
-                <h4>{{ assignment.title }}</h4>
-                <p>{{ assignment.description }}</p>
-                <div class="assignment-meta">
-                  <span class="deadline">
-                    <el-icon><Clock /></el-icon>
-                    截止: {{ formatDeadline(assignment.deadline) }}
-                  </span>
-                  <el-tag
-                    :type="getStatusType(assignment.status)"
-                    size="small"
-                  >
-                    {{ assignment.status }}
-                  </el-tag>
-                </div>
-              </div>
-              <div class="assignment-score" v-if="assignment.score">
-                <span>{{ assignment.score }}/{{ assignment.totalScore }}</span>
+      <div class="practice-items" v-loading="componentLoading || practiceStore.loading"
+        element-loading-text="加载中...">
+        <div v-if="componentError || practiceStore.error" class="error-message">
+          <el-icon>
+            <Warning />
+          </el-icon>
+          加载失败，请稍后重试
+        </div>
+        <div v-else-if="practices.length === 0" class="empty-message">
+          <el-icon>
+            <Edit />
+          </el-icon>
+          暂无练习
+        </div>
+        <div v-else>
+          <div v-for="(practice, index) in practices" :key="index" class="practice-item" :class="{
+            active: selectedPractice === index,
+            completed: practice.status === '已提交',
+            overdue: isOverdue(practice.deadline)
+          }" @click="selectPractice(index)">
+            <div class="practice-icon">
+              <el-icon v-if="practice.status === '已提交'">
+                <Check />
+              </el-icon>
+              <el-icon v-else-if="isOverdue(practice.deadline)">
+                <Warning />
+              </el-icon>
+              <el-icon v-else>
+                <Edit />
+              </el-icon>
+            </div>
+            <div class="practice-info">
+              <h4>{{ practice.title }}</h4>
+              <p>{{ practice.description }}</p>
+              <div class="practice-meta">
+                <span class="deadline">
+                  <el-icon>
+                    <Clock />
+                  </el-icon>
+                  截止: {{ formatDeadline(practice.deadline) }}
+                </span>
+                <el-tag :type="getStatusType(practice.status)" size="small">
+                  {{ practice.status }}
+                </el-tag>
               </div>
             </div>
+            <div class="practice-score" v-if="practice.score">
+              <span>{{ practice.score }}/{{ practice.totalScore }}</span>
+            </div>
           </div>
+        </div>
       </div>
     </div>
 
-    <!-- 右侧作业详情预览 -->
+    <!-- 右侧练习详情预览 -->
     <div class="preview-panel">
-      <div v-if="selectedAssignment !== null" class="assignment-preview">
+      <div v-if="selectedPractice !== null" class="practice-preview">
         <el-card class="preview-card">
           <template #header>
             <div class="preview-header">
-              <h4>{{ assignments[selectedAssignment].title }}</h4>
-              <el-button
-                type="primary"
-                @click="openAssignmentDetail"
-              >
+              <h4>{{ practices[selectedPractice].title }}</h4>
+              <el-button type="primary" @click="openPracticeDetail">
                 开始做题
               </el-button>
             </div>
@@ -77,13 +78,13 @@
 
           <div class="preview-content">
             <div class="preview-section">
-              <h5>作业说明</h5>
-              <p>{{ assignments[selectedAssignment].description }}</p>
+              <h5>练习说明</h5>
+              <p>{{ practices[selectedPractice].description }}</p>
             </div>
 
             <div class="preview-section">
-              <h5>作业要求</h5>
-              <div v-html="assignments[selectedAssignment].requirement"></div>
+              <h5>练习要求</h5>
+              <div v-html="practices[selectedPractice].requirement"></div>
             </div>
 
             <div class="preview-section">
@@ -98,7 +99,7 @@
 
             <div class="preview-section">
               <h5>测试用例概览</h5>
-              <p>共 {{ assignments[selectedAssignment].testCases?.length || 0 }} 个测试用例</p>
+              <p>共 {{ practices[selectedPractice].testCases?.length || 0 }} 个测试用例</p>
             </div>
           </div>
         </el-card>
@@ -108,11 +109,7 @@
           <template #header>
             <h5>最近提交</h5>
           </template>
-          <div
-            v-for="(record, index) in submissionHistory.slice(0, 3)"
-            :key="index"
-            class="history-item"
-          >
+          <div v-for="(record, index) in submissionHistory.slice(0, 3)" :key="index" class="history-item">
             <div class="history-time">{{ record.submitTime }}</div>
             <el-tag :type="getSubmissionType(record.status)" size="small">
               {{ record.status }}
@@ -126,8 +123,10 @@
 
       <!-- 空状态 -->
       <div v-else class="empty-preview">
-        <el-icon size="60"><Edit /></el-icon>
-        <p>请选择作业查看详情</p>
+        <el-icon size="60">
+          <Edit />
+        </el-icon>
+        <p>请选择练习查看详情</p>
       </div>
     </div>
   </div>
@@ -140,46 +139,42 @@ import {
   Edit, Check, Warning, Clock
 } from '@element-plus/icons-vue';
 import { ElCard, ElButton, ElTag, ElMessage } from 'element-plus';
-import { useAssignmentStore } from '@/store';
-import { useQuestionsStore } from '@/store/modules/questionsStore';
-import { getQuestionByIndex } from '@/api/modules/practice/question';
-import { getPracticesByIndex } from '@/api/modules/practice/practice';
+import { usePracticeStore, useQuestionsStore } from '@/store';
+import { getQuestionByIndex, getPracticesByIndex } from '@/api';
 
 const router = useRouter();
 const route = useRoute();
 
 // 使用Pinia store
-const assignmentStore = useAssignmentStore();
+const practiceStore = usePracticeStore();
 const questionsStore = useQuestionsStore();
 
-const selectedAssignment = ref(null);
+const selectedPractice = ref(null);
 const submissionHistory = ref([]);
 const componentLoading = ref(false);
 const componentError = ref(null);
 
-// 计算当前课程的作业列表
-const assignments = computed(() => {
-  return assignmentStore.getAssignmentsByCourseId(route.params.id);
+// 计算当前课程的练习列表
+const practices = computed(() => {
+  return practiceStore.getPracticesByCourseId(route.params.id);
 });
 
-// 加载作业数据
+// 加载练习数据
 onMounted(async () => {
   componentLoading.value = true;
   componentError.value = null;
-  
+
   try {
-    // 注意：这里需要根据实际情况获取courseSectionId
-    // 目前暂时使用1作为默认值，后续需要根据实际路由或参数获取
-    const courseSectionId = 1;
-    
-    // 直接调用接口获取作业列表
+    // 从路由参数中获取课程章节ID，如果没有则使用默认值1
+    const courseSectionId = parseInt(route.params.id || 1);
+
+    // 直接调用接口获取练习列表
     const response = await getPracticesByIndex({
-      courseId: parseInt(route.params.id),
       courseSectionId: parseInt(courseSectionId)
     });
-    
-    // 转换API返回的Practice数据为Assignment格式
-    const fetchedAssignments = response.data.map(practice => ({
+
+    // 转换API返回的Practice数据为Practice格式
+    const fetchedPractices = response.data.map(practice => ({
       id: practice.id.toString(),
       courseId: route.params.id,
       title: practice.name,
@@ -192,45 +187,43 @@ onMounted(async () => {
       difficulty: 1,
       questionNum: practice.questionNum
     }));
-    
-    // 更新assignmentStore中的作业列表
-    // 只保留当前课程的作业
-    const otherAssignments = assignmentStore.assignments.filter(a => a.courseId !== route.params.id);
-    assignmentStore.assignments = [...otherAssignments, ...fetchedAssignments];
-    
-    // 如果获取到了作业，默认选择第一个
-    if (assignments.value.length > 0) {
-      selectAssignment(0);
+
+    // 更新practiceStore中的练习列表
+    // 直接重置整个练习列表，而不是合并
+    practiceStore.resetPractices(fetchedPractices);
+
+    // 如果获取到了练习，默认选择第一个
+    if (practices.value.length > 0) {
+      selectPractice(0);
     }
   } catch (err) {
     componentError.value = err;
-    ElMessage.error('加载作业列表失败');
-    console.error('获取作业列表失败:', err);
+    ElMessage.error('加载练习列表失败');
+    console.error('获取练习列表失败:', err);
   } finally {
     componentLoading.value = false;
   }
 });
 
 // 计算统计
-const totalCount = computed(() => assignments.value.length);
+const totalCount = computed(() => practices.value.length);
 const completedCount = computed(() =>
-  assignments.value.filter(a => a.status === '已提交' || a.status === '部分正确').length
+  practices.value.filter(p => p.status === '已提交' || p.status === '部分正确').length
 );
 
-// 选择作业
-const selectAssignment = async (index) => {
-  selectedAssignment.value = index;
-  const assignment = assignments.value[index];
-  const assignmentId = assignment.id;
-  submissionHistory.value = assignmentStore.getSubmissionHistory(assignmentId);
-  
+// 选择练习
+const selectPractice = async (index) => {
+  selectedPractice.value = index;
+  const practice = practices.value[index];
+  const practiceId = practice.id;
+  submissionHistory.value = practiceStore.getSubmissionHistory(practiceId);
+
   try {
-    // 使用作业ID作为练习ID获取问题
-    const response = await getQuestionByIndex(assignmentId);
+    // 使用练习ID获取问题
+    const response = await getQuestionByIndex(practiceId);
     if (response.code === 200 && response.data) {
       // 将获取到的问题存入questionStore，store会自动处理结构转换
       questionsStore.setQuestions(response.data);
-      ElMessage.success('已加载作业题目');
     } else {
       ElMessage.warning('获取题目失败: ' + response.message);
     }
@@ -240,11 +233,11 @@ const selectAssignment = async (index) => {
   }
 };
 
-// 打开作业详情
-const openAssignmentDetail = () => {
-  const assignmentId = assignments.value[selectedAssignment.value].id;
+// 打开练习详情
+const openPracticeDetail = () => {
+  const practiceId = practices.value[selectedPractice.value].id;
   const courseId = route.params.id;
-  router.push(`/teaching/course/${courseId}/assignment/${assignmentId}`);
+  router.push(`/teaching/course/${courseId}/practice/${practiceId}`);
 };
 
 // 判断是否过期
@@ -293,7 +286,8 @@ const getSubmissionType = (status) => {
 
 <style scoped>
 /* 加载和错误状态样式 */
-.error-message, .empty-message {
+.error-message,
+.empty-message {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -307,25 +301,28 @@ const getSubmissionType = (status) => {
   color: #f56c6c;
 }
 
-.error-message .el-icon, .empty-message .el-icon {
+.error-message .el-icon,
+.empty-message .el-icon {
   font-size: 32px;
   margin-bottom: 12px;
 }
 
-.error-message span, .empty-message span {
+.error-message span,
+.empty-message span {
   font-size: 14px;
 }
-.assignment-list {
+
+.practice-list {
   display: flex;
   gap: 20px;
   height: 100%;
   padding: 20px;
 }
 
-/* 左侧作业列表面板 */
-.assignment-panel {
+/* 左侧练习列表面板 */
+.practice-panel {
   flex: 0 0 350px;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   padding: 20px;
   overflow-y: auto;
@@ -352,13 +349,13 @@ const getSubmissionType = (status) => {
   font-size: 13px;
 }
 
-.assignment-items {
+.practice-items {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.assignment-item {
+.practice-item {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -371,26 +368,26 @@ const getSubmissionType = (status) => {
   position: relative;
 }
 
-.assignment-item:hover {
+.practice-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(214, 51, 132, 0.1);
 }
 
-.assignment-item.active {
+.practice-item.active {
   background: linear-gradient(135deg, #ffd6e8 0%, #fff0f4 100%);
   border-color: #d63384;
 }
 
-.assignment-item.completed {
+.practice-item.completed {
   border-color: #67c23a;
 }
 
-.assignment-item.overdue {
+.practice-item.overdue {
   background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
   border-color: #f56c6c;
 }
 
-.assignment-icon {
+.practice-icon {
   width: 40px;
   height: 40px;
   display: flex;
@@ -403,35 +400,35 @@ const getSubmissionType = (status) => {
   flex-shrink: 0;
 }
 
-.assignment-item.completed .assignment-icon {
+.practice-item.completed .practice-icon {
   background: linear-gradient(135deg, #f0f9ff, #e0f7fa);
   color: #67c23a;
 }
 
-.assignment-item.overdue .assignment-icon {
+.practice-item.overdue .practice-icon {
   background: linear-gradient(135deg, #fef0f0, #fde2e2);
   color: #f56c6c;
 }
 
-.assignment-info {
+.practice-info {
   flex: 1;
 }
 
-.assignment-info h4 {
+.practice-info h4 {
   margin: 0 0 8px 0;
   color: #7b2a53;
   font-size: 15px;
   font-weight: 600;
 }
 
-.assignment-info p {
+.practice-info p {
   margin: 0 0 10px 0;
   color: #9b7a88;
   font-size: 13px;
   line-height: 1.4;
 }
 
-.assignment-meta {
+.practice-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -445,7 +442,7 @@ const getSubmissionType = (status) => {
   color: #9b7a88;
 }
 
-.assignment-score {
+.practice-score {
   padding: 4px 8px;
   background: linear-gradient(135deg, #ffd6e8, #fff0f4);
   color: #d63384;
@@ -457,13 +454,13 @@ const getSubmissionType = (status) => {
 /* 右侧预览面板 */
 .preview-panel {
   flex: 1;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   padding: 20px;
   overflow-y: auto;
 }
 
-.assignment-preview {
+.practice-preview {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -472,7 +469,7 @@ const getSubmissionType = (status) => {
 .preview-card,
 .history-card {
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .preview-header {
@@ -564,17 +561,17 @@ const getSubmissionType = (status) => {
 
 /* 响应式设计 */
 @media (max-width: 1200px) {
-  .assignment-panel {
+  .practice-panel {
     flex: 0 0 300px;
   }
 }
 
 @media (max-width: 768px) {
-  .assignment-list {
+  .practice-list {
     flex-direction: column;
   }
 
-  .assignment-panel {
+  .practice-panel {
     flex: none;
     width: 100%;
   }

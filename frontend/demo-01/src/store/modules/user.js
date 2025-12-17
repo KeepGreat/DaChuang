@@ -4,25 +4,63 @@ import { computed, ref } from "vue";
 export const useUserStore = defineStore(
   "user",
   () => {
-    // 登录状态
+    /**
+     * 登录状态
+     */
     const isLoggedIn = ref(false);
 
-    // 登录令牌
+    /**
+     * 登录令牌
+     */
     const token = ref("");
 
-    // 用户信息
+    /**
+     * 用户角色信息
+     */
     const role = ref("");
 
-    // 认证头信息
+    /**
+     * 认证头信息
+     */
     const authHeader = computed(() => token.value || "");
 
-    // 设置令牌
+    /**
+     * 设置token
+     */
     const setToken = (newToken) => {
       token.value = newToken;
       isLoggedIn.value = newToken ? true : false;
     };
 
-    // 登出，清空用户信息
+    /**
+     * 设置用户角色
+     */
+    const setUserRole = (userRole) => {
+      role.value = userRole;
+    };
+
+    /**
+     * 根据role获取默认路由
+     */
+    const getDefaultRoute = () => {
+      const routeMap = {
+        student: "/",
+        teacher: "/teach",
+        admin: "/admin",
+      };
+      return routeMap[role.value] || "/";
+    };
+
+    /**
+     * 检查角色权限
+     */
+    const hasPermission = (requiredRole) => {
+      return role.value === requiredRole;
+    };
+
+    /**
+     * 登出，清空用户信息
+     */
     const logout = () => {
       role.value = "";
       isLoggedIn.value = false;
@@ -35,15 +73,16 @@ export const useUserStore = defineStore(
       token,
       authHeader,
       setToken,
+      setUserRole,
+      getDefaultRoute,
+      hasPermission,
       logout,
     };
   },
   {
     // 配置持久化
     persist: {
-      // 持久化的键名，默认为store的id
       key: "user-store",
-      // 持久化存储方式，可选：localStorage、sessionStorage、cookie
       storage: localStorage,
       // 需要持久化的状态字段
       pick: ["role", "isLoggedIn", "token"],
