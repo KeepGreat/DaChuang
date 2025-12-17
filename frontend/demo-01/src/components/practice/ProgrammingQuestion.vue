@@ -46,7 +46,7 @@
             <el-select
               v-model="selectedLanguage"
               placeholder="选择语言"
-              size="medium"
+              size="default"
               style="width: 100px"
             >
               <el-option label="Python" value="python"></el-option>
@@ -57,7 +57,7 @@
             <!-- 查看上一次评测按钮 -->
             <el-button
               v-if="hasPreviousEvaluation"
-              size="medium"
+              size="default"
               style="margin-left: 10px"
               @click="showPreviousEvaluation"
               >查看上一次评测</el-button
@@ -128,10 +128,10 @@
 
 <script setup>
 // 导入必要的库和组件
+import { useUserAnswerStore } from "@/store";
 import { ElMessage } from "element-plus";
 import { marked } from "marked";
 import { nextTick, onMounted, ref, watch } from "vue";
-import { useUserAnswerStore } from "@/store";
 import QuestionResources from "./QuestionResources.vue";
 
 // ==========================================================================
@@ -220,7 +220,7 @@ watch(
     }
     codeResult.value = ""; // 清空之前的运行结果
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 ); // immediate：立即执行，deep：深度监听
 
 // 监听代码变化，更新store中的用户答案
@@ -229,7 +229,7 @@ watch(
   (newCode) => {
     userAnswerStore.updateUserAnswerByQuestionId(props.question.id, newCode);
   },
-  { deep: true },
+  { deep: true }
 );
 
 // ==========================================================================
