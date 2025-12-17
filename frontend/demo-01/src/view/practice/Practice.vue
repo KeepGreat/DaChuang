@@ -253,12 +253,24 @@ const fetchUserAnswersFromApi = async () => {
       // 转换API数据格式为store所需格式
       const userAnswerMap = {};
       apiUserAnswers.forEach((answer) => {
-        // 将content字符串转换为数组（如果是选择题或判断题）
-        let parsedAnswer = [];
+        let parsedAnswer;
         try {
-          // 如果content是逗号分隔的字符串，转换为数组
           if (answer.content && typeof answer.content === "string") {
-            parsedAnswer = answer.content.split(",").filter((item) => item.trim());
+            // 根据题目类型决定答案格式
+            // questionType: 0-判断题, 1-选择题, 2-简答题, 3-编程题
+            if (answer.questionType === 0 || answer.questionType === 1) {
+              // 判断题和选择题：转换为数组
+              parsedAnswer = answer.content.split(",").filter((item) => item.trim());
+            } else if (answer.questionType === 2 || answer.questionType === 3) {
+              // 简答题和编程题：保持字符串格式
+              parsedAnswer = answer.content;
+            } else {
+              console.error("未知类型", answer.questionType);
+              // 未知类型，默认为空数组
+              parsedAnswer = [];
+            }
+          } else {
+            parsedAnswer = [];
           }
         } catch (e) {
           console.error(`解析问题 ${answer.questionId} 的答案失败:`, e);

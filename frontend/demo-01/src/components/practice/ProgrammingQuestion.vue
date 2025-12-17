@@ -128,7 +128,7 @@
 
 <script setup>
 // 导入必要的库和组件
-import { getUserId, judgeCodeAnswer } from "@/api";
+import { getUserAnswers, getUserId, judgeCodeAnswer } from "@/api";
 import { useUserAnswerStore, useUserStore } from "@/store";
 import { ElMessage } from "element-plus";
 import { marked } from "marked";
@@ -279,6 +279,32 @@ async function submitCode() {
     isEmpty: false,
   });
 
+  // 查询现有的用户答案记录，获取id
+  let existingAnswerId = null;
+  try {
+    const existingAnswers = await getUserAnswers({
+      questionId: props.question.id,
+      userId: userId,
+    });
+
+    if (existingAnswers?.data?.length > 0) {
+      const answers = existingAnswers.data;
+      if (answers.length === 1) {
+        // 只有一条记录，直接使用
+        existingAnswerId = answers[0].id;
+        console.log(`找到现有答案记录，id: ${existingAnswerId}`);
+      } else {
+        // 有多条记录，取最新的一条作为兜底处理
+        const sortedAnswers = answers.sort((a, b) => b.id - a.id);
+        existingAnswerId = sortedAnswers[0].id;
+        console.log(`找到多条现有答案记录，取最新的一条，id: ${existingAnswerId}`);
+      }
+    }
+  } catch (error) {
+    console.error("查询现有答案失败:", error);
+    // 查询失败不影响后续流程，继续执行
+  }
+
   // 准备提交给后端的代码判题数据，按照JudgeCodeRequest结构
   const judgeCodeRequest = {
     codeSandboxInput: {
@@ -291,6 +317,8 @@ async function submitCode() {
       userId: userId,
       questionId: props.question.id,
       questionType: 3, // 3代表编程题
+      // 如果找到现有记录，传递id，否则不传id
+      ...(existingAnswerId && { id: existingAnswerId }),
     },
   };
 
