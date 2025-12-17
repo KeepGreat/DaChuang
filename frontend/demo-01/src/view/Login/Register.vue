@@ -200,12 +200,15 @@ const goLogin = () => {
 </script>
 
 <style scoped>
+/* 导入新的样式系统 */
+@import '@/styles/main.css';
+
 .register-page {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-gradient-primary);
   font-family: "Segoe UI", Helvetica, Arial;
   padding: 20px;
   position: relative;
@@ -259,7 +262,7 @@ const goLogin = () => {
   color: #2563eb;
   margin-bottom: 16px;
   letter-spacing: 0.5px;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

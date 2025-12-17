@@ -37,12 +37,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button
-            type="primary"
-            class="login-btn"
-            native-type="submit"
-            :loading="loading"
-          >
+          <el-button class="login-btn" native-type="submit" :loading="loading">
             登录
           </el-button>
         </el-form-item>
@@ -143,12 +138,14 @@ function goRegister() {
 </script>
 
 <style scoped>
+@import "@/styles/main.css";
+
 .login-page {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-gradient-primary);
   font-family: "Segoe UI", Helvetica, Arial;
   padding: 20px;
   position: relative;
@@ -202,7 +199,7 @@ function goRegister() {
   color: #2563eb;
   margin-bottom: 16px;
   letter-spacing: 0.5px;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -234,7 +231,7 @@ function goRegister() {
 
 .login-btn {
   width: 100%;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: var(--brand-gradient);
   border: none;
   border-radius: 12px;
   padding: 14px 0;

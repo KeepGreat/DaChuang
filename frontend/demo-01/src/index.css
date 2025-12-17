@@ -1,8 +1,2 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* 你也可以在这里自定义全局样式 */
-body {
-    @apply bg-gray-50 text-gray-800;
-}
+/* 全局样式导入 - 统一颜色管理 */
+@import './styles/main.css';
