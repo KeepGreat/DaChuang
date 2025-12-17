@@ -359,9 +359,7 @@ public class Main {
       addPractice(practice)
     })
   }
-// 更新practiceStore中的练习列表
-// 直接重置整个练习列表，而不是合并
-practiceStore.resetPractices(fetchedPractices);
+
   const clearAll = () => {
     practices.value = []
     currentPractice.value = null

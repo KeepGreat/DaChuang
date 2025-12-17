@@ -138,7 +138,7 @@ const componentLoading = ref(false);
 const componentError = ref(null);
 
 // 计算当前课程的练习列表
-const practices = practiceStore.getPracticesByCourseId(route.params.id);
+const practices = computed(() => practiceStore.getPracticesByCourseId(route.params.id));
 
 // 加载练习数据
 onMounted(async () => {
