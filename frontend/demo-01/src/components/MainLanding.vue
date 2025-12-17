@@ -1,6 +1,6 @@
 <template>
   <div class="landing-page">
-    
+    <TopNav />
     <HeroSection />
     <HotCoursesSection :course-images="courseImages" />
     <CourseSection :course-images="courseImages" />
@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import TopNav from './TopNav.vue'; 
+import TopNav from './TopNav.vue';
 import HeroSection from './HeroSection.vue';
 import HotCoursesSection from './HotCoursesSection.vue';
 import CourseSection from './CourseSection.vue';

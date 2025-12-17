@@ -10,77 +10,69 @@ import { ref, onMounted } from "vue";
 
 const chartRef = ref(null);
 
+const props = defineProps({
+  days: {
+    type: Array,
+    default: () => ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+  },
+  timePerTask: {
+    type: Array,
+    default: () => [16, 14, 18, 12, 10, 11, 15],
+  },
+});
+
 onMounted(() => {
   const chart = echarts.init(chartRef.value);
-
-  const colors = ["#5470C6"];
 
   chart.setOption({
     backgroundColor: "transparent",
 
     title: {
-      text: "学习活跃度趋势（单位：小时）",
+      text: "学习效率趋势（单位成果所需时间）",
       left: "center",
       top: 10,
-      textStyle: {
-        fontSize: 18,
-        fontWeight: "600",
-      },
+      textStyle: { fontSize: 18, fontWeight: 600 },
     },
 
     tooltip: {
       trigger: "axis",
-       formatter: "{b}：{c} 小时",
       backgroundColor: "rgba(50,50,50,0.8)",
-      borderWidth: 0,
       textStyle: { color: "#fff" },
-      padding: 10,
-      axisPointer: {
-        type: "line",
-        lineStyle: {
-          color: "#5470C6",
-          width: 2,
-          type: "dashed",
-        },
-      },
+      borderWidth: 0,
     },
 
     xAxis: {
       type: "category",
-      data: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+      data: props.days,
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { color: "#666", fontSize: 14 },
-      name: "星期",
-      nameLocation: "middle",
-      nameGap: 30,
+      axisLabel: { color: "#666" },
     },
 
     yAxis: {
       type: "value",
-      name: "学习时长 (h)",
+      name: "分钟/题",
       axisLine: { show: false },
-      axisTick: { show: false },
+      axisLabel: { color: "#666" },
       splitLine: {
         lineStyle: { color: "rgba(0,0,0,0.1)" },
       },
-      axisLabel: { color: "#666" },
     },
 
     series: [
       {
-        data: [2, 3.5, 4, 3, 5.2, 6, 2.8],
         type: "line",
         smooth: true,
-        symbolSize: 10,
+        data: props.timePerTask,
+        symbolSize: 8,
         itemStyle: {
-          color: colors[0],
-          borderColor: "#fff",
+          color: "#5470C6",
           borderWidth: 2,
+          borderColor: "#fff",
         },
         lineStyle: {
           width: 4,
-          color: colors[0],
+          color: "#5470C6",
         },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -88,44 +80,25 @@ onMounted(() => {
             { offset: 1, color: "rgba(84,112,198,0.05)" },
           ]),
         },
-
-        emphasis: {
-          focus: "series",
-          itemStyle: {
-            color: "#ff7f50",
-            borderColor: "#fff",
-            borderWidth: 3,
-          },
-          lineStyle: {
-            width: 5,
-          },
-        },
-
-        animationDuration: 1800,
-        animationEasing: "cubicOut",
       },
     ],
+
+    animationDuration: 1600,
   });
 
-  // 解决窗口缩放导致图表变形
   window.addEventListener("resize", () => chart.resize());
 });
 </script>
 
 <style scoped>
-/* 外层保证居中 */
 .chart-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
 }
-
-/* 图表本体区域 */
 .chart-card {
   width: 100%;
   max-width: 900px;
-  height: 420px;
-  margin: 0 auto;
+  height: 400px;
 }
-
 </style>

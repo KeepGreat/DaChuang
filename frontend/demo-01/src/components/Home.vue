@@ -25,7 +25,7 @@
       </div>
     </header>
 
-    <!-- 主体 -->
+    <!-- 主体（侧栏已移除） -->
     <div class="main-content">
       <div class="content full">
         <router-view></router-view>
@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-// sidebar removed; content occupies full width
+// sidebar removed; keep layout simple
 </script>
 
 <style scoped>

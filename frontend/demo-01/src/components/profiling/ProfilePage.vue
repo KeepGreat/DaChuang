@@ -1,37 +1,41 @@
 <template>
-  <div class="profile-page">
-    
-    <!-- 顶部个人信息 -->
-    <UserHeader
-      :username="user.name"
-      :certificateCount="user.certs"
-      :avatarUrl="user.avatar"
-      @edit="openEdit"
-    />
+  <!-- 外层 wrapper 用于背景色和填充 -->
+  <div class="page-wrapper">
+    <div class="profile-page">
+      
+      <!-- 顶部个人信息 -->
+      <UserHeader
+        :username="user.name"
+        :certificateCount="user.certs"
+        :avatarUrl="user.avatar"
+        @edit="openEdit"
+      />
 
-    <div class="section-title">Snapshot</div>
-    <!-- 快照状态 -->
-    <QuickStatus
-      :progress="user.progress"
-      :finished="user.finished"
-      :hours="user.hours"
-    />
+      <div class="section-title">Snapshot</div>
+      <!-- 快照状态 -->
+      <QuickStatus
+        :progress="user.progress"
+        :finished="user.finished"
+        :hours="user.hours"
+      />
 
-    <!-- 进行中课程 -->
-    <div class="section-title">进行中</div>
-    <CourseInProgress :courses="inProgress" />
+      <!-- 进行中课程 -->
+      <div class="section-title">进行中</div>
+      <CourseInProgress :courses="inProgress" />
 
-    <!-- 短课程 -->
-    <div class="section-title">短期课程</div>
-    <CourseShort :shortCourses="shortCourses" />
+      <!-- 短课程 -->
+      <div class="section-title">短期课程</div>
+      <CourseShort :shortCourses="shortCourses" />
 
-    <!-- 消息 -->
-    <div class="section-title">消息与提醒</div>
-    <NotificationCenter :shortCourses="shortCourses" />
+      <!-- 消息 -->
+      <div class="section-title">消息与提醒</div>
+      <NotificationCenter :shortCourses="shortCourses" />
 
-    <div class="section-title">证书与成就</div>
-    <!-- 成就 -->
-    <Achievements :items="achievements" />
+      <div class="section-title">证书与成就</div>
+      <!-- 成就 -->
+      <Achievements :items="achievements" />
+
+    </div>
   </div>
 </template>
 
@@ -76,18 +80,30 @@ const openEdit = () => console.log("打开编辑弹窗");
 </script>
 
 <style scoped>
-.profile-page {
-  max-width: 1200px;
-  margin: auto;
-  padding: 40px 20px;
-   margin-top: 20px;
+/* 页面整体背景 */
+.page-wrapper {
+  background-color: #fff6fb;
+  min-height: 100vh; /* 高度撑满视口 */
+  padding: 40px 0;
+  display: flex;
+  justify-content: center; /* 水平居中 profile-page */
 }
 
+/* 内容区域 */
+.profile-page {
+  max-width: 1200px;
+  width: 100%;
+  background-color: #fffefe85; /* 内容区白色 */
+  border-radius: 16px;
+  padding: 40px 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+/* 标题间距 */
 .section-title {
-  margin-top: 32px;      /* 顶部间距保持不变 */
-  margin-bottom: -16px;   /* 改小底部间距，让它离下面内容更近 */
+  margin-top: 32px;
+  margin-bottom: 16px; /* 上下间距更自然 */
   font-size: 20px;
   font-weight: bold;
 }
-
 </style>
