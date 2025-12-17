@@ -3,35 +3,28 @@
     <!-- 左侧导航栏 -->
     <div class="nav-sidebar">
       <!-- 返回按钮 -->
-      <div
-        class="nav-item back-item"
-        @click="handleBack"
-        :title="'返回课程列表'"
-      >
-        <el-icon><ArrowLeft /></el-icon>
+      <div class="nav-item back-item" @click="handleBack" :title="'返回课程列表'">
+        <el-icon>
+          <ArrowLeft />
+        </el-icon>
         <span class="nav-tooltip">返回课程列表</span>
       </div>
 
       <div class="nav-menu">
-        <div
-          class="nav-item"
-          :class="{ active: activeModule === 'course' }"
-          @click="switchModule('course')"
-          :title="'课程学习'"
-        >
-          <el-icon><VideoPlay /></el-icon>
+        <div class="nav-item" :class="{ active: activeModule === 'course' }" @click="switchModule('course')"
+          :title="'课程学习'">
+          <el-icon>
+            <VideoPlay />
+          </el-icon>
           <span class="nav-tooltip">课程学习</span>
         </div>
-        <div
-          class="nav-item"
-          :class="{ active: activeModule === 'task' }"
-          @click="switchModule('task')"
-          :title="'任务'"
-        >
-          <el-icon><Bell /></el-icon>
+        <div class="nav-item" :class="{ active: activeModule === 'task' }" @click="switchModule('task')" :title="'任务'">
+          <el-icon>
+            <Bell />
+          </el-icon>
           <span class="nav-tooltip">任务</span>
         </div>
-        <div
+        <!-- <div
           class="nav-item"
           :class="{ active: activeModule === 'assignment' }"
           @click="switchModule('assignment')"
@@ -39,8 +32,8 @@
         >
           <el-icon><Edit /></el-icon>
           <span class="nav-tooltip">作业</span>
-        </div>
-        <div
+        </div> -->
+        <!-- <div
           class="nav-item"
           :class="{ active: activeModule === 'exam' }"
           @click="switchModule('exam')"
@@ -48,32 +41,26 @@
         >
           <el-icon><Document /></el-icon>
           <span class="nav-tooltip">考试</span>
-        </div>
-        <div
-          class="nav-item"
-          :class="{ active: activeModule === 'resource' }"
-          @click="switchModule('resource')"
-          :title="'资料'"
-        >
-          <el-icon><FolderOpened /></el-icon>
+        </div> -->
+        <div class="nav-item" :class="{ active: activeModule === 'resource' }" @click="switchModule('resource')"
+          :title="'资料'">
+          <el-icon>
+            <FolderOpened />
+          </el-icon>
           <span class="nav-tooltip">资料</span>
         </div>
-        <div
-          class="nav-item"
-          :class="{ active: activeModule === 'discussion' }"
-          @click="switchModule('discussion')"
-          :title="'讨论'"
-        >
-          <el-icon><ChatDotRound /></el-icon>
+        <div class="nav-item" :class="{ active: activeModule === 'discussion' }" @click="switchModule('discussion')"
+          :title="'讨论'">
+          <el-icon>
+            <ChatDotRound />
+          </el-icon>
           <span class="nav-tooltip">讨论</span>
         </div>
-        <div
-          class="nav-item"
-          :class="{ active: activeModule === 'knowledge' }"
-          @click="switchModule('knowledge')"
-          :title="'知识图谱'"
-        >
-          <el-icon><Share /></el-icon>
+        <div class="nav-item" :class="{ active: activeModule === 'knowledge' }" @click="switchModule('knowledge')"
+          :title="'知识图谱'">
+          <el-icon>
+            <Share />
+          </el-icon>
           <span class="nav-tooltip">知识图谱</span>
         </div>
       </div>
@@ -110,7 +97,7 @@ const switchModule = (module) => {
 
   // 根据模块跳转到不同的路由
   const courseId = route.params.id;
-  switch(module) {
+  switch (module) {
     case 'course':
       router.push(`/teaching/course/${courseId}/learn`);
       break;
@@ -192,10 +179,10 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
   top: 50%;
   transform: translateY(-50%);
   z-index: 100;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
   padding: 20px 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(10px);
 }
 
@@ -290,9 +277,9 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
 .main-content {
   margin-left: 100px;
   width: calc(100% - 100px);
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
   min-height: calc(100vh - 40px);
   overflow: hidden;
 }
@@ -348,9 +335,11 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
   0% {
     box-shadow: 0 0 0 0 rgba(214, 51, 132, 0.4);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(214, 51, 132, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(214, 51, 132, 0);
   }
