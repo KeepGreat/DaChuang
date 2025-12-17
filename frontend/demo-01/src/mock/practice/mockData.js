@@ -394,40 +394,4 @@ export const storedFiles = new Map([
  * 用户答案数据
  * @type {UserAnswer[]}
  */
-export const userAnswers = [
-  {
-    id: 1,
-    content: "True",
-    userId: "2",
-    questionId: 1,
-    questionType: 0, // 0:判断，1:选择，2:简答，3:编程
-    score: 5, // 得分应小于等于问题分值，-1代表未批改
-  },
-  {
-    id: 2,
-    content: "A",
-    userId: "2",
-    questionId: 2,
-    questionType: 1,
-    score: 10,
-  },
-  {
-    id: 3,
-    content:
-      "Vue 3的Composition API具有更好的逻辑复用性、代码组织更灵活、类型推导更完善等优势。",
-    userId: "2",
-    questionId: 3,
-    questionType: 2,
-    score: -1, // 未批改
-  },
-  {
-    id: 4,
-    content: `function uniqueArray(arr) {
-      return [...new Set(arr)];
-    }`,
-    userId: "2",
-    questionId: 4,
-    questionType: 3,
-    score: 15,
-  },
-];
+export const userAnswers = [];

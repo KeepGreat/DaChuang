@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 
 export const useQuestionsStore = defineStore(
   "questions",
@@ -158,6 +158,11 @@ export const useQuestionsStore = defineStore(
 
     // 侧边栏题型统计数据
     const sidebarQuestionTypes = computed(() => {
+      return generateSidebarQuestionTypes();
+    });
+
+    // 生成侧边栏题型统计数据的函数，支持传入用户答案数据
+    const generateSidebarQuestionTypes = (userAnswersMap = null) => {
       // 初始化空数组，不再包含"全部题型"
       const typesWithStats = [];
       
@@ -165,7 +170,15 @@ export const useQuestionsStore = defineStore(
       questionTypes.value.forEach(type => {
         if (type.type !== -1) { // 排除"全部题型"
           const typeQuestions = questions.value.filter(q => q.type === type.type);
-          const typeAnswered = typeQuestions.filter(q => q.status !== null).length;
+          let typeAnswered = 0;
+          
+          // 计算已回答的题目数量
+          typeQuestions.forEach(question => {
+            const isAnswered = isQuestionAnswered(question.id, userAnswersMap);
+            if (isAnswered) {
+              typeAnswered++;
+            }
+          });
           
           typesWithStats.push({
             id: type.type,
@@ -177,7 +190,19 @@ export const useQuestionsStore = defineStore(
       });
 
       return typesWithStats;
-    });
+    };
+
+    // 判断题目是否已回答的辅助函数
+    const isQuestionAnswered = (questionId) => {
+      // 检查 questionsStore 中的 status 字段（已提交到后端的答案）
+      const question = questions.value.find(q => q.id === questionId);
+      if (question && question.status !== null) {
+        return true;
+      }
+      
+      // 不考虑 userAnswerStore 中的数据（用户点选但未提交的答案）      
+      return false;
+    };
 
 
     // 辅助函数：将API返回的Question转换为store所需的结构
@@ -239,7 +264,9 @@ export const useQuestionsStore = defineStore(
       totalQuestions,
       updateQuestionStatus,
       setQuestions,
-      transformApiQuestions
+      transformApiQuestions,
+      generateSidebarQuestionTypes,
+      isQuestionAnswered
     };
   },
   {

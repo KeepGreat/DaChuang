@@ -13,7 +13,7 @@
       <!-- 侧边栏组件 -->
       <div style="background: #f5f7fa">
         <PracticeSiderbar
-          :question-types="questionsStore.sidebarQuestionTypes"
+          :question-types="computedSidebarQuestionTypes"
           :active-type-id="activeType"
           @type-change="handleTypeChange"
         />
@@ -177,9 +177,11 @@ const currentQuestion = computed(() => {
   return filteredQuestions.value[currentQuestionIndex.value];
 });
 
-// 已回答的问题数量
+// 已回答的问题数量（与题型导航逻辑保持一致）
 const answeredCount = computed(() => {
-  return questionsStore.answeredCount;
+  return questionsStore.questions.filter(q => 
+    questionsStore.isQuestionAnswered(q.id, userAnswers.value)
+  ).length;
 });
 
 // 正确的问题数量
@@ -211,6 +213,11 @@ const completionRate = computed(() => {
 // 进度条颜色 - 使用侧边栏相同的渐变色
 const progressColor = computed(() => {
   return "linear-gradient(45deg, #2563eb, #1d4ed8)"; // 与PracticeSiderbar.vue第147行相同的渐变色
+});
+
+// 侧边栏题型统计数据（包含用户答案信息）
+const computedSidebarQuestionTypes = computed(() => {
+  return questionsStore.generateSidebarQuestionTypes(userAnswers.value);
 });
 
 // -------------------
@@ -252,6 +259,8 @@ const fetchUserAnswersFromApi = async () => {
 
       // 转换API数据格式为store所需格式
       const userAnswerMap = {};
+      const answeredQuestionIds = []; // 记录已回答的问题ID
+      
       apiUserAnswers.forEach((answer) => {
         let parsedAnswer;
         try {
@@ -278,12 +287,26 @@ const fetchUserAnswersFromApi = async () => {
         }
 
         userAnswerMap[answer.questionId] = parsedAnswer;
+        
+        // 如果答案不为空，记录为已回答
+        if (parsedAnswer && (Array.isArray(parsedAnswer) ? parsedAnswer.length > 0 : parsedAnswer.toString().trim() !== '')) {
+          answeredQuestionIds.push(answer.questionId);
+        }
       });
 
       // 使用userAnswerStore的updateUserAnswers方法批量更新用户答案
       userAnswerStore.updateUserAnswers(userAnswerMap);
 
+      // 将从API获取的已回答题目同步到questionsStore的status字段
+      answeredQuestionIds.forEach(questionId => {
+        const question = questionsStore.questions.find(q => q.id === questionId);
+        if (question && question.status === null) {
+          question.status = 'answered'; // 设置为已回答状态
+        }
+      });
+
       console.log("成功从API获取用户答案数据:", apiUserAnswers.length, "条");
+      console.log("已同步", answeredQuestionIds.length, "个已回答题目到questionsStore");
     } else {
       const errorMsg = response?.message || "未知错误";
       console.error("获取用户答案数据失败:", errorMsg);
