@@ -201,9 +201,28 @@ export const useQuestionsStore = defineStore(
       return typesWithStats;
     };
 
+    // 验证答案是否为有效答案的辅助函数
+    const isValidAnswer = (answer) => {
+      if (Array.isArray(answer)) {
+        return answer.length > 0;
+      }
+
+      if (typeof answer === "string") {
+        return answer.trim() !== "";
+      }
+
+      return false;
+    };
+
     // 判断题目是否已回答的辅助函数
-    const isQuestionAnswered = (questionId) => {
-      // 检查 questionsStore 中的 status 字段（已提交到后端的答案）
+    const isQuestionAnswered = (questionId, userAnswersMap = null) => {
+      // 如果提供了用户答案数据，使用用户答案数据判断
+      if (userAnswersMap && userAnswersMap[questionId]) {
+        const userAnswer = userAnswersMap[questionId];
+        return isValidAnswer(userAnswer);
+      }
+
+      // 如果没有用户答案数据，检查 questionsStore 中的 status 字段（已提交到后端的答案）
       const question = questions.value.find((q) => q.id === questionId);
       if (question && question.status !== null) {
         return true;
