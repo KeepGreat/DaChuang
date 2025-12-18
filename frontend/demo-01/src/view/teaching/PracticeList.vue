@@ -362,6 +362,7 @@ const getSubmissionType = (status) => {
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
+  margin: 6px 0;
   background: white;
   border-radius: 10px;
   cursor: pointer;
