@@ -6,6 +6,14 @@ import { defineConfig } from "vite";
 import { viteMockServe } from "vite-plugin-mock";
 
 export default defineConfig({
+  // 设置scss的api类型为modern-compiler，否则会出现： Deprecation Warning [legacy-js-api]: The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0. More info: https://sass-lang.com/d/legacy-js-api
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: "modern-compiler",
+      },
+    },
+  },
   plugins: [
     vue(),
     codeInspectorPlugin({

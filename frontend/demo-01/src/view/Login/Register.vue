@@ -199,16 +199,13 @@ const goLogin = () => {
 };
 </script>
 
-<style scoped>
-/* 导入新的样式系统 */
-@import '@/styles/main.css';
-
+<style lang="scss" scoped>
 .register-page {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--bg-gradient-primary);
+  background: var(--gradient-primary);
   font-family: "Segoe UI", Helvetica, Arial;
   padding: 20px;
   position: relative;
@@ -259,17 +256,17 @@ const goLogin = () => {
 .platform-name {
   font-size: 22px;
   font-weight: 700;
-  color: #2563eb;
+  color: var(--primary);
   margin-bottom: 16px;
   letter-spacing: 0.5px;
-  background: var(--brand-gradient);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .register-header h2 {
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
   font-size: 28px;
   font-weight: 600;
@@ -285,7 +282,7 @@ const goLogin = () => {
 
 .register-btn {
   width: 100%;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: var(--gradient-brand);
   border: none;
   border-radius: 12px;
   padding: 14px 0;
@@ -333,7 +330,7 @@ const goLogin = () => {
 }
 
 .login-link {
-  color: #2563eb;
+  color: var(--primary);
   font-weight: 600;
   margin-left: 4px;
   transition: color 0.2s ease;
@@ -347,7 +344,7 @@ const goLogin = () => {
   left: 0;
   width: 0;
   height: 2px;
-  background: #2563eb;
+  background: var(--primary);
   transition: width 0.3s ease;
 }
 
@@ -356,7 +353,7 @@ const goLogin = () => {
 }
 
 .login-link:hover {
-  color: #1d4ed8;
+  color: var(--primary-hover);
 }
 
 /* 适配Element Plus组件样式 - 修复标签对齐和输入框间距问题 */
@@ -397,15 +394,15 @@ const goLogin = () => {
   border-radius: 10px;
   padding-left: 12px;
   box-sizing: border-box;
-  border: 2px solid #e2e8f0;
-  background: #f8fafc;
+  border: 2px solid var(--border-light);
+  background: var(--bg-light);
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .register-form :deep(.el-input__wrapper:hover) {
   border-color: #cbd5e1;
-  background: #ffffff;
+  background: var(--bg-white);
 }
 
 /* 调整图标位置 */
@@ -425,7 +422,7 @@ const goLogin = () => {
   padding-left: 8px;
   padding-right: 8px;
   box-sizing: border-box;
-  color: #1e293b;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -441,15 +438,15 @@ const goLogin = () => {
 }
 
 .register-form :deep(.el-input__wrapper:focus-within) {
-  border-color: #2563eb;
-  background: #ffffff;
+  border-color: var(--primary);
+  background: var(--bg-white);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* 用deep修改Element Plus组件的样式，使得和上方的输入框UI更一致 */
 .register-form :deep(.el-select__wrapper) {
   border-radius: 10px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-light);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .register-form :deep(.el-select__wrapper):hover {

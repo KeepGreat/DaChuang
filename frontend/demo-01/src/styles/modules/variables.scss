@@ -1,0 +1,25 @@
+// 主品牌色
+$primary: #2563eb;
+$primary-hover: #1d4ed8;
+
+// 渐变背景
+$gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$gradient-brand: linear-gradient(45deg, #2563eb, #1d4ed8);
+
+// 基础色
+$bg-white: #ffffff;
+$bg-light: #f0f9ff;
+$text-primary: #1e293b;
+$border-light: #e2e8f0;
+
+// 将SCSS变量导出为CSS变量
+:root {
+  --primary: #{$primary};
+  --primary-hover: #{$primary-hover};
+  --gradient-primary: #{$gradient-primary};
+  --gradient-brand: #{$gradient-brand};
+  --bg-white: #{$bg-white};
+  --bg-light: #{$bg-light};
+  --text-primary: #{$text-primary};
+  --border-light: #{$border-light};
+}
