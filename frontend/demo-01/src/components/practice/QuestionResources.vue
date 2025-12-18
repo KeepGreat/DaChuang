@@ -1,5 +1,5 @@
 <template>
-  <div class="question-resources">
+  <div v-if="allResources.length > 0" class="question-resources">
     <!-- 图片问题描述资料 - 移到标题前展示 -->
     <div
       v-if="imageDescriptionResources.length > 0"
@@ -362,11 +362,6 @@
             </el-button>
           </div>
         </div>
-      </div>
-
-      <!-- 无资源提示 -->
-      <div v-if="allResources.length === 0" class="no-resources">
-        <el-empty description="暂无相关资源" :image-size="80"></el-empty>
       </div>
     </div>
   </div>
@@ -918,13 +913,6 @@ watch(
   font-size: 12px;
   color: #f56c6c;
   margin-bottom: 8px;
-}
-
-.no-resources {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px 0;
 }
 
 /* 文件预览样式 */
