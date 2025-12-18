@@ -168,11 +168,11 @@ function goRegister() {
 
 .login-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 380px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 40px;
+  padding: 36px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;

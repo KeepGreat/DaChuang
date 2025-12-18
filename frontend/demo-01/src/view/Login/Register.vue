@@ -16,11 +16,7 @@
         @submit.prevent="handleRegister"
       >
         <el-form-item prop="username" label="用户名">
-          <el-input
-            v-model="registerForm.username"
-            placeholder="请输入用户名"
-            size="large"
-          >
+          <el-input v-model="registerForm.username" placeholder="请输入用户名">
             <template #prefix>
               <el-icon class="el-input__icon"><User /></el-icon>
             </template>
@@ -28,12 +24,7 @@
         </el-form-item>
 
         <el-form-item prop="email" label="邮箱">
-          <el-input
-            v-model="registerForm.email"
-            type="email"
-            placeholder="请输入邮箱"
-            size="large"
-          >
+          <el-input v-model="registerForm.email" type="email" placeholder="请输入邮箱">
             <template #prefix>
               <el-icon class="el-input__icon"><Message /></el-icon>
             </template>
@@ -46,7 +37,6 @@
             type="password"
             placeholder="请输入密码"
             show-password
-            size="large"
           >
             <template #prefix>
               <el-icon class="el-input__icon"><Lock /></el-icon>
@@ -60,7 +50,6 @@
             type="password"
             placeholder="请再次输入密码"
             show-password
-            size="large"
           >
             <template #prefix>
               <el-icon class="el-input__icon"><Lock /></el-icon>
@@ -69,7 +58,7 @@
         </el-form-item>
 
         <el-form-item prop="role" label="角色">
-          <el-select v-model="registerForm.role" placeholder="请选择角色" size="large">
+          <el-select v-model="registerForm.role" placeholder="请选择角色">
             <el-option label="学生" value="student" />
             <el-option label="教师" value="teacher" />
             <el-option label="管理员" value="admin" />
@@ -82,7 +71,6 @@
             class="register-btn"
             native-type="submit"
             :loading="loading"
-            size="large"
           >
             <span v-if="!loading">注册</span>
             <span v-else>注册中...</span>
@@ -230,11 +218,11 @@ const goLogin = () => {
 
 .register-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 380px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 40px;
+  padding: 36px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
