@@ -1,10 +1,10 @@
-import "@/styles/index.scss";
+import { createApp } from "vue";
+import App from "@/App.vue";
+import router from "@/router/router";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
-import { createApp } from "vue";
-import App from "./App.vue";
-import router from "./router/router";
-import { pinia } from "./store";
+import "@/styles/index.scss";
+import { pinia } from "@/store";
 
 const app = createApp(App);
 app.use(pinia);
