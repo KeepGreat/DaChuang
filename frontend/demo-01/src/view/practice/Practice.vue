@@ -179,7 +179,7 @@ const currentQuestion = computed(() => {
 
 // 已回答的问题数量（与题型导航逻辑保持一致）
 const answeredCount = computed(() => {
-  return questionsStore.questions.filter(q => 
+  return questionsStore.questions.filter((q) =>
     questionsStore.isQuestionAnswered(q.id, userAnswers.value)
   ).length;
 });
@@ -260,7 +260,7 @@ const fetchUserAnswersFromApi = async () => {
       // 转换API数据格式为store所需格式
       const userAnswerMap = {};
       const answeredQuestionIds = []; // 记录已回答的问题ID
-      
+
       apiUserAnswers.forEach((answer) => {
         let parsedAnswer;
         try {
@@ -287,9 +287,14 @@ const fetchUserAnswersFromApi = async () => {
         }
 
         userAnswerMap[answer.questionId] = parsedAnswer;
-        
+
         // 如果答案不为空，记录为已回答
-        if (parsedAnswer && (Array.isArray(parsedAnswer) ? parsedAnswer.length > 0 : parsedAnswer.toString().trim() !== '')) {
+        if (
+          parsedAnswer &&
+          (Array.isArray(parsedAnswer)
+            ? parsedAnswer.length > 0
+            : parsedAnswer.toString().trim() !== "")
+        ) {
           answeredQuestionIds.push(answer.questionId);
         }
       });
@@ -298,10 +303,10 @@ const fetchUserAnswersFromApi = async () => {
       userAnswerStore.updateUserAnswers(userAnswerMap);
 
       // 将从API获取的已回答题目同步到questionsStore的status字段
-      answeredQuestionIds.forEach(questionId => {
-        const question = questionsStore.questions.find(q => q.id === questionId);
+      answeredQuestionIds.forEach((questionId) => {
+        const question = questionsStore.questions.find((q) => q.id === questionId);
         if (question && question.status === null) {
-          question.status = 'answered'; // 设置为已回答状态
+          question.status = "answered"; // 设置为已回答状态
         }
       });
 

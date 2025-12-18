@@ -9,8 +9,11 @@
         </div>
       </div>
 
-      <div class="practice-items" v-loading="componentLoading || practiceStore.loading"
-        element-loading-text="加载中...">
+      <div
+        class="practice-items"
+        v-loading="componentLoading || practiceStore.loading"
+        element-loading-text="加载中..."
+      >
         <div v-if="componentError || practiceStore.error" class="error-message">
           <el-icon>
             <Warning />
@@ -24,11 +27,17 @@
           暂无练习
         </div>
         <div v-else>
-          <div v-for="(practice, index) in practices" :key="index" class="practice-item" :class="{
-            active: practiceStore.selectedPractice === index,
-            completed: practice.status === '已提交',
-            overdue: isOverdue(practice.deadline)
-          }" @click="selectPractice(index)">
+          <div
+            v-for="(practice, index) in practices"
+            :key="index"
+            class="practice-item"
+            :class="{
+              active: practiceStore.selectedPractice === index,
+              completed: practice.status === '已提交',
+              overdue: isOverdue(practice.deadline),
+            }"
+            @click="selectPractice(index)"
+          >
             <div class="practice-icon">
               <el-icon v-if="practice.status === '已提交'">
                 <Check />
@@ -65,14 +74,18 @@
 
     <!-- 右侧练习详情预览 -->
     <div class="preview-panel">
-      <div v-if="practiceStore.selectedPractice !== null && practices[practiceStore.selectedPractice]" class="practice-preview">
+      <div
+        v-if="
+          practiceStore.selectedPractice !== null &&
+          practices[practiceStore.selectedPractice]
+        "
+        class="practice-preview"
+      >
         <el-card class="preview-card">
           <template #header>
             <div class="preview-header">
               <h4>{{ practices[practiceStore.selectedPractice].title }}</h4>
-              <el-button type="primary" @click="openPracticeDetail">
-                开始做题
-              </el-button>
+              <el-button type="primary" @click="openPracticeDetail"> 开始做题 </el-button>
             </div>
           </template>
 
@@ -99,7 +112,11 @@
 
             <div class="preview-section">
               <h5>测试用例概览</h5>
-              <p>共 {{ practices[practiceStore.selectedPractice].testCases?.length || 0 }} 个测试用例</p>
+              <p>
+                共
+                {{ practices[practiceStore.selectedPractice].testCases?.length || 0 }}
+                个测试用例
+              </p>
             </div>
           </div>
         </el-card>
@@ -117,14 +134,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import {
-  Edit, Check, Warning, Clock
-} from '@element-plus/icons-vue';
-import { ElCard, ElButton, ElTag, ElMessage } from 'element-plus';
-import { usePracticeStore, useQuestionsStore } from '@/store';
-import { getQuestionByIndex, getPracticesByIndex } from '@/api';
+import { getPracticesByIndex, getQuestionByIndex } from "@/api";
+import { usePracticeStore, useQuestionsStore } from "@/store";
+import { Check, Clock, Edit, Warning } from "@element-plus/icons-vue";
+import { ElButton, ElCard, ElMessage, ElTag } from "element-plus";
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
@@ -151,22 +166,22 @@ onMounted(async () => {
 
     // 直接调用接口获取练习列表
     const response = await getPracticesByIndex({
-      courseSectionId: parseInt(courseSectionId)
+      courseSectionId: parseInt(courseSectionId),
     });
 
     // 转换API返回的Practice数据为Practice格式
-    const fetchedPractices = response.data.map(practice => ({
+    const fetchedPractices = response.data.map((practice) => ({
       id: practice.id.toString(),
       courseId: route.params.id,
       title: practice.name,
       description: `包含 ${practice.questionNum} 个问题的练习`,
-      requirement: '',
+      requirement: "",
       deadline: practice.expiredAt ? new Date(practice.expiredAt).toISOString() : null,
-      status: '未开始',
+      status: "未开始",
       score: null,
       totalScore: 100,
       difficulty: 1,
-      questionNum: practice.questionNum
+      questionNum: practice.questionNum,
     }));
 
     // 更新practiceStore中的练习列表
@@ -179,8 +194,8 @@ onMounted(async () => {
     }
   } catch (err) {
     componentError.value = err;
-    ElMessage.error('加载练习列表失败');
-    console.error('获取练习列表失败:', err);
+    ElMessage.error("加载练习列表失败");
+    console.error("获取练习列表失败:", err);
   } finally {
     componentLoading.value = false;
   }
@@ -188,8 +203,9 @@ onMounted(async () => {
 
 // 计算统计
 const totalCount = computed(() => practices.value.length);
-const completedCount = computed(() =>
-  practices.value.filter(p => p.status === '已提交' || p.status === '部分正确').length
+const completedCount = computed(
+  () =>
+    practices.value.filter((p) => p.status === "已提交" || p.status === "部分正确").length
 );
 
 // 选择练习
@@ -198,7 +214,7 @@ const selectPractice = async (index) => {
   if (practiceStore.selectedPractice === index) {
     return;
   }
-  
+
   practiceStore.setSelectedPractice(index);
   const practice = practices.value[index];
   const practiceId = practice.id;
@@ -211,11 +227,11 @@ const selectPractice = async (index) => {
       // 将获取到的问题存入questionStore，store会自动处理结构转换
       questionsStore.setQuestions(response.data);
     } else {
-      ElMessage.warning('获取题目失败: ' + response.message);
+      ElMessage.warning("获取题目失败: " + response.message);
     }
   } catch (error) {
-    console.error('获取题目失败:', error);
-    ElMessage.error('获取题目失败，请稍后重试');
+    console.error("获取题目失败:", error);
+    ElMessage.error("获取题目失败，请稍后重试");
   }
 };
 
@@ -239,34 +255,34 @@ const formatDeadline = (deadline) => {
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-  if (diff < 0) return '已过期';
+  if (diff < 0) return "已过期";
   if (days > 0) return `${days}天后`;
   if (hours > 0) return `${hours}小时后`;
-  return '即将截止';
+  return "即将截止";
 };
 
 // 获取状态类型
 const getStatusType = (status) => {
   const types = {
-    '未开始': 'info',
-    '未提交': 'warning',
-    '已提交': 'success',
-    '部分正确': 'warning',
-    '全部正确': 'success'
+    未开始: "info",
+    未提交: "warning",
+    已提交: "success",
+    部分正确: "warning",
+    全部正确: "success",
   };
-  return types[status] || 'info';
+  return types[status] || "info";
 };
 
 // 获取提交状态类型
 const getSubmissionType = (status) => {
   const types = {
-    '评判中': 'warning',
-    '部分正确': 'warning',
-    '全部正确': 'success',
-    '编译错误': 'danger',
-    '运行错误': 'danger'
+    评判中: "warning",
+    部分正确: "warning",
+    全部正确: "success",
+    编译错误: "danger",
+    运行错误: "danger",
   };
-  return types[status] || 'info';
+  return types[status] || "info";
 };
 </script>
 
