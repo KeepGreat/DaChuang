@@ -1,13 +1,23 @@
 <template>
   <div class="question-resources">
-     <!-- 图片问题描述资料 - 移到标题前展示 -->
-    <div v-if="imageDescriptionResources.length > 0" class="resource-group image-resources-group">
+    <!-- 图片问题描述资料 - 移到标题前展示 -->
+    <div
+      v-if="imageDescriptionResources.length > 0"
+      class="resource-group image-resources-group"
+    >
       <div class="resource-list">
-        <div v-for="resource in imageDescriptionResources" :key="resource.id" class="resource-item image-resource-item">
+        <div
+          v-for="resource in imageDescriptionResources"
+          :key="resource.id"
+          class="resource-item image-resource-item"
+        >
           <!-- 图片文件直接展示 -->
           <div class="image-preview-direct">
             <!-- 加载中状态 -->
-            <div v-if="!getImageUrl(resource) && !failedImages.has(resource.id)" class="image-loading">
+            <div
+              v-if="!getImageUrl(resource) && !failedImages.has(resource.id)"
+              class="image-loading"
+            >
               <el-icon class="loading-icon"><Loading /></el-icon>
               <span class="loading-text">图片加载中...</span>
             </div>
@@ -20,9 +30,9 @@
               </el-button>
             </div>
             <!-- 图片显示 -->
-            <img 
+            <img
               v-else
-              :src="getImageUrl(resource)" 
+              :src="getImageUrl(resource)"
               :alt="resource.name"
               class="direct-image"
               @error="handleImageError(resource)"
@@ -38,26 +48,41 @@
         题目资源
       </h4>
     </div>
-    
+
     <div class="resources-content">
       <!-- 非图片问题描述资料 -->
       <div v-if="nonImageDescriptionResources.length > 0" class="resource-group">
-        <h5 class="resource-group-title" @click="toggleGroup('description')" style="cursor: pointer; user-select: none;">
+        <h5
+          class="resource-group-title"
+          @click="toggleGroup('description')"
+          style="cursor: pointer; user-select: none"
+        >
           <el-icon><Reading /></el-icon>
           问题描述资料
-          <el-icon style="margin-left: auto; transition: transform 0.3s;" :style="{ transform: expandedGroups.description ? 'rotate(0deg)' : 'rotate(-90deg)' }">
+          <el-icon
+            style="margin-left: auto; transition: transform 0.3s"
+            :style="{
+              transform: expandedGroups.description ? 'rotate(0deg)' : 'rotate(-90deg)',
+            }"
+          >
             <ArrowDown />
           </el-icon>
         </h5>
         <div v-show="expandedGroups.description" class="resource-list">
-          <div v-for="resource in nonImageDescriptionResources" :key="resource.id" class="resource-item">
+          <div
+            v-for="resource in nonImageDescriptionResources"
+            :key="resource.id"
+            class="resource-item"
+          >
             <!-- 非图片文件的信息展示 -->
             <div class="resource-info">
               <span class="resource-name">{{ resource.name }}</span>
               <span class="resource-size">{{ formatFileSize(resource.size) }}</span>
-              <span v-if="resource.description" class="resource-description">{{ resource.description }}</span>
+              <span v-if="resource.description" class="resource-description">{{
+                resource.description
+              }}</span>
             </div>
-            
+
             <!-- 非图片文件的操作按钮 -->
             <div class="resource-actions">
               <el-button size="small" type="success" @click="previewResource(resource)">
@@ -70,18 +95,31 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 测试用例资源 -->
       <div v-if="testCaseResources.length > 0" class="resource-group">
-        <h5 class="resource-group-title" @click="toggleGroup('testCase')" style="cursor: pointer; user-select: none;">
+        <h5
+          class="resource-group-title"
+          @click="toggleGroup('testCase')"
+          style="cursor: pointer; user-select: none"
+        >
           <i class="el-icon-document-copy"></i>
           测试用例
-          <el-icon style="margin-left: auto; transition: transform 0.3s;" :style="{ transform: expandedGroups.testCase ? 'rotate(0deg)' : 'rotate(-90deg)' }">
+          <el-icon
+            style="margin-left: auto; transition: transform 0.3s"
+            :style="{
+              transform: expandedGroups.testCase ? 'rotate(0deg)' : 'rotate(-90deg)',
+            }"
+          >
             <ArrowDown />
           </el-icon>
         </h5>
         <div v-show="expandedGroups.testCase" class="resource-list">
-          <div v-for="resource in testCaseResources" :key="resource.id" class="resource-item">
+          <div
+            v-for="resource in testCaseResources"
+            :key="resource.id"
+            class="resource-item"
+          >
             <div class="resource-info">
               <span class="resource-name">{{ resource.name }}</span>
               <span class="resource-size">{{ formatFileSize(resource.size) }}</span>
@@ -94,18 +132,31 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 用例答案资源 -->
       <div v-if="answerResources.length > 0" class="resource-group">
-        <h5 class="resource-group-title" @click="toggleGroup('answer')" style="cursor: pointer; user-select: none;">
+        <h5
+          class="resource-group-title"
+          @click="toggleGroup('answer')"
+          style="cursor: pointer; user-select: none"
+        >
           <i class="el-icon-check"></i>
           参考答案
-          <el-icon style="margin-left: auto; transition: transform 0.3s;" :style="{ transform: expandedGroups.answer ? 'rotate(0deg)' : 'rotate(-90deg)' }">
+          <el-icon
+            style="margin-left: auto; transition: transform 0.3s"
+            :style="{
+              transform: expandedGroups.answer ? 'rotate(0deg)' : 'rotate(-90deg)',
+            }"
+          >
             <ArrowDown />
           </el-icon>
         </h5>
         <div v-show="expandedGroups.answer" class="resource-list">
-          <div v-for="resource in answerResources" :key="resource.id" class="resource-item">
+          <div
+            v-for="resource in answerResources"
+            :key="resource.id"
+            class="resource-item"
+          >
             <div class="resource-info">
               <span class="resource-name">{{ resource.name }}</span>
               <span class="resource-size">{{ formatFileSize(resource.size) }}</span>
@@ -115,9 +166,110 @@
                 下载
               </el-button>
             </div>
+          </div>
+        </div>
+
+        <!-- 文件预览区域 - 独立显示，不嵌套在资源组内 -->
+        <div
+          v-if="previewFileUrl && currentPreviewResource"
+          class="file-preview-container"
+        >
+          <div class="preview-header">
+            <span class="preview-title">{{ currentPreviewResource.name }}</span>
+            <el-button size="small" circle @click="closePreview">
+              <el-icon><Close /></el-icon>
+            </el-button>
+          </div>
+
+          <!-- 图片预览 -->
+          <img
+            v-if="previewFileType.startsWith('image/')"
+            :src="previewFileUrl"
+            :alt="currentPreviewResource.name"
+            class="preview-image"
+          />
+
+          <!-- PDF预览 -->
+          <div
+            v-else-if="previewFileType.startsWith('application/pdf')"
+            class="pdf-preview-container"
+          >
+            <div v-if="pdfPreviewError" class="pdf-preview-error">
+              <p>PDF文件加载失败，可能是由于浏览器安全限制或文件格式不支持。</p>
+              <el-button
+                type="primary"
+                size="small"
+                @click="downloadResource(currentPreviewResource)"
+              >
+                下载PDF文件
+              </el-button>
+            </div>
+            <iframe
+              v-else
+              :src="previewFileUrl"
+              class="preview-iframe"
+              @error="handlePdfPreviewError"
+              @load="handlePdfPreviewLoad"
+            ></iframe>
+          </div>
+
+          <!-- TXT预览 -->
+          <div
+            v-else-if="previewFileType === 'text/plain'"
+            class="text-preview-container"
+          >
+            <pre class="preview-text">{{ textContent }}</pre>
+          </div>
+
+          <!-- JSON预览 -->
+          <div
+            v-else-if="previewFileType === 'application/json'"
+            class="json-preview-container"
+          >
+            <pre class="preview-json">{{ jsonContent }}</pre>
+          </div>
+
+          <!-- PPT预览提示 -->
+          <div
+            v-else-if="
+              previewFileType.includes('powerpoint') ||
+              previewFileType.includes('pptx') ||
+              previewFileType.includes('ppt')
+            "
+            class="ppt-preview-container"
+          >
+            <div class="ppt-preview-info">
+              <i class="el-icon-warning-outline"></i>
+              <p>PPT文件无法直接在页面中预览</p>
+              <p>请下载后查看完整内容</p>
+              <el-button
+                type="primary"
+                size="small"
+                @click="downloadResource(currentPreviewResource)"
+              >
+                下载PPT文件
+              </el-button>
+            </div>
+          </div>
+
+          <!-- 其他文件类型 -->
+          <div v-else class="other-preview-container">
+            <div class="other-preview-info">
+              <i class="el-icon-document"></i>
+              <p>该文件类型暂不支持预览</p>
+              <p>文件类型：{{ previewFileType }}</p>
+              <el-button
+                type="primary"
+                size="small"
+                @click="downloadResource(currentPreviewResource)"
+              >
+                下载文件
+              </el-button>
+            </div>
+          </div>
         </div>
       </div>
-      
+
       <!-- 文件预览区域 - 独立显示，不嵌套在资源组内 -->
       <div v-if="previewFileUrl && currentPreviewResource" class="file-preview-container">
         <div class="preview-header">
@@ -126,7 +278,7 @@
             <el-icon><Close /></el-icon>
           </el-button>
         </div>
-        
+
         <!-- 图片预览 -->
         <img
           v-if="previewFileType.startsWith('image/')"
@@ -136,10 +288,17 @@
         />
 
         <!-- PDF预览 -->
-        <div v-else-if="previewFileType.startsWith('application/pdf')" class="pdf-preview-container">
+        <div
+          v-else-if="previewFileType.startsWith('application/pdf')"
+          class="pdf-preview-container"
+        >
           <div v-if="pdfPreviewError" class="pdf-preview-error">
             <p>PDF文件加载失败，可能是由于浏览器安全限制或文件格式不支持。</p>
-            <el-button type="primary" size="small" @click="downloadResource(currentPreviewResource)">
+            <el-button
+              type="primary"
+              size="small"
+              @click="downloadResource(currentPreviewResource)"
+            >
               下载PDF文件
             </el-button>
           </div>
@@ -158,17 +317,31 @@
         </div>
 
         <!-- JSON预览 -->
-        <div v-else-if="previewFileType === 'application/json'" class="json-preview-container">
+        <div
+          v-else-if="previewFileType === 'application/json'"
+          class="json-preview-container"
+        >
           <pre class="preview-json">{{ jsonContent }}</pre>
         </div>
 
         <!-- PPT预览提示 -->
-        <div v-else-if="previewFileType.includes('powerpoint') || previewFileType.includes('pptx') || previewFileType.includes('ppt')" class="ppt-preview-container">
+        <div
+          v-else-if="
+            previewFileType.includes('powerpoint') ||
+            previewFileType.includes('pptx') ||
+            previewFileType.includes('ppt')
+          "
+          class="ppt-preview-container"
+        >
           <div class="ppt-preview-info">
             <i class="el-icon-warning-outline"></i>
             <p>PPT文件无法直接在页面中预览</p>
             <p>请下载后查看完整内容</p>
-            <el-button type="primary" size="small" @click="downloadResource(currentPreviewResource)">
+            <el-button
+              type="primary"
+              size="small"
+              @click="downloadResource(currentPreviewResource)"
+            >
               下载PPT文件
             </el-button>
           </div>
@@ -180,83 +353,17 @@
             <i class="el-icon-document"></i>
             <p>该文件类型暂不支持预览</p>
             <p>文件类型：{{ previewFileType }}</p>
-            <el-button type="primary" size="small" @click="downloadResource(currentPreviewResource)">
+            <el-button
+              type="primary"
+              size="small"
+              @click="downloadResource(currentPreviewResource)"
+            >
               下载文件
             </el-button>
           </div>
         </div>
       </div>
-      </div>
-      
-      <!-- 文件预览区域 - 独立显示，不嵌套在资源组内 -->
-      <div v-if="previewFileUrl && currentPreviewResource" class="file-preview-container">
-        <div class="preview-header">
-          <span class="preview-title">{{ currentPreviewResource.name }}</span>
-          <el-button size="small" circle @click="closePreview">
-            <el-icon><Close /></el-icon>
-          </el-button>
-        </div>
-        
-        <!-- 图片预览 -->
-        <img
-          v-if="previewFileType.startsWith('image/')"
-          :src="previewFileUrl"
-          :alt="currentPreviewResource.name"
-          class="preview-image"
-        />
 
-        <!-- PDF预览 -->
-        <div v-else-if="previewFileType.startsWith('application/pdf')" class="pdf-preview-container">
-          <div v-if="pdfPreviewError" class="pdf-preview-error">
-            <p>PDF文件加载失败，可能是由于浏览器安全限制或文件格式不支持。</p>
-            <el-button type="primary" size="small" @click="downloadResource(currentPreviewResource)">
-              下载PDF文件
-            </el-button>
-          </div>
-          <iframe
-            v-else
-            :src="previewFileUrl"
-            class="preview-iframe"
-            @error="handlePdfPreviewError"
-            @load="handlePdfPreviewLoad"
-          ></iframe>
-        </div>
-
-        <!-- TXT预览 -->
-        <div v-else-if="previewFileType === 'text/plain'" class="text-preview-container">
-          <pre class="preview-text">{{ textContent }}</pre>
-        </div>
-
-        <!-- JSON预览 -->
-        <div v-else-if="previewFileType === 'application/json'" class="json-preview-container">
-          <pre class="preview-json">{{ jsonContent }}</pre>
-        </div>
-
-        <!-- PPT预览提示 -->
-        <div v-else-if="previewFileType.includes('powerpoint') || previewFileType.includes('pptx') || previewFileType.includes('ppt')" class="ppt-preview-container">
-          <div class="ppt-preview-info">
-            <i class="el-icon-warning-outline"></i>
-            <p>PPT文件无法直接在页面中预览</p>
-            <p>请下载后查看完整内容</p>
-            <el-button type="primary" size="small" @click="downloadResource(currentPreviewResource)">
-              下载PPT文件
-            </el-button>
-          </div>
-        </div>
-
-        <!-- 其他文件类型 -->
-        <div v-else class="other-preview-container">
-          <div class="other-preview-info">
-            <i class="el-icon-document"></i>
-            <p>该文件类型暂不支持预览</p>
-            <p>文件类型：{{ previewFileType }}</p>
-            <el-button type="primary" size="small" @click="downloadResource(currentPreviewResource)">
-              下载文件
-            </el-button>
-          </div>
-        </div>
-      </div>
-      
       <!-- 无资源提示 -->
       <div v-if="allResources.length === 0" class="no-resources">
         <el-empty description="暂无相关资源" :image-size="80"></el-empty>
@@ -266,37 +373,43 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick, onMounted, watch } from 'vue';
-import { downloadQuestionResource } from '@/api';
-import { ElMessage } from 'element-plus';
-import { useQuestionResourceStore } from '@/store';
-import { FolderOpened, Reading, Close, Loading, Picture, ArrowDown } from '@element-plus/icons-vue';
-import axios from 'axios';
+import { downloadQuestionResource } from "@/api";
+import { useQuestionResourceStore } from "@/store";
+import {
+	ArrowDown,
+	Close,
+	FolderOpened,
+	Loading,
+	Picture,
+	Reading,
+} from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
+import { computed, onMounted, ref, watch } from "vue";
 
 // 初始化store
 const questionResourceStore = useQuestionResourceStore();
 
 // 文件预览相关状态
-const previewFileUrl = ref('');
-const previewFileType = ref('');
+const previewFileUrl = ref("");
+const previewFileType = ref("");
 const currentPreviewResource = ref(null);
 const pdfPreviewError = ref(false);
-const textContent = ref('');
-const jsonContent = ref('');
+const textContent = ref("");
+const jsonContent = ref("");
 
 // 资源组展开/收起状态
 const expandedGroups = ref({
-  description: true,  // 问题描述资料默认展开
-  testCase: true,     // 测试用例默认展开
-  answer: true        // 参考答案默认展开
+  description: true, // 问题描述资料默认展开
+  testCase: true, // 测试用例默认展开
+  answer: true, // 参考答案默认展开
 });
 
 // Props定义
 const props = defineProps({
   questionId: {
     type: [String, Number],
-    required: true
-  }
+    required: true,
+  },
 });
 
 // 从store获取资源 - 直接调用方法，而不是使用computed
@@ -310,61 +423,67 @@ const allResources = computed(() => {
 
 // 按类型分组资源
 const testCaseResources = computed(() => {
-  return getResourcesByType(0).filter(resource => resource.questionId === props.questionId);
+  return getResourcesByType(0).filter(
+    (resource) => resource.questionId === props.questionId
+  );
 });
 
 const answerResources = computed(() => {
-  return getResourcesByType(1).filter(resource => resource.questionId === props.questionId);
+  return getResourcesByType(1).filter(
+    (resource) => resource.questionId === props.questionId
+  );
 });
 
 const descriptionResources = computed(() => {
-  return getResourcesByType(2).filter(resource => resource.questionId === props.questionId);
+  return getResourcesByType(2).filter(
+    (resource) => resource.questionId === props.questionId
+  );
 });
 
 // 获取所有图片资源
 const imageResources = computed(() => {
-  return descriptionResources.value.filter(resource => isImageFile(resource.name));
+  return descriptionResources.value.filter((resource) => isImageFile(resource.name));
 });
 
 // 分离图片和非图片问题描述资料
 const imageDescriptionResources = computed(() => {
-  return descriptionResources.value.filter(resource => isImageFile(resource.name));
+  return descriptionResources.value.filter((resource) => isImageFile(resource.name));
 });
 
 const nonImageDescriptionResources = computed(() => {
-  return descriptionResources.value.filter(resource => !isImageFile(resource.name));
+  return descriptionResources.value.filter((resource) => !isImageFile(resource.name));
 });
 
 // 格式化文件大小
 const formatFileSize = (size) => {
-  if (!size) return '未知大小';
-  
+  if (!size) return "未知大小";
+
   if (size < 1024) {
-    return size + ' B';
+    return size + " B";
   } else if (size < 1024 * 1024) {
-    return (size / 1024).toFixed(2) + ' KB';
+    return (size / 1024).toFixed(2) + " KB";
   } else {
-    return (size / (1024 * 1024)).toFixed(2) + ' MB';
+    return (size / (1024 * 1024)).toFixed(2) + " MB";
   }
 };
 
 // 判断是否为图片文件
 const isImageFile = (fileName) => {
-  const imageExtensions = ['png', 'jpg', 'jpeg', 'gif'];
-  const extension = fileName.split('.').pop().toLowerCase();
+  const imageExtensions = ["png", "jpg", "jpeg", "gif"];
+  const extension = fileName.split(".").pop().toLowerCase();
   return imageExtensions.includes(extension);
 };
 
 // 获取图片MIME类型
 const getImageMimeType = (fileName) => {
-  const extension = fileName.split('.').pop().toLowerCase();
+  const extension = fileName.split(".").pop().toLowerCase();
   const mimeTypes = {
-    'png': 'image/png',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'gif': 'image/gif'
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    gif: "image/gif",
   };
-  return mimeTypes[extension] || 'image/jpeg';
+  return mimeTypes[extension] || "image/jpeg";
 };
 
 // 存储图片URL的映射
@@ -380,40 +499,40 @@ const getImageUrl = (resource) => {
   if (imageUrls.value.has(resource.id)) {
     return imageUrls.value.get(resource.id);
   }
-  
-  return ''; // 还没有加载完成，返回空字符串
+
+  return ""; // 还没有加载完成，返回空字符串
 };
 
 // 异步加载图片
 const loadImage = async (resource) => {
   try {
-    console.log('正在加载图片:', resource.name, 'ID:', resource.id);
+    console.log("正在加载图片:", resource.name, "ID:", resource.id);
     const response = await downloadQuestionResource(resource.id);
-    console.log('图片下载成功:', resource.name, '数据大小:', response.data.size);
-    
+    console.log("图片下载成功:", resource.name, "数据大小:", response.data.size);
+
     // 验证响应数据
     if (!response.data || response.data.size === 0) {
-      throw new Error('下载的文件为空');
+      throw new Error("下载的文件为空");
     }
-    
+
     const blob = new Blob([response.data], { type: getImageMimeType(resource.name) });
     const imageUrl = URL.createObjectURL(blob);
-    
+
     // 验证URL是否创建成功
     if (!imageUrl) {
-      throw new Error('无法创建图片URL');
+      throw new Error("无法创建图片URL");
     }
-    
+
     // 缓存URL
     imageUrls.value.set(resource.id, imageUrl);
     // 强制更新界面
     imageUpdateCounter.value++;
-    console.log('图片URL创建成功:', resource.name);
+    console.log("图片URL创建成功:", resource.name);
   } catch (error) {
-    console.error('图片加载失败:', error);
+    console.error("图片加载失败:", error);
     handleImageError(resource);
     // 设置一个空URL避免重复加载，并标记为失败
-    imageUrls.value.set(resource.id, '');
+    imageUrls.value.set(resource.id, "");
     failedImages.value.add(resource.id);
   }
 };
@@ -423,13 +542,13 @@ const handleImageError = (resource) => {
   failedImages.value.add(resource.id);
   ElMessage({
     message: `图片 ${resource.name} 加载失败，请尝试下载查看`,
-    type: 'error'
+    type: "error",
   });
 };
 
 // 重新加载图片
 const retryLoadImage = (resource) => {
-  console.log('重新加载图片:', resource.name);
+  console.log("重新加载图片:", resource.name);
   // 清除失败状态
   failedImages.value.delete(resource.id);
   // 清除缓存的URL
@@ -443,29 +562,29 @@ const previewResource = async (resource) => {
   try {
     ElMessage({
       message: `正在加载 ${resource.name}...`,
-      type: 'info',
-      duration: 1000
+      type: "info",
+      duration: 1000,
     });
 
     // 重置预览状态
     closePreview();
     pdfPreviewError.value = false;
-    textContent.value = '';
-    jsonContent.value = '';
+    textContent.value = "";
+    jsonContent.value = "";
 
     // 获取文件数据
     const response = await downloadQuestionResource(resource.id);
-    
+
     // 获取文件类型
-    const contentType = response.headers['content-type'] || getFileType(resource.name);
+    const contentType = response.headers["content-type"] || getFileType(resource.name);
     previewFileType.value = contentType;
     currentPreviewResource.value = resource;
 
     // 处理不同类型的文件
-    if (contentType === 'text/plain') {
+    if (contentType === "text/plain") {
       // 文本文件直接读取内容
       textContent.value = await response.data.text();
-    } else if (contentType === 'application/json') {
+    } else if (contentType === "application/json") {
       // JSON文件格式化显示
       const jsonData = await response.data.text();
       jsonContent.value = JSON.stringify(JSON.parse(jsonData), null, 2);
@@ -477,13 +596,13 @@ const previewResource = async (resource) => {
 
     ElMessage({
       message: `${resource.name} 预览加载成功`,
-      type: 'success'
+      type: "success",
     });
   } catch (error) {
-    console.error('预览资源失败:', error);
+    console.error("预览资源失败:", error);
     ElMessage({
       message: `预览 ${resource.name} 失败`,
-      type: 'error'
+      type: "error",
     });
     closePreview();
   }
@@ -494,12 +613,12 @@ const closePreview = () => {
   if (previewFileUrl.value) {
     window.URL.revokeObjectURL(previewFileUrl.value);
   }
-  previewFileUrl.value = '';
-  previewFileType.value = '';
+  previewFileUrl.value = "";
+  previewFileType.value = "";
   currentPreviewResource.value = null;
   pdfPreviewError.value = false;
-  textContent.value = '';
-  jsonContent.value = '';
+  textContent.value = "";
+  jsonContent.value = "";
 };
 
 // 处理PDF预览错误
@@ -514,19 +633,19 @@ const handlePdfPreviewLoad = () => {
 
 // 根据文件名获取文件类型
 const getFileType = (fileName) => {
-  const extension = fileName.split('.').pop().toLowerCase();
+  const extension = fileName.split(".").pop().toLowerCase();
   const typeMap = {
-    'txt': 'text/plain',
-    'pdf': 'application/pdf',
-    'ppt': 'application/vnd.ms-powerpoint',
-    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'json': 'application/json',
-    'png': 'image/png',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'gif': 'image/gif'
+    txt: "text/plain",
+    pdf: "application/pdf",
+    ppt: "application/vnd.ms-powerpoint",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    json: "application/json",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    gif: "image/gif",
   };
-  return typeMap[extension] || 'application/octet-stream';
+  return typeMap[extension] || "application/octet-stream";
 };
 
 // 下载资源
@@ -534,40 +653,40 @@ const downloadResource = async (resource) => {
   try {
     ElMessage({
       message: `正在下载 ${resource.name}...`,
-      type: 'info',
-      duration: 1000
+      type: "info",
+      duration: 1000,
     });
-    
+
     const response = await downloadQuestionResource(resource.id);
-    
+
     // 创建下载链接
     const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', resource.name);
+    link.setAttribute("download", resource.name);
     document.body.appendChild(link);
     link.click();
-    
+
     // 清理
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-    
+
     ElMessage({
       message: `${resource.name} 下载成功`,
-      type: 'success'
+      type: "success",
     });
   } catch (error) {
-    console.error('下载资源失败:', error);
+    console.error("下载资源失败:", error);
     ElMessage({
       message: `下载 ${resource.name} 失败`,
-      type: 'error'
+      type: "error",
     });
   }
 };
 
 // 加载所有图片
 const loadAllImages = () => {
-  imageResources.value.forEach(resource => {
+  imageResources.value.forEach((resource) => {
     if (!imageUrls.value.has(resource.id)) {
       loadImage(resource);
     }
@@ -581,15 +700,19 @@ const toggleGroup = (groupName) => {
 
 // 组件挂载时加载所有图片
 onMounted(() => {
-  console.log('组件挂载，开始加载图片资源...');
+  console.log("组件挂载，开始加载图片资源...");
   loadAllImages();
 });
 
 // 监听图片资源变化
-watch(imageResources, (newResources) => {
-  console.log('图片资源发生变化，重新加载...', newResources);
-  loadAllImages();
-}, { immediate: true });
+watch(
+  imageResources,
+  (newResources) => {
+    console.log("图片资源发生变化，重新加载...", newResources);
+    loadAllImages();
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
@@ -913,7 +1036,7 @@ watch(imageResources, (newResources) => {
   background: #f8f9fa;
   border: 1px solid #e4e7ed;
   border-radius: 4px;
-  font-family: 'Consolas', 'Monaco', monospace;
+  font-family: "Consolas", "Monaco", monospace;
   font-size: 13px;
   line-height: 1.5;
   white-space: pre-wrap;
