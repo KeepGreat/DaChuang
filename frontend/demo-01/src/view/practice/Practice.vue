@@ -492,13 +492,15 @@ const handleAnswerSubmitted = async (result) => {
     // 保存用户答案到userAnswerStore
     updateUserAnswer(result.questionId, result.answer);
 
-    // 提交答案到后端
+    // 只有在答案不为空时才提交到后端，并标记为已回答
     if (!result.isEmpty) {
       await submitUserAnswerToBackend(result.questionId, result.answer);
+      // 提交成功后才标记为已回答
+      question.status = "answered";
+    } else {
+      // 答案为空时，保持状态为null（未回答）
+      question.status = null;
     }
-
-    // 根据是否为空答案设置题目状态
-    question.status = result.isEmpty ? null : "answered";
   }
 };
 
