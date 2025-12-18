@@ -76,6 +76,7 @@ import {
 	useUserStore,
 } from "@/store";
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useRoute } from "vue-router";
 
 // 使用store
 const questionsStore = useQuestionsStore();
@@ -84,6 +85,7 @@ const userAnswerStore = useUserAnswerStore(); // 管理用户答案
 const practiceStore = usePracticeStore(); // 管理练习数据
 const questionResourceStore = useQuestionResourceStore(); // 管理问题资源
 const userStore = useUserStore(); // 管理用户状态
+const route = useRoute();
 
 // -------------------
 // 基础数据定义
@@ -117,12 +119,27 @@ const fetchUserIdFromToken = async () => {
   }
 };
 
-// 练习基本信息 - 从practiceStore中获取
+// 路由参数获取当前练习ID
+const currentPracticeId = computed(() => {
+  return route.params.practiceId || null;
+});
+
+// 练习基本信息 - 从practiceStore中根据practiceId动态获取
 const practiceTitle = computed(() => {
-  // 从practiceStore中获取第一个练习的标题作为练习标题
-  if (practiceStore.practices && practiceStore.practices.length > 0) {
-    return practiceStore.practices[0].title.replace("作业", "练习");
+  // 如果有practiceId，根据ID查找对应的练习
+  if (currentPracticeId.value) {
+    const practice = practiceStore.getPracticeById(currentPracticeId.value);
+    if (practice) {
+      return practice.title;
+    }
   }
+  console.warn(`未找到ID为${currentPracticeId.value}的练习，使用第一个练习作为标题`);
+
+  // 如果没有找到对应的练习，使用第一个练习
+  if (practiceStore.practices && practiceStore.practices.length > 0) {
+    return practiceStore.practices[0].title;
+  }
+
   // 如果没有练习数据，返回默认标题
   return "JavaScript基础练习";
 });
@@ -134,14 +151,24 @@ const userInfo = ref({ name: "张三", avatar: "" });
 // 单题作答模式，默认为false
 const singleQuestionMode = ref(false);
 
-// 倒计时相关 - 从 practiceStore 获取 deadline
+// 倒计时相关 - 从 practiceStore 根据practiceId动态获取 deadline
 const deadline = computed(() => {
-  // 从 practiceStore 中获取第一个练习的 deadline
+  // 如果有practiceId，根据ID查找对应的练习
+  if (currentPracticeId.value) {
+    const practice = practiceStore.getPracticeById(currentPracticeId.value);
+    if (practice && practice.deadline) {
+      // 将 deadline 字符串转换为 Date 对象
+      return new Date(practice.deadline);
+    }
+  }
+
+  // 如果没有找到对应的练习，使用第一个练习作为fallback
   if (practiceStore.practices && practiceStore.practices.length > 0) {
     const assignmentDeadline = practiceStore.practices[0].deadline;
     // 将 deadline 字符串转换为 Date 对象
     return new Date(assignmentDeadline);
   }
+
   // 如果没有练习数据，使用默认值：当前时间后30分钟
   return new Date(Date.now() + 30 * 60 * 1000);
 });
