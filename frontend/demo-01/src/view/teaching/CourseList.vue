@@ -2,7 +2,7 @@
   <div class="course-list">
     <!-- 课程系列列表头部 -->
     <div class="list-header">
-      <h2>课程系列</h2>
+      <h2>课程列表</h2>
       <div class="header-info">
         <span class="course-count">共 {{ courseSeries.length }} 个系列</span>
       </div>
@@ -10,7 +10,7 @@
 
     <!-- 课程系列列表 -->
     <div class="courses-container">
-      <div v-if="loading" class="loading-container">
+      <div v-if="teachingStore.loading" class="loading-container">
         <el-skeleton :rows="5" animated />
       </div>
 
@@ -19,12 +19,7 @@
       </div>
 
       <div v-else class="course-items">
-        <div
-          v-for="(series, index) in courseSeries"
-          :key="series.id"
-          class="course-item"
-          @click="enterSeries(series)"
-        >
+        <div v-for="(series, index) in courseSeries" :key="series.id" class="course-item" @click="enterSeries(series)">
           <!-- 系列图标 -->
           <div class="course-icon">
             <el-icon :size="32">
@@ -40,11 +35,15 @@
             <!-- 内容统计 -->
             <div class="content-stats">
               <el-tag size="small" effect="light" type="success">
-                <el-icon><VideoPlay /></el-icon>
+                <el-icon>
+                  <VideoPlay />
+                </el-icon>
                 {{ series.videoCount }} 个视频
               </el-tag>
               <el-tag size="small" effect="light" type="warning">
-                <el-icon><Document /></el-icon>
+                <el-icon>
+                  <Document />
+                </el-icon>
                 {{ series.pdfCount }} 个文档
               </el-tag>
               <el-tag size="small" effect="light" type="info">
@@ -54,11 +53,7 @@
 
             <!-- 系列进度 -->
             <div class="course-progress">
-              <el-progress
-                :percentage="series.progress"
-                :stroke-width="4"
-                :show-text="false"
-              />
+              <el-progress :percentage="series.progress" :stroke-width="4" :show-text="false" />
               <span class="progress-text">{{ series.completedCount }}/{{ series.totalCount }} 已完成</span>
             </div>
           </div>
@@ -76,76 +71,54 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
   VideoPlay, Document, Files, Check, Lock, Folder, ArrowRight
 } from '@element-plus/icons-vue'
+// 导入 Pinia store
+import { useTeachingStore } from '@/store'
 
 const router = useRouter()
 
-// 响应式数据
-const loading = ref(false)
+// 使用 Pinia store
+const teachingStore = useTeachingStore()
 const courseSeries = ref([])
 
 // 进入课程系列
 const enterSeries = (series) => {
-  // 跳转到课程系列详情页
+  // 跳转到课程系列详情页，只传递必要的参数
   const courseId = router.currentRoute.value.params.id
-  router.push(`/teaching/course/${courseId}/learn/series/${series.id}`)
+
+  // 使用 query 参数传递必要的系列信息
+  router.push({
+    path: `/teaching/course/${courseId}/learn/series/${series.id}`,
+    query: {
+      id: series.id,
+      title: series.title,
+      description: series.description
+    }
+  })
 }
 
 // 初始化课程系列列表
-const initCourseSeries = () => {
-  loading.value = true
+const initCourseSeries = async () => {
+  try {
+    // 调用 store 的方法获取课程系列数据
+    const response = await teachingStore.fetchCourseSeries()
 
-  // 模拟课程系列数据
-  setTimeout(() => {
-    courseSeries.value = [
-      {
-        id: 'series-1',
-        title: 'Python 基础入门',
-        description: '从零开始学习 Python 编程语言的基础知识',
-        videoCount: 5,
-        pdfCount: 3,
-        totalCount: 8,
-        completedCount: 3,
-        progress: 38
-      },
-      {
-        id: 'series-2',
-        title: 'Python 进阶教程',
-        description: '深入学习 Python 的高级特性和编程技巧',
-        videoCount: 8,
-        pdfCount: 5,
-        totalCount: 13,
-        completedCount: 0,
-        progress: 0
-      },
-      {
-        id: 'series-3',
-        title: 'Python Web 开发',
-        description: '使用 Python 进行 Web 应用开发的完整指南',
-        videoCount: 12,
-        pdfCount: 8,
-        totalCount: 20,
-        completedCount: 5,
-        progress: 25
-      },
-      {
-        id: 'series-4',
-        title: 'Python 数据分析',
-        description: '掌握使用 Python 进行数据分析的核心技能',
-        videoCount: 10,
-        pdfCount: 6,
-        totalCount: 16,
-        completedCount: 0,
-        progress: 0
-      }
-    ]
-    loading.value = false
-  }, 500)
+    if (response.code === 200) {
+      ElMessage.success('课程列表加载成功')
+      // console.log(teachingStore.courseSeries)
+      courseSeries.value = teachingStore.courseSeries
+    } else {
+      ElMessage.error(response.message || '加载课程列表失败')
+    }
+  } catch (error) {
+    console.error('加载课程列表失败:', error)
+    ElMessage.error('加载课程列表失败，请重试')
+  }
 }
 
 onMounted(() => {

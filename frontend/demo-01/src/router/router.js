@@ -63,11 +63,6 @@ const router = createRouter({
               component: () => import("@/view/teaching/CourseSeriesDetail.vue"),
             },
             {
-              path: "learn/content/:contentId",
-              name: "CourseContentDetail",
-              component: () => import("@/view/teaching/CourseContentDetail.vue"),
-            },
-            {
               path: "task",
               name: "TaskList",
               component: () => import("@/view/teaching/TaskList.vue"),
@@ -147,6 +142,13 @@ const router = createRouter({
           component: () => import("@/view/Practice.vue"),
         },
 
+        // AI学伴页面
+        {
+          path: "ai-companion",
+          name: "AICompanion",
+          component: () => import("@/view/ai/AICompanion.vue"),
+        },
+
         // 其他页面
         {
           path: "exp",
@@ -182,14 +184,22 @@ const router = createRouter({
           path: "pracindex",
           name: "PracticeIndex",
           props: true,
-          component: () => import("@/view/practice/PracticeIndex.vue")
-        }
-      ]
+          component: () => import("@/view/practice/PracticeIndex.vue"),
+        },
+      ],
     },
 
     // 登录页面
-    { path: "/login", name: "Login", component: () => import("@/view/Login/Login.vue") },
-    { path: "/register", name: "register", component: () => import("@/view/Login/Register.vue") },
+    {
+      path: "/login",
+      name: "Login",
+      component: () => import("@/view/Login/Login.vue"),
+    },
+    {
+      path: "/register",
+      name: "register",
+      component: () => import("@/view/Login/Register.vue"),
+    },
   ],
 });
 

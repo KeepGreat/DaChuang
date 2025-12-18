@@ -5,6 +5,7 @@ import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import { useCounterStore } from "./modules/testCountStore";
 import { testClassifm } from "./modules/testClassifm";
 import { useCourseStore } from "./modules/courseStore";
+import { useTeachingStore } from "./modules/teachingStore";
 import { useAssignmentStore } from "./modules/assignmentStore";
 import { useTaskStore } from "./modules/taskStore";
 import { useDiscussionStore } from "./modules/discussionStore";
@@ -25,6 +26,7 @@ export {
   testClassifm,
   // 新增的store
   useCourseStore,
+  useTeachingStore,
   useAssignmentStore,
   useTaskStore,
   useDiscussionStore,
