@@ -7,7 +7,7 @@ const request = axios.create({
   // baseURL: "http://localhost:80",
   // Mock 接口地址
   baseURL: "http://localhost:5173",
-  timeout: 50000,
+  timeout: 5000,
 });
 
 // 请求拦截器
@@ -70,7 +70,10 @@ request.interceptors.response.use(
     }
 
     // 记录响应信息
-    console.log(`${new Date().toLocaleTimeString()} response interceptors:`, response);
+    console.log(
+      `${new Date().toLocaleTimeString()} response interceptors:`,
+      response
+    );
     console.log("response.data :", response.data);
 
     // 获取data结构

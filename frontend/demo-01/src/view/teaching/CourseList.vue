@@ -3,9 +3,6 @@
     <!-- 课程系列列表头部 -->
     <div class="list-header">
       <h2>课程列表</h2>
-      <div class="header-info">
-        <span class="course-count">共 {{ courseSeries.length }} 个系列</span>
-      </div>
     </div>
 
     <!-- 课程系列列表 -->
@@ -31,31 +28,6 @@
           <div class="course-info">
             <h3 class="course-title">{{ series.title }}</h3>
             <p class="course-description">{{ series.description }}</p>
-
-            <!-- 内容统计 -->
-            <div class="content-stats">
-              <el-tag size="small" effect="light" type="success">
-                <el-icon>
-                  <VideoPlay />
-                </el-icon>
-                {{ series.videoCount }} 个视频
-              </el-tag>
-              <el-tag size="small" effect="light" type="warning">
-                <el-icon>
-                  <Document />
-                </el-icon>
-                {{ series.pdfCount }} 个文档
-              </el-tag>
-              <el-tag size="small" effect="light" type="info">
-                共 {{ series.totalCount }} 个内容
-              </el-tag>
-            </div>
-
-            <!-- 系列进度 -->
-            <div class="course-progress">
-              <el-progress :percentage="series.progress" :stroke-width="4" :show-text="false" />
-              <span class="progress-text">{{ series.completedCount }}/{{ series.totalCount }} 已完成</span>
-            </div>
           </div>
 
           <!-- 系列状态 -->
@@ -75,7 +47,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
-  VideoPlay, Document, Files, Check, Lock, Folder, ArrowRight
+  Folder, ArrowRight
 } from '@element-plus/icons-vue'
 // 导入 Pinia store
 import { useTeachingStore } from '@/store'
@@ -105,13 +77,21 @@ const enterSeries = (series) => {
 // 初始化课程系列列表
 const initCourseSeries = async () => {
   try {
-    // 调用 store 的方法获取课程系列数据
-    const response = await teachingStore.fetchCourseSeries()
+    // 获取当前课程ID
+    const courseId = router.currentRoute.value.params.id
+
+    // 调用 store 的方法获取课程数据
+    const response = await teachingStore.fetchCourses(courseId)
 
     if (response.code === 200) {
-      ElMessage.success('课程列表加载成功')
-      // console.log(teachingStore.courseSeries)
-      courseSeries.value = teachingStore.courseSeries
+      ElMessage.success(response.message || '课程列表加载成功')
+      console.log('课程数据:', response.data)
+      // 将返回的课程数据作为课程系列
+      courseSeries.value = response.data.map(course => ({
+        id: course.id,
+        title: course.title,
+        description: course.description
+      }))
     } else {
       ElMessage.error(response.message || '加载课程列表失败')
     }

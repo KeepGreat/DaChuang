@@ -42,7 +42,7 @@
       </div>
     </div>
 
-    <!-- 主体内容 -->
+    <!-- 主体内容 - 包含历史记录和聊天区域 -->
     <div class="companion-main">
       <!-- 历史记录侧边栏 -->
       <transition name="slide">
@@ -65,7 +65,7 @@
         </div>
       </transition>
 
-      <!-- 聊天区域 -->
+      <!-- 聊天区域 - 中间内容区域 -->
       <div class="chat-container" :class="{ 'with-history': showHistory }">
         <!-- 消息列表 - 中间可滚动区域 -->
         <div class="messages-container" ref="messagesContainer">
@@ -141,62 +141,36 @@
             </div>
           </div>
         </div>
-
-        <!-- 输入区域 - 固定在底部 -->
-        <div class="input-area">
-          <div class="input-wrapper">
-            <div class="input-box">
-              <div class="input-toolbar">
-                <el-upload action="#" :auto-upload="false" :show-file-list="false" accept="image/*,.pdf,.doc,.docx"
-                  :on-change="handleFileUpload">
-                  <div class="tool-btn">
-                    <el-icon>
-                      <Paperclip />
-                    </el-icon>
-                  </div>
-                </el-upload>
-              </div>
-              <el-input v-model="inputMessage" type="textarea" :rows="1" :autosize="{ minRows: 1, maxRows: 5 }"
-                placeholder="输入你的问题..." @keydown.enter.prevent="handleEnterKey" resize="none" class="message-input" />
-              <div class="send-button" @click="sendMessage" :class="{ 'active': inputMessage.trim() && !isTyping }">
-                <el-icon>
-                  <Promotion />
-                </el-icon>
-              </div>
-            </div>
-            <div class="input-hint">
-              按 Enter 发送，Shift + Enter 换行
-            </div>
-          </div>
-        </div>
       </div>
 
-      <!-- 右侧面板 - 相关资源 -->
-      <transition name="slide-right">
-        <div class="side-panel" v-show="showSidePanel && relatedResources.length > 0">
-          <div class="panel-header">
-            <h4>相关资源</h4>
-            <div class="close-btn" @click="showSidePanel = false">
-              <el-icon>
-                <Close />
-              </el-icon>
-            </div>
-          </div>
-          <div class="panel-content">
-            <div v-for="resource in relatedResources" :key="resource.id" class="resource-card">
-              <div class="resource-icon">
+      </div>
+
+    <!-- 输入区域 - 独立的底部区域 -->
+    <div class="input-area">
+      <div class="input-wrapper">
+        <div class="input-box">
+          <div class="input-toolbar">
+            <el-upload action="#" :auto-upload="false" :show-file-list="false" accept="image/*,.pdf,.doc,.docx"
+              :on-change="handleFileUpload">
+              <div class="tool-btn">
                 <el-icon>
-                  <Document />
+                  <Paperclip />
                 </el-icon>
               </div>
-              <div class="resource-info">
-                <h5>{{ resource.title }}</h5>
-                <p>{{ resource.description }}</p>
-              </div>
-            </div>
+            </el-upload>
+          </div>
+          <el-input v-model="inputMessage" type="textarea" :rows="1" :autosize="{ minRows: 1, maxRows: 5 }"
+            placeholder="输入你的问题..." @keydown.enter.prevent="handleEnterKey" resize="none" class="message-input" />
+          <div class="send-button" @click="sendMessage" :class="{ 'active': inputMessage.trim() && !isTyping }">
+            <el-icon>
+              <Promotion />
+            </el-icon>
           </div>
         </div>
-      </transition>
+        <div class="input-hint">
+          按 Enter 发送，Shift + Enter 换行
+        </div>
+      </div>
     </div>
 
     <!-- 设置对话框 -->
@@ -227,7 +201,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
@@ -239,9 +213,7 @@ import {
   Refresh,
   Paperclip,
   More,
-  Promotion,
-  Close,
-  Document
+  Promotion
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -255,7 +227,6 @@ const messages = ref([])
 const isTyping = ref(false)
 const showHistory = ref(false)
 const showSettings = ref(false)
-const showSidePanel = ref(false)
 const showEmojiPicker = ref(false)
 const inputRows = ref(1)
 const inputTips = ref(false)
@@ -280,8 +251,6 @@ const quickActions = ref([
   { text: '练习题推荐', icon: '✏️', prompt: '请推荐一些适合我的练习题' }
 ])
 
-// 相关资源
-const relatedResources = ref([])
 
 // 设置项配置
 const settingItems = ref([
@@ -357,9 +326,6 @@ const sendMessage = async () => {
     })
     isTyping.value = false
     scrollToBottom()
-
-    // 更新相关资源
-    updateRelatedResources(currentInput)
   }, 1000 + Math.random() * 1000)
 }
 
@@ -514,16 +480,6 @@ const formatMessageTime = (date) => {
   })
 }
 
-// 更新相关资源
-const updateRelatedResources = (query) => {
-  // 模拟相关资源
-  relatedResources.value = [
-    { id: 1, title: '课程章节：基础概念' },
-    { id: 2, title: '参考资料：深入理解' },
-    { id: 3, title: '练习题：巩固提高' }
-  ]
-  showSidePanel.value = true
-}
 
 // 保存设置
 const saveSettings = () => {
@@ -539,6 +495,10 @@ const handleSettingsClose = () => {
 
 // 生命周期
 onMounted(() => {
+  // 防止页面滚动
+  document.body.style.overflow = 'hidden'
+  document.documentElement.style.overflow = 'hidden'
+
   // 加载设置
   const savedSettings = localStorage.getItem('aiCompanionSettings')
   if (savedSettings) {
@@ -556,16 +516,29 @@ onMounted(() => {
     inputTips.value = inputMessage.value.length > 0
   })
 })
+
+// 组件卸载时恢复页面滚动
+onUnmounted(() => {
+  document.body.style.overflow = ''
+  document.documentElement.style.overflow = ''
+})
 </script>
 
 <style scoped>
+/* 防止页面滚动 */
 .ai-companion-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #e0f2fe 0%, #e6f7ff 25%, #f0fdf4 50%, #e6f4ea 100%);
   overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
+
 
 /* 头部样式 */
 .companion-header {
@@ -574,6 +547,7 @@ onMounted(() => {
   box-shadow: 0 2px 20px rgba(59, 130, 246, 0.1);
   z-index: 100;
   flex-shrink: 0;
+  height: auto;
 }
 
 .header-content {
@@ -701,13 +675,14 @@ onMounted(() => {
   transform: scale(1.05);
 }
 
-/* 主体内容 */
+/* 主体内容 - 中间聊天区域 */
 .companion-main {
   flex: 1;
   display: flex;
   overflow: hidden;
   position: relative;
   min-height: 0;
+  height: calc(100vh - 172px); /* 减去头部和输入框的高度 */
 }
 
 /* 动画过渡 */
@@ -817,11 +792,32 @@ onMounted(() => {
 .messages-container {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 32px;
   display: flex;
   flex-direction: column;
   gap: 20px;
   min-height: 0;
+  max-height: 100%;
+  scroll-behavior: smooth;
+}
+
+/* 确保滚动条样式美观 */
+.messages-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background: rgba(34, 197, 94, 0.3);
+  border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 197, 94, 0.5);
 }
 
 /* 欢迎消息 */
@@ -849,21 +845,26 @@ onMounted(() => {
   height: 120px;
   margin: 0 auto 32px;
   position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.15);
 }
 
 .ai-avatar-welcome img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  border-radius: 50%;
 }
 
 .pulse-ring {
   position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
-  border: 2px solid rgba(34, 197, 94, 0.3);
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  border: 3px solid rgba(34, 197, 94, 0.3);
   border-radius: 50%;
   animation: pulse-ring 2s ease-in-out infinite;
 }
@@ -871,17 +872,17 @@ onMounted(() => {
 @keyframes pulse-ring {
   0% {
     transform: scale(1);
-    opacity: 1;
+    opacity: 0.6;
   }
 
   50% {
-    transform: scale(1.1);
-    opacity: 0.5;
+    transform: scale(1.15);
+    opacity: 0.2;
   }
 
   100% {
     transform: scale(1);
-    opacity: 1;
+    opacity: 0.6;
   }
 }
 
@@ -1122,6 +1123,10 @@ onMounted(() => {
   border-top: 1px solid rgba(59, 130, 246, 0.1);
   padding: 20px 32px;
   flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  height: 92px; /* 固定输入框高度 */
 }
 
 .input-wrapper {
@@ -1203,100 +1208,6 @@ onMounted(() => {
   text-align: center;
 }
 
-/* 右侧面板 */
-.side-panel {
-  width: 320px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-left: 1px solid rgba(34, 197, 94, 0.1);
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 10;
-}
-
-.panel-header {
-  padding: 20px;
-  border-bottom: 1px solid rgba(34, 197, 94, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.panel-header h4 {
-  margin: 0;
-  font-size: 18px;
-  color: #303133;
-}
-
-.close-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  transition: all 0.3s;
-  color: #606266;
-}
-
-.close-btn:hover {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-}
-
-.panel-content {
-  flex: 1;
-  padding: 16px;
-  overflow-y: auto;
-}
-
-.resource-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  cursor: pointer;
-  border-radius: 12px;
-  transition: all 0.3s;
-  margin-bottom: 12px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(34, 197, 94, 0.05);
-}
-
-.resource-card:hover {
-  background: rgba(240, 253, 244, 0.8);
-  transform: translateX(-4px);
-}
-
-.resource-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-  color: #22c55e;
-  font-size: 20px;
-}
-
-.resource-info h5 {
-  margin: 0 0 4px 0;
-  font-size: 15px;
-  color: #303133;
-}
-
-.resource-info p {
-  margin: 0;
-  font-size: 13px;
-  color: #909399;
-}
 
 /* 设置对话框 */
 .settings-content {
@@ -1369,8 +1280,19 @@ onMounted(() => {
 
 /* 响应式 */
 @media (max-width: 768px) {
+  .ai-companion-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
   .header-content {
     padding: 12px 20px;
+  }
+
+  .companion-main {
+    height: calc(100vh - 152px); /* 移动端调整高度 */
   }
 
   .header-left {
@@ -1417,12 +1339,10 @@ onMounted(() => {
     width: 100%;
   }
 
-  .side-panel {
-    width: 100%;
-  }
-
+  
   .input-area {
     padding: 16px 20px;
+    height: 80px; /* 移动端减小高度 */
   }
 }
 

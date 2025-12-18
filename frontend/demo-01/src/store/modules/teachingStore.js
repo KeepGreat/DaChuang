@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { getCourses } from "@/api/modules/teaching/CourseAPI";
 // import { testpdf } from "@/assets/test_pdf.pdf";
 
 // 模拟延迟函数
@@ -15,73 +16,70 @@ export const useTeachingStore = defineStore("teaching", () => {
 
   // 获取所有课程系列
   const fetchCourseSeries = async () => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      // 模拟API延迟
-      await delay(500);
-
-      // 模拟数据
-      const mockData = [
-        {
-          id: 1,
-          title: "Python 基础入门",
-          description: "从零开始学习 Python 编程语言的基础知识",
-          videoCount: 5,
-          pdfCount: 3,
-          totalCount: 8,
-          completedCount: 3,
-          progress: 38,
-        },
-        {
-          id: 2,
-          title: "Python 进阶教程",
-          description: "深入学习 Python 的高级特性和编程技巧",
-          videoCount: 8,
-          pdfCount: 5,
-          totalCount: 13,
-          completedCount: 0,
-          progress: 0,
-        },
-        {
-          id: 3,
-          title: "Python Web 开发",
-          description: "使用 Python 进行 Web 应用开发的完整指南",
-          videoCount: 12,
-          pdfCount: 8,
-          totalCount: 20,
-          completedCount: 5,
-          progress: 25,
-        },
-        {
-          id: 4,
-          title: "Python 数据分析",
-          description: "掌握使用 Python 进行数据分析的核心技能",
-          videoCount: 10,
-          pdfCount: 6,
-          totalCount: 16,
-          completedCount: 0,
-          progress: 0,
-        },
-      ];
-
-      courseSeries.value = mockData;
-      return {
-        code: 200,
-        message: "获取成功",
-        data: mockData,
-      };
-    } catch (err) {
-      error.value = err.message;
-      return {
-        code: 500,
-        message: err.message || "获取失败",
-        data: null,
-      };
-    } finally {
-      loading.value = false;
-    }
+    // loading.value = true;
+    // error.value = null;
+    // try {
+    //   // 模拟API延迟
+    //   await delay(500);
+    //   // 模拟数据
+    //   const mockData = [
+    //     {
+    //       id: 1,
+    //       title: "Python 基础入门",
+    //       description: "从零开始学习 Python 编程语言的基础知识",
+    //       videoCount: 5,
+    //       pdfCount: 3,
+    //       totalCount: 8,
+    //       completedCount: 3,
+    //       progress: 38,
+    //     },
+    //     {
+    //       id: 2,
+    //       title: "Python 进阶教程",
+    //       description: "深入学习 Python 的高级特性和编程技巧",
+    //       videoCount: 8,
+    //       pdfCount: 5,
+    //       totalCount: 13,
+    //       completedCount: 0,
+    //       progress: 0,
+    //     },
+    //     {
+    //       id: 3,
+    //       title: "Python Web 开发",
+    //       description: "使用 Python 进行 Web 应用开发的完整指南",
+    //       videoCount: 12,
+    //       pdfCount: 8,
+    //       totalCount: 20,
+    //       completedCount: 5,
+    //       progress: 25,
+    //     },
+    //     {
+    //       id: 4,
+    //       title: "Python 数据分析",
+    //       description: "掌握使用 Python 进行数据分析的核心技能",
+    //       videoCount: 10,
+    //       pdfCount: 6,
+    //       totalCount: 16,
+    //       completedCount: 0,
+    //       progress: 0,
+    //     },
+    //   ];
+    //   courseSeries.value = mockData;
+    //   return {
+    //     code: 200,
+    //     message: "获取成功",
+    //     data: mockData,
+    //   };
+    // } catch (err) {
+    //   error.value = err.message;
+    //   return {
+    //     code: 500,
+    //     message: err.message || "获取失败",
+    //     data: null,
+    //   };
+    // } finally {
+    //   loading.value = false;
+    // }
   };
 
   // 根据ID获取课程系列
@@ -247,6 +245,59 @@ export const useTeachingStore = defineStore("teaching", () => {
     error.value = null;
   };
 
+  // 获取课程数据
+  const fetchCourses = async (courseId) => {
+    loading.value = true;
+    error.value = null;
+    await delay(500); // 模拟延迟
+
+    try {
+      // 调用 getCourses API
+      const response = await getCourses(courseId);
+
+      if (response && response.data) {
+        return response;
+      }
+
+      throw new Error("API返回数据格式错误");
+    } catch (err) {
+      console.error("获取课程数据失败:", err);
+      error.value = err.message;
+
+      // 返回模拟数据
+      const mockData = [
+        {
+          id: 1,
+          title: "Python 基础入门",
+          description: "从零开始学习 Python 编程语言的基础知识",
+        },
+        {
+          id: 2,
+          title: "Python 进阶教程",
+          description: "深入学习 Python 的高级特性和编程技巧",
+        },
+        {
+          id: 3,
+          title: "Python Web 开发",
+          description: "使用 Python 进行 Web 应用开发的完整指南",
+        },
+        {
+          id: 4,
+          title: "Python 数据分析",
+          description: "掌握使用 Python 进行数据分析的核心技能",
+        },
+      ];
+
+      return {
+        code: 200,
+        message: "使用模拟数据",
+        data: mockData,
+      };
+    } finally {
+      loading.value = false;
+    }
+  };
+
   // 重置状态
   const resetState = () => {
     courseSeries.value = [];
@@ -266,6 +317,7 @@ export const useTeachingStore = defineStore("teaching", () => {
     getCourseSeriesById,
     fetchCourseContent,
     getContentBySeriesId,
+    fetchCourses,
     clearError,
     resetState,
   };

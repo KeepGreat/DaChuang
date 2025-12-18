@@ -142,13 +142,7 @@ const router = createRouter({
           component: () => import("@/view/Practice.vue"),
         },
 
-        // AI学伴页面
-        {
-          path: "ai-companion",
-          name: "AICompanion",
-          component: () => import("@/view/ai/AICompanion.vue"),
-        },
-
+  
         // 其他页面
         {
           path: "exp",
@@ -187,6 +181,13 @@ const router = createRouter({
           component: () => import("@/view/practice/PracticeIndex.vue"),
         },
       ],
+    },
+
+    // AI学伴页面 - 独立路由，不使用主布局
+    {
+      path: "/ai-companion",
+      name: "AICompanion",
+      component: () => import("@/view/ai/AICompanion.vue"),
     },
 
     // 登录页面

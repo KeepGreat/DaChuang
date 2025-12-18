@@ -5,51 +5,73 @@
     <!-- 标题 + 搜索框 -->
     <div class="header-container">
       <h2 class="section-title">课程系列</h2>
-      <el-input v-model="searchName" placeholder="输入课程系列名称搜索..." class="search-input" clearable
+      <ElInput v-model="searchName" placeholder="输入课程系列名称搜索..." class="search-input" clearable
         @input="handleInputSearch" @keyup.enter="handleSearch" @clear="handleClearSearch">
         <template #append>
-          <el-button @click="handleSearch" :icon="Search">搜索</el-button>
+          <ElButton @click="handleSearch" :icon="Search">搜索</ElButton>
         </template>
-      </el-input>
+      </ElInput>
     </div>
 
-    <!-- 其余部分（卡片、分页等）保持不变 -->
-    <div v-if="!loading && courses.length === 0" class="empty-state">
-      <el-icon size="60" class="empty-icon">
+    <!-- Loading 状态 -->
+    <div v-if="loading" class="loading-container">
+      <ElSkeleton :rows="4" animated :throttle="500">
+        <template #template>
+          <div class="skeleton-grid">
+            <ElSkeletonItem
+              v-for="i in 8"
+              :key="i"
+              variant="rect"
+              class="skeleton-card"
+              style="height: 280px; background: linear-gradient(90deg, #fff0f4 25%, #ffe8f1 50%, #fff0f4 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite;"
+            />
+          </div>
+        </template>
+      </ElSkeleton>
+      <div class="loading-text">
+        <ElIcon class="is-loading">
+          <Loading />
+        </ElIcon>
+        <span>正在加载课程数据...</span>
+      </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div v-else-if="courses.length === 0" class="empty-state">
+      <ElIcon size="60" class="empty-icon">
         <Document />
-      </el-icon>
+      </ElIcon>
       <p class="empty-text">{{ isSearching ? '未找到匹配的课程系列' : '当前没有课程系列' }}</p>
     </div>
 
+    <!-- 课程列表 -->
     <div v-else class="course-grid">
-      <el-card v-for="course in courses" :key="course.id" class="course-card" :body-style="{ padding: '0' }"
+      <ElCard v-for="course in courses" :key="course.id" class="course-card" :body-style="{ padding: '0' }"
         @click="handleCardClick(course)">
         <div class="course-image">
-          <el-icon size="60" class="image-placeholder">
+          <ElIcon size="60" class="image-placeholder">
             <Document />
-          </el-icon>
+          </ElIcon>
         </div>
         <div class="course-info">
           <h3 class="course-title">{{ course.name }}</h3>
           <p class="course-description">{{ course.description || '暂无描述' }}</p>
         </div>
-      </el-card>
+      </ElCard>
     </div>
 
     <!-- 分页只在非搜索状态下显示 -->
-    <div v-if="!loading && !isSearching && total > pageSize" class="pagination-container">
-      <el-pagination v-model:current-page="currentPage" :page-size="pageSize" layout="total, prev, pager, next, jumper"
-        :total="total" @current-change="handleCurrentChange" />
+    <div v-if="!loading && !isSearching && courses.length > 0" class="pagination-container">
+      <ElPagination v-model:current-page="currentPage" :page-size="pageSize" layout="total, prev, pager, next, jumper"
+        :total="total" @current-change="handleCurrentChange" :background="true" :hide-on-single-page="false" />
     </div>
-
-    <el-skeleton v-if="loading" :rows="4" animated />
   </div>
 </template>
 
 <script setup>
 import { onMounted, computed } from 'vue';
-import { Document, Search } from '@element-plus/icons-vue';
-import { ElCard, ElPagination, ElIcon, ElSkeleton, ElInput, ElButton } from 'element-plus';
+import { Document, Search, Loading } from '@element-plus/icons-vue';
+import { ElCard, ElPagination, ElIcon, ElSkeleton, ElSkeletonItem, ElInput, ElButton } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { useCourseStore } from '@/store';
 import { testClassifm } from '@/store';
@@ -58,12 +80,16 @@ const router = useRouter();
 
 // 使用Pinia store
 const courseStore = useCourseStore();
+console.log('课程数据加载成功', courseStore.courses);
 const classifm = testClassifm();
 
 // 计算属性
 const courses = computed(() => courseStore.courses);
 const total = computed(() => courseStore.pagination.total);
-const loading = computed(() => courseStore.loading);
+const loading = computed(() => {
+  console.log('courseStore.loading:', courseStore.loading);
+  return courseStore.loading;
+});
 const searchName = computed({
   get: () => courseStore.searchName,
   set: (value) => courseStore.searchName = value
@@ -84,13 +110,6 @@ const handleCardClick = (course) => {
 // 搜索
 const handleSearch = async () => {
   const searchTerm = searchName.value?.trim();
-
-  // if (!searchTerm) {
-  //   // 如果搜索内容为空，加载所有课程
-  //   await courseStore.fetchCoursePage(1, 12);
-  //   currentPage.value = 1;
-  // } else {
-  //   // 有搜索内容时执行搜索
   await courseStore.searchCourses(searchTerm);
   // }
 };
@@ -135,6 +154,7 @@ const handleCurrentChange = async (page) => {
 onMounted(async () => {
   try {
     await courseStore.fetchCoursePage(1, 12);
+    console.log('课程数据加载成功', courseStore.courses);
   } catch (error) {
     // 使用默认数据
     courses.value = classifm.class_data || [];
@@ -144,6 +164,52 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Loading 样式 */
+.loading-container {
+  position: relative;
+  min-height: 400px;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.skeleton-card {
+  border-radius: 12px;
+}
+
+.loading-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #9b7a88;
+  margin-top: 30px;
+  gap: 8px;
+  background: linear-gradient(135deg, #fff0f4 0%, #fff6fb 100%);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(214, 51, 132, 0.04);
+}
+
+.loading-text .el-icon {
+  font-size: 24px;
+  color: #ff7ab1;
+}
+
+/* 骨架屏动画 */
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* 样式基本不变，仅微调搜索框 */
 .header-container {
   display: flex;
@@ -218,7 +284,7 @@ onMounted(async () => {
 .course-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 16px;
   margin-bottom: 30px;
 }
 
@@ -242,7 +308,8 @@ onMounted(async () => {
 }
 
 .course-image {
-  height: 140px;
+  flex: 1;
+  min-height: 180px;
   background: linear-gradient(135deg, #ffd6e8 0%, #fff0f4 100%);
   display: flex;
   align-items: center;
@@ -255,8 +322,8 @@ onMounted(async () => {
 }
 
 .course-info {
-  flex: 1;
-  padding: 20px;
+  flex: 0 0 auto;
+  padding: 16px;
   display: flex;
   flex-direction: column;
 }
@@ -298,16 +365,28 @@ onMounted(async () => {
   .course-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .skeleton-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 992px) {
   .course-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .skeleton-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
   .course-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .skeleton-grid {
     grid-template-columns: 1fr;
   }
 
