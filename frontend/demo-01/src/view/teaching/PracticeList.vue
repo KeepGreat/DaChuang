@@ -65,7 +65,7 @@
 
     <!-- 右侧练习详情预览 -->
     <div class="preview-panel">
-      <div v-if="practiceStore.selectedPractice !== null" class="practice-preview">
+      <div v-if="practiceStore.selectedPractice !== null && practices[practiceStore.selectedPractice]" class="practice-preview">
         <el-card class="preview-card">
           <template #header>
             <div class="preview-header">
