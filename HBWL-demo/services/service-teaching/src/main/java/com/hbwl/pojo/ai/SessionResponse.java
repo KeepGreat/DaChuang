@@ -12,6 +12,8 @@ public class SessionResponse {
     @JsonProperty("created_at")
     private String createdAt;
     private String message;
+    @JsonProperty("max_turns")
+    private Integer maxTurns;
 }
 
 //class SessionResponse(BaseModel):

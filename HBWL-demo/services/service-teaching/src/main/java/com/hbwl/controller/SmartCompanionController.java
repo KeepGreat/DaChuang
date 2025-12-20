@@ -14,14 +14,17 @@ public class SmartCompanionController {
     private SmartCompanionService smartCompanionService;
 
     @PostMapping("/session/create")
-    public Result createSession(@RequestBody CreateSessionRequest createSessionRequest){
+    public Result createSession(@RequestBody CreateSessionRequest createSessionRequest,
+                                @RequestHeader("userId") String userId,
+                                @RequestHeader("role") String role){
         SessionResponse response = smartCompanionService.createSession(createSessionRequest);
         return Result.success(response, null);
     }
 
     @PostMapping("/chat")
-    public Result chat(@RequestBody ChatRequest chatRequest){
-        ChatResponse response = smartCompanionService.chat(chatRequest);
+    public Result chat(@RequestBody ChatRequest chatRequest,
+                       @RequestHeader("userId") String userId){
+        ChatResponse response = smartCompanionService.chat(chatRequest, userId);
         return Result.success(response, null);
     }
 

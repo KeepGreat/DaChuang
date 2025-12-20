@@ -1,4 +1,4 @@
-package com.hbwl.ai.service;
+package com.hbwl.ai;
 
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;

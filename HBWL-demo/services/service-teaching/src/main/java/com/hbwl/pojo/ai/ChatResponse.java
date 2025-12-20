@@ -19,6 +19,14 @@ public class ChatResponse {
     private Integer guideCount;
     @JsonProperty("response_time")
     private String responseTime;
+    @JsonProperty("user_scores")
+    private UserScoreResponse userScores;
+    @JsonProperty("is_session_ended")
+    private Boolean isSessionEnded;
+    @JsonProperty("max_turns")
+    private Integer maxTurns;
+    @JsonProperty("remaining_turns")
+    private Integer remainingTurns;
 }
 
 //class ChatResponse(BaseModel):

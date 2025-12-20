@@ -48,6 +48,7 @@ public class UserAnswerController {
     @PutMapping
     public Result updateUserAnswerById(@RequestBody UserAnswer userAnswer){
         userAnswer.setScore(null);
+        userAnswer.setComment(null);
         int row = userAnswerService.updateUserAnswerById(userAnswer);
         if (row == -1) return Result.error("参数不能为空");
         if (row == 0) return Result.error("更新用户答案失败");

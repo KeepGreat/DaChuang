@@ -1,6 +1,6 @@
 package com.hbwl.test;
 
-import com.hbwl.ai.service.AITeacherService;
+import com.hbwl.ai.AITeacherService;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.document.parser.apache.tika.ApacheTikaDocumentParser;

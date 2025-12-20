@@ -8,8 +8,10 @@ import com.hbwl.analysis.pojo.AnalysisInput;
 import com.hbwl.analysis.pojo.AnalysisOutput;
 import com.hbwl.codesandbox.pojo.CodeSandboxInput;
 import com.hbwl.codesandbox.pojo.CodeSandboxOutput;
+import com.hbwl.common.Result;
 import com.hbwl.feign.AnalysisFeignClient;
 import com.hbwl.feign.CodeSandboxFeignClient;
+import com.hbwl.feign.EvaluationFeignClient;
 import com.hbwl.mapper.AnswerMapper;
 import com.hbwl.mapper.QuestionMapper;
 import com.hbwl.mapper.QuestionResourceMapper;
@@ -31,7 +33,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -57,6 +61,9 @@ public class UserAnswerServiceImpl implements UserAnswerService {
 
     @Autowired
     private AnalysisFeignClient analysisFeignClient;
+
+    @Autowired
+    private EvaluationFeignClient evaluationFeignClient;
 
     @Override
     public int addUserAnswer(UserAnswer userAnswer) {
@@ -179,6 +186,11 @@ public class UserAnswerServiceImpl implements UserAnswerService {
             analysisInput.setCodeSandboxOutput(codeSandboxOutput);
             AnalysisOutput analysisOutput = analysisFeignClient.analyze(analysisInput);
             userAnswer.setComment(analysisOutput.getAnalysis());
+            //将分析结果同步到评估模块
+            Map<String, String> score = new HashMap<>();
+            score.put("userId", userAnswer.getUserId());
+            score.put("score", JSONUtil.toJsonStr(analysisOutput.getScore()));
+            evaluationFeignClient.evaluateBaseOnPractice(score);
             //代码运行错误
             if (!codeSandboxOutput.getStatus().equals("Accepted")){
                 userAnswerOutputDTO.setCodeSandboxOutput(codeSandboxOutput);

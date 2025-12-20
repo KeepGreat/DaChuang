@@ -1,7 +1,8 @@
 package com.hbwl.test;
 
-import com.hbwl.ai.service.AITeacherService;
-import com.hbwl.ai.service.SmartCompanionService;
+import com.hbwl.ai.AITeacherService;
+import com.hbwl.ai.service.SmartTeacherService;
+import com.hbwl.teaching.pojo.TeachingInput;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +14,9 @@ public class ModelTest {
 
     @Autowired
     private AITeacherService aiTeacherService;
+
+    @Autowired
+    private SmartTeacherService smartTeacherService;
 
     @Test
     public void test01(){
@@ -35,6 +39,22 @@ public class ModelTest {
         String code = "#include<bits/stdc++.h>\n using namespace std; int main(){cout << 1/0; return 0;}";
         String codeLanguage = "cpp";
         Flux<String> flux = aiTeacherService.teach(question, code, codeLanguage);
+        StepVerifier.create(flux)
+                .thenConsumeWhile(element -> {
+                    System.out.print(element);
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void test03(){
+        String question = "什么是SpringBoot?";
+        String userId = "8163401c-2e9b-4d62-86b5-019f860765a1";
+        String role = "admin";
+        TeachingInput teachingInput = new TeachingInput();
+        teachingInput.setQuestion(question);
+        Flux<String> flux = smartTeacherService.answerQuestion(teachingInput, userId, role);
         StepVerifier.create(flux)
                 .thenConsumeWhile(element -> {
                     System.out.print(element);

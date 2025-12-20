@@ -92,6 +92,23 @@ public class JwtAuthController {
         return buildSuccessResponse(jwtTokenUtil.getUserRoleFromToken(token));
     }
 
+    //获取用户id
+    @PostMapping("/identity")
+    public Mono<ResponseEntity<Result>> identity(@RequestBody String token){
+        if (token == null || token.isEmpty()){
+            return buildFailureResponse("参数不能为空");
+        }
+        String usernameFromToken = jwtTokenUtil.getUsernameFromToken(token);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", usernameFromToken);
+        User user = userMapper.selectOne(queryWrapper);
+        String localId = user.getId();
+        if (!localId.equals(jwtTokenUtil.getUserIdFromToken(token))){
+            return buildFailureResponse("token信息出错！");
+        }
+        return buildSuccessResponse(jwtTokenUtil.getUserIdFromToken(token));
+    }
+
     private Mono<ResponseEntity<Result>> buildSuccessResponse(Object data){
         return Mono.just(ResponseEntity.ok(Result.success(data, "success")));
     }

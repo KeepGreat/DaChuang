@@ -6,7 +6,8 @@ public interface SmartCompanionService {
 
     SessionResponse createSession(CreateSessionRequest createSessionRequest);
 
-    ChatResponse chat(ChatRequest chatRequest);
+    //设置userId是为了向评估模块反馈
+    ChatResponse chat(ChatRequest chatRequest, String userId);
 
     HistoryResponse getConversationHistory(String sessionId);
 

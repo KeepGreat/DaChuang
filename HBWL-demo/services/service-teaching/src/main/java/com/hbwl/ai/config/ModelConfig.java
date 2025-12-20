@@ -1,6 +1,6 @@
 package com.hbwl.ai.config;
 
-import com.hbwl.ai.service.AITeacherService;
+import com.hbwl.ai.AITeacherService;
 import com.hbwl.ai.listener.CustomChatModelListener;
 import com.hbwl.ai.tool.CodeSandboxTool;
 import com.hbwl.ai.properties.TeachingProperties;
@@ -67,7 +67,7 @@ public class ModelConfig {
                 .user("postgres")
                 .password("123456")
                 .table("teaching_material")
-                .dimension(embeddingModel.dimension())
+                .dimension(embeddingModel.dimension()) //1024维
                 .createTable(true)
                 .build();
     }

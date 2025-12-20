@@ -9,6 +9,8 @@ public class CreateSessionRequest {
     private String sessionId;
     @JsonProperty("clear_history")
     private Boolean isClearHistory;
+    @JsonProperty("max_turns")
+    private Integer maxTurns;
 }
 
 //class CreateSessionRequest(BaseModel):
