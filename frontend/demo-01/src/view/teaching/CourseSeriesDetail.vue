@@ -165,9 +165,13 @@ const loadSeriesContent = async (seriesId) => {
     // 调用 store 的方法获取课程内容
     ElMessage.info('正在获取课程内容数据...')
 
-    const response = await teachingStore.fetchCourseContent(seriesId)
+    // 获取当前课程ID（从路由参数中获取）
+    const courseId = route.params.id
 
-    if (response.code === 200 && response.data && response.data.length > 0) {
+    // 调用 teachingStore 的 fetchMaterials 方法
+    const response = await teachingStore.fetchMaterials(seriesId, courseId)
+
+    if (response.code >= 200 && response.code < 300 && response.data && response.data.length > 0) {
       const contentData = response.data
       contentList.value = contentData
 
@@ -179,6 +183,9 @@ const loadSeriesContent = async (seriesId) => {
       seriesInfo.value.videoCount = videoCount
       seriesInfo.value.pdfCount = pdfCount
       seriesInfo.value.totalCount = contentData.length
+    } else if (response.code >= 200 && response.data && response.data.length === 0) {
+      // 没有数据但请求成功
+      ElMessage.warning('该课程系列暂无内容')
     }
 
     hasFetched.value = true
@@ -186,6 +193,10 @@ const loadSeriesContent = async (seriesId) => {
   } catch (error) {
     console.error('加载内容失败:', error)
     ElMessage.error('加载课程内容失败，请重试')
+
+    // store 已经处理了错误，包括返回模拟数据
+    contentList.value = teachingStore.getContentBySeriesId(seriesId)
+    hasFetched.value = true
   }
 }
 

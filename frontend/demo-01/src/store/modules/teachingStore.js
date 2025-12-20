@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { getCourses } from "@/api/modules/teaching/CourseAPI";
+import { getMaterials } from "@/api/modules/teaching/MaterialAPI";
 // import { testpdf } from "@/assets/test_pdf.pdf";
 
 // 模拟延迟函数
@@ -14,7 +15,7 @@ export const useTeachingStore = defineStore("teaching", () => {
   const loading = ref(false);
   const error = ref(null);
 
-  // 获取所有课程系列
+  // // 获取所有课程系列
   const fetchCourseSeries = async () => {
     // loading.value = true;
     // error.value = null;
@@ -240,6 +241,79 @@ export const useTeachingStore = defineStore("teaching", () => {
     return courseContent.value[seriesId] || [];
   };
 
+  // 获取资料数据
+  const fetchMaterials = async (seriesId, courseId) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      // 调用 getMaterials API
+      const response = await getMaterials(
+        seriesId, // 资料ID
+        null, // 类型
+        null, // 创建时间
+        null, // 更新时间
+        courseId // 课程ID
+      );
+
+      if (response && response.code >= 200 && response.code < 300) {
+        // 缓存内容
+        courseContent.value[seriesId] = response.data || [];
+
+        return response;
+      }
+
+      throw new Error("API返回数据格式错误");
+    } catch (err) {
+      console.error("获取资料数据失败:", err);
+      error.value = err.message;
+
+      // 返回模拟数据
+      const mockData = [
+        {
+          id: seriesId,
+          title: "Python基础语法入门",
+          type: "video",
+          url: "https://www.w3schools.com/html/mov_bbb.mp4",
+          duration: "15:30",
+          description: "学习Python的基本语法和数据类型",
+          createdTime: new Date().toISOString(),
+          updatedTime: new Date().toISOString(),
+        },
+        {
+          id: seriesId + 1,
+          title: "Python变量与数据类型",
+          type: "pdf",
+          url: "/src/assets/test_pdf.pdf",
+          description: "深入理解Python的变量和基本数据类型",
+          createdTime: new Date().toISOString(),
+          updatedTime: new Date().toISOString(),
+        },
+        {
+          id: seriesId + 2,
+          title: "Python流程控制语句",
+          type: "video",
+          url: "https://www.w3schools.com/html/mov_bbb.mp4",
+          duration: "20:15",
+          description: "掌握if-else、for循环、while循环等流程控制",
+          createdTime: new Date().toISOString(),
+          updatedTime: new Date().toISOString(),
+        },
+      ];
+
+      // 缓存模拟数据
+      courseContent.value[seriesId] = mockData;
+
+      return {
+        code: 200,
+        message: "使用模拟数据",
+        data: mockData,
+      };
+    } finally {
+      loading.value = false;
+    }
+  };
+
   // 清除错误
   const clearError = () => {
     error.value = null;
@@ -318,6 +392,7 @@ export const useTeachingStore = defineStore("teaching", () => {
     fetchCourseContent,
     getContentBySeriesId,
     fetchCourses,
+    fetchMaterials,
     clearError,
     resetState,
   };

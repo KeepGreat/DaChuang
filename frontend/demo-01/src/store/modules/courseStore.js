@@ -297,7 +297,7 @@ export const useCourseStore = defineStore("course", () => {
       return {
         code: 200,
         message: "使用测试数据",
-        data: originalCourses.value
+        data: originalCourses.value,
       };
     } finally {
       loading.value = false;
