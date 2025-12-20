@@ -44,8 +44,8 @@
 
 <script setup>
 // 导入必要的库和组件
-import { ref, onMounted, nextTick, watch } from "vue";
 import { ArrowRight } from "@element-plus/icons-vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 
 // ==========================================================================\n// Props 定义：父组件传递的数据
 // ==========================================================================
@@ -54,8 +54,7 @@ const props = defineProps({
   questionTypes: {
     type: Array,
     required: true,
-    description:
-      "包含所有题型的数组，每个题型包含id、name、answered和total属性",
+    description: "包含所有题型的数组，每个题型包含id、name、answered和total属性",
   },
   // 当前激活的题型ID
   activeTypeId: {
@@ -98,7 +97,7 @@ watch(
     nextTick(() => {
       updateBackgroundBoxToActiveItem();
     });
-  },
+  }
 );
 
 // ==========================================================================\n// 核心功能函数
@@ -149,8 +148,7 @@ function updateBackgroundBoxFromEvent(event) {
 function updateBackgroundBoxPosition(element) {
   if (element) {
     const rect = element.getBoundingClientRect();
-    const containerRect =
-      element.parentElement.parentElement.getBoundingClientRect();
+    const containerRect = element.parentElement.parentElement.getBoundingClientRect();
 
     // 计算背景框的位置和高度
     backgroundBoxTop.value = rect.top - containerRect.top;
@@ -182,9 +180,7 @@ function resetBackgroundBox() {
  * @returns {HTMLElement|null} - 激活的题型项DOM元素，如果没有则返回null
  */
 function findActiveQuestionTypeItem() {
-  return questionTypeItems.value.find((item) =>
-    item.classList.contains("active"),
-  );
+  return questionTypeItems.value.find((item) => item.classList.contains("active"));
 }
 </script>
 
@@ -237,9 +233,7 @@ function findActiveQuestionTypeItem() {
   left: 0;
   width: 100%;
   background-color: rgba(37, 99, 235, 0.12);
-  transition:
-    top 0.25s ease,
-    height 0.25s ease;
+  transition: top 0.25s ease, height 0.25s ease;
   z-index: 0;
   border-left: 3px solid #2563eb;
 }

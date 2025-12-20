@@ -21,7 +21,7 @@ import request from "@/utils/request";
  * @property {number|null} id - 索引ID
  * @property {number|null} practiceId - 练习ID
  * @property {number} courseSectionId - 课程系列ID
- * @property {number} courseId - 课程ID
+ * @property {number} courseId - 课程对应ID，若无则为0，即为整个课程的练习
  */
 
 // request
