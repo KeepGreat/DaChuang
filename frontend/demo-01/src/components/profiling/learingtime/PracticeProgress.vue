@@ -6,18 +6,18 @@
 
 <script setup>
 import * as echarts from "echarts";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, onBeforeUnmount } from "vue";
 
 const chartRef = ref(null);
 
 onMounted(() => {
-  const chart = echarts.init(chartRef.value);
+  let chart = echarts.init(chartRef.value);
 
   chart.setOption({
     backgroundColor: "transparent",
 
     title: {
-      text: "练习完成进度",
+      text: "练习完成进度（单位：百分比）",
       left: "center",
       top: 10,
       textStyle: {
@@ -28,6 +28,7 @@ onMounted(() => {
 
     tooltip: {
       trigger: "axis",
+       formatter: "{b}：{c}%",
       backgroundColor: "rgba(0,0,0,0.75)",
       borderWidth: 0,
       padding: 12,
@@ -55,6 +56,7 @@ onMounted(() => {
 
     yAxis: {
       type: "value",
+      name: "完成度 (%)",
       max: 100,
       axisLine: { show: false },
       axisTick: { show: false },
@@ -101,7 +103,14 @@ onMounted(() => {
     ]
   });
 
-  window.addEventListener("resize", () => chart.resize());
+  const handleResize = () => chart && chart.resize();
+  window.addEventListener("resize", handleResize);
+
+  onBeforeUnmount(() => {
+    window.removeEventListener("resize", handleResize);
+    try { chart && chart.dispose(); } catch (e) {}
+    chart = null;
+  });
 });
 </script>
 

@@ -1,21 +1,22 @@
 import { createPinia } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
-// 导入所有store模块
-import { useCounterStore } from "./modules/testCountStore";
-import { testClassifm } from "./modules/testClassifm";
-import { useCourseStore } from "./modules/courseStore";
-import { useAssignmentStore } from "./modules/assignmentStore";
-
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
-export {
-  pinia,
-  // 原有的store
-  useCounterStore,
-  testClassifm,
-  // 新增的store
-  useCourseStore,
-  useAssignmentStore
-}
+// 统一导出所有store模块
+export * from "./modules/auth/user";
+export * from "./modules/courseStore";
+export * from "./modules/discussionStore";
+export * from "./modules/examStore";
+export * from "./modules/practice/answerStore";
+export * from "./modules/practice/practiceStore";
+export * from "./modules/practice/questionResourceStore";
+export * from "./modules/practice/questionsStore";
+export * from "./modules/practice/userAnswerStore";
+export * from "./modules/resourceStore";
+export * from "./modules/taskStore";
+export * from "./modules/testClassifm";
+export * from "./modules/testCountStore";
+
+export { pinia };
