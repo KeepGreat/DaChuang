@@ -1,44 +1,37 @@
 import { createRouter, createWebHashHistory } from "vue-router";
-
+import MainLanding from '../components/MainLanding.vue';
+import Layout from '../components/Layout.vue';
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     // 主界面，没有左侧栏
     /*{ path: "/", name: "MainLanding", component: () => import("@/components/MainLanding.vue") },*/
-
+{ path: '/', name: 'MainLanding', component: MainLanding },
     // 所有有左侧栏的页面都用 Layout 包裹
     {
       path: "/",
-      component: () => import("@/layout/main/index.vue"),
+      component: Layout,
       children: [
-        // Profiling 页面
+         // Profiling 页面
         {
-          path: "/",
-          name: "MainLanding",
-          component: () => import("@/view/MainLanding.vue"),
+          path: 'profile',
+          name: 'Profile',
+          component: () => import('../components/profiling/ProfilePage.vue')
         },
         {
-          path: "profile",
-          name: "Profile",
-          component: () => import("@/components/profiling/ProfilePage.vue"),
+          path: 'LearningTime',
+          name: 'LearningTime',
+          component: () => import('../components/profiling/LearingTime.vue')
         },
         {
-          path: "LearningTime",
-          name: "LearningTime",
-          component: () => import("@/components/profiling/LearingTime.vue"),
+          path: 'course/:id',
+          name: 'CourseView',
+          component: () => import('../components/profiling/image/CourseDetail.vue'), props: true
         },
         {
-          path: "course/:id",
-          name: "CourseView",
-          component: () =>
-            import("@/components/profiling/image/CourseDetail.vue"),
-          props: true,
-        },
-        {
-          path: "CoursePlaceholder",
-          name: "CoursePlaceholder",
-          component: () =>
-            import("@/components/profiling/image/CoursePlaceholder.vue"),
+          path: 'CoursePlaceholder',
+          name: 'CoursePlaceholder',
+          component: () => import('../components/profiling/image/CoursePlaceholder.vue')
         },
 
         // Teaching 页面
@@ -73,13 +66,13 @@ const router = createRouter({
               component: () => import("@/view/teaching/TaskDetail.vue"),
             },
             {
-              path: "assignment",
-              name: "AssignmentList",
-              component: () => import("@/view/teaching/AssignmentList.vue"),
+              path: "practice",
+              name: "PracticeList",
+              component: () => import("@/view/teaching/PracticeList.vue"),
             },
             {
-              path: "assignment/:assignmentId",
-              name: "AssignmentDetail",
+              path: "practice/:practiceId",
+              name: "PracticeDetail",
               component: () => import("@/view/practice/Practice.vue"),
             },
             {
@@ -139,7 +132,7 @@ const router = createRouter({
         {
           path: "prac",
           name: "Practice",
-          component: () => import("@/view/Practice.vue"),
+          component: () => import("@/view/practice/Practice.vue"),
         },
 
   

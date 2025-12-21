@@ -5,7 +5,7 @@ import axios from "axios";
  * @import { ApiResponse, ApiEmptyResponse, Page } from "@/utils/types"
  */
 
-// 实体类
+// model
 /**
  * 问题资源实体类
  * @typedef {Object} QuestionResource

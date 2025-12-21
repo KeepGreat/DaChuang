@@ -156,8 +156,11 @@ onMounted(async () => {
     await courseStore.fetchCoursePage(1, 12);
     console.log('课程数据加载成功', courseStore.courses);
   } catch (error) {
-    // 使用默认数据
-    courses.value = classifm.class_data || [];
+    // 使用默认数据 - 直接修改store中的数据而不是计算属性
+    if (classifm.class_data && classifm.class_data.length > 0) {
+      courseStore.courses = classifm.class_data;
+      courseStore.originalCourses = classifm.class_data;
+    }
     console.log('使用默认课程数据');
   }
 });

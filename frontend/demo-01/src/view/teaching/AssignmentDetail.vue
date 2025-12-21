@@ -9,7 +9,7 @@
     </el-button>
 
     <div class="assignment-content">
-      <!-- 左侧作业信息 -->
+      <!-- 左侧练习信息 -->
       <div class="assignment-info-panel">
         <el-card class="info-card">
           <template #header>
@@ -39,7 +39,7 @@
           </div>
 
           <div class="assignment-description">
-            <h4>作业要求</h4>
+            <h4>练习要求</h4>
             <div class="description-content" v-html="assignment.requirement"></div>
           </div>
 
@@ -168,7 +168,7 @@ import cpp from 'highlight.js/lib/languages/cpp';
 import python from 'highlight.js/lib/languages/python';
 import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/atom-one-light.css';
-import { useAssignmentStore } from '@/store';
+import { usePracticeStore } from '@/store';
 
 hljs.registerLanguage('cpp', cpp);
 hljs.registerLanguage('python', python);
@@ -178,10 +178,10 @@ const route = useRoute();
 const router = useRouter();
 
 // 使用Pinia store
-const assignmentStore = useAssignmentStore();
+const practiceStore = usePracticeStore();
 
-// 作业信息
-const assignment = computed(() => assignmentStore.currentAssignment || {});
+// 练习信息
+const assignment = computed(() => practiceStore.currentAssignment || {});
 
 // 代码相关
 const selectedLanguage = ref('cpp');
@@ -203,23 +203,23 @@ const languageMap = {
   java: 'Java'
 };
 
-// 获取作业详情
+// 获取练习详情
 const fetchAssignmentDetail = () => {
   const assignmentId = route.params.assignmentId;
   console.log('Assignment ID:', assignmentId); // 调试日志
 
-  // 从store获取作业数据
-  const assignmentData = assignmentStore.getAssignmentById(assignmentId);
+  // 从store获取练习数据
+  const assignmentData = practiceStore.getAssignmentById(assignmentId);
 
   if (assignmentData) {
-    assignmentStore.setCurrentAssignment(assignmentData);
+    practiceStore.setCurrentAssignment(assignmentData);
   }
 
   // 获取提交历史
-  submissionHistory.value = assignmentStore.getSubmissionHistory(assignmentId);
+  submissionHistory.value = practiceStore.getSubmissionHistory(assignmentId);
 
   // 初始化代码
-  codeContent.value = assignmentStore.getCodeTemplate(assignmentId, selectedLanguage.value);
+  codeContent.value = practiceStore.getCodeTemplate(assignmentId, selectedLanguage.value);
   nextTick(() => highlightCode());
 };
 
@@ -275,29 +275,29 @@ const runTest = () => {
   }, 1000);
 };
 
-// 提交作业
+// 提交练习
 const submitAssignment = async () => {
   const assignmentId = route.params.assignmentId;
   try {
     ElMessage.loading('正在提交...');
 
     // 使用store的提交方法
-    await assignmentStore.submitAssignment(
+    await practiceStore.submitAssignment(
       assignmentId,
       codeContent.value,
       selectedLanguage.value
     );
 
-    ElMessage.success('作业提交成功！');
+    ElMessage.success('练习提交成功！');
 
     // 刷新提交历史
-    submissionHistory.value = assignmentStore.getSubmissionHistory(assignmentId);
+    submissionHistory.value = practiceStore.getSubmissionHistory(assignmentId);
   } catch (error) {
     ElMessage.error('提交失败，请重试');
   }
 };
 
-// 返回作业列表
+// 返回练习列表
 const handleBack = () => {
   // 确保使用正确的courseId参数
   const courseId = route.params.courseId || route.params.id;
@@ -338,7 +338,7 @@ const getProgressColor = (percentage) => {
 // 监听语言变化
 watch(selectedLanguage, (newLang) => {
   const assignmentId = route.params.assignmentId;
-  codeContent.value = assignmentStore.getCodeTemplate(assignmentId, newLang);
+  codeContent.value = practiceStore.getCodeTemplate(assignmentId, newLang);
   nextTick(() => highlightCode());
 });
 

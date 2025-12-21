@@ -57,7 +57,7 @@
 </template>
 
 <script setup>
-import { login } from "@/api";
+import { getUserRole, login } from "@/api";
 import { useFormValidation } from "@/hooks";
 import { useUserStore } from "@/store";
 import { BusinessError } from "@/utils/error";
@@ -103,20 +103,21 @@ async function handleLogin() {
     const isValid = await validateForm(loginFormRef.value);
     if (!isValid) return;
 
-    const res = await login(loginForm);
+    const tokenRes = await login(loginForm);
 
-    // 登录成功
-    if (res.data) {
-      // 保存token
-      userStore.setToken(res.data);
+    // 登录成功, 保存token
+    userStore.setToken(tokenRes.data);
 
-      ElMessage.success("登录成功");
+    // 调用getUserRole接口获取用户角色
+    const roleRes = await getUserRole({ token: tokenRes.data });
 
-      // TODO 处理role的逻辑，存储role到store，push到不同页面，但是目前还没有接口
+    // 保存角色到store
+    userStore.setUserRole(roleRes.data);
+    ElMessage.success("登录成功");
 
-      // 跳转到首页
-      router.push("/");
-    }
+    // 根据角色跳转到不同页面
+    const roleDefaultRoute = userStore.getDefaultRoute();
+    router.push(roleDefaultRoute);
   } catch (error) {
     console.error("登录失败:", error);
     if (error instanceof BusinessError) {
@@ -125,7 +126,7 @@ async function handleLogin() {
       } else if (error.code === 404) {
         ElMessage.error("用户不存在");
       } else {
-        ElMessage.error("登录失败，请稍后重试");
+        ElMessage.error(error.message);
       }
     } else {
       ElMessage.error("网络错误，请稍后重试");
@@ -135,9 +136,10 @@ async function handleLogin() {
   }
 }
 
-const goRegister = () => {
-  router.push("/register"); // 跳转到注册页面
-};
+// 跳转到注册页面
+function goRegister() {
+  router.push("/register");
+}
 </script>
 
 <style scoped>

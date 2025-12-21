@@ -4,7 +4,7 @@ import request from "@/utils/request";
  * @import { ApiResponse, ApiEmptyResponse, Page } from "@/utils/types"
  */
 
-// 实体类
+// model
 /**
  * 问题索引实体类
  * @typedef {Object} QuestionIndex
@@ -91,7 +91,7 @@ export function getQuestionIndexes(params = {}) {
  * @param {Object} [queryParams] - 查询参数（均为可选）
  * @param {number} [queryParams.practiceId] - 练习ID
  * @param {number} [queryParams.questionId] - 问题ID
- * @returns {Promise<ApiResponse<Page<QuestionIndex>>} 分页问题索引列表
+ * @returns {Promise<ApiResponse<Page<QuestionIndex>>>} 分页问题索引列表
  */
 export function getQuestionIndexesPage(pageParams, queryParams = {}) {
   const { pageNo, pageSize } = pageParams;

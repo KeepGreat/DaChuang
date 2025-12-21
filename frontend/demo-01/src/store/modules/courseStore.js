@@ -1,7 +1,7 @@
+import { getCourseSectionsPage, getAllCourseSections } from "@/api";
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { getCourseSectionsPage, getAllCourseSections } from "@/api";
-import { useUserStore } from "./user";
+import { useUserStore } from "./auth/user";
 
 export const useCourseStore = defineStore("course", () => {
   // State

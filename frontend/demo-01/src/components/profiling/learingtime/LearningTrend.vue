@@ -19,7 +19,7 @@ onMounted(() => {
     backgroundColor: "transparent",
 
     title: {
-      text: "学习活跃度趋势",
+      text: "学习活跃度趋势（单位：小时）",
       left: "center",
       top: 10,
       textStyle: {
@@ -30,6 +30,7 @@ onMounted(() => {
 
     tooltip: {
       trigger: "axis",
+       formatter: "{b}：{c} 小时",
       backgroundColor: "rgba(50,50,50,0.8)",
       borderWidth: 0,
       textStyle: { color: "#fff" },
@@ -50,6 +51,9 @@ onMounted(() => {
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { color: "#666", fontSize: 14 },
+      name: "星期",
+      nameLocation: "middle",
+      nameGap: 30,
     },
 
     yAxis: {
@@ -123,4 +127,5 @@ onMounted(() => {
   height: 420px;
   margin: 0 auto;
 }
+
 </style>

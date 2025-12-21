@@ -20,9 +20,9 @@ export const register = {
         };
       }
 
-      // 创建新用户
+      // 创建新用户，用户ID使用string类型
       const newUser = {
-        id: getNextId(users),
+        id: getNextId(users, "string"),
         username,
         password,
         role,
@@ -121,6 +121,8 @@ export const getUserRole = {
         };
       }
 
+      console.log(`用户 ${user.username} 的角色是 ${user.role}`);
+
       return {
         code: 200,
         message: "获取用户权限成功",
@@ -128,6 +130,48 @@ export const getUserRole = {
       };
     } catch (error) {
       console.error("identify error:", error);
+      return {
+        code: 500,
+        message: "Internal Server Error",
+        data: null,
+      };
+    }
+  },
+};
+
+export const getUserId = {
+  url: "/identity",
+  method: "post",
+  response: (req) => {
+    try {
+      console.log("req:", req);
+      const { token } = req.body;
+
+      if (!token) {
+        return {
+          code: 400,
+          message: "token 不能为空",
+          data: null,
+        };
+      }
+
+      const user = validateToken(token, users);
+
+      if (!user) {
+        return {
+          code: 401,
+          message: "无效的token",
+          data: null,
+        };
+      }
+
+      return {
+        code: 200,
+        message: "获取用户ID成功",
+        data: user.id,
+      };
+    } catch (error) {
+      console.error("getUserId error:", error);
       return {
         code: 500,
         message: "Internal Server Error",
@@ -182,4 +226,4 @@ export const refreshToken = {
   },
 };
 
-export default [register, login, getUserRole, refreshToken];
+export default [register, login, getUserRole, getUserId, refreshToken];

@@ -27,7 +27,7 @@
       </div>
 
       <!-- 计时器显示（当有剩余时间时） -->
-      <div class="timer" v-if="remainingTime">
+      <div class="timer" :class="{ 'timer-urgent': isTimeUrgent }" v-if="remainingTime">
         <el-icon class="timer-icon"><Timer /></el-icon>
         <span class="timer-text">{{ remainingTime }}</span>
       </div>
@@ -38,7 +38,7 @@
 <script setup>
 // 导入依赖
 import { useRouter } from "vue-router";
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, onUnmounted, computed } from "vue";
 import { ArrowLeft, Timer } from "@element-plus/icons-vue";
 
 // 初始化路由
@@ -46,7 +46,7 @@ const router = useRouter();
 
 // =============== 组件属性与事件 ===============
 // 定义组件事件
-const emit = defineEmits(["update:singleQuestionMode"]);
+const emit = defineEmits(["update:singleQuestionMode", "time-up"]);
 
 // 定义组件属性
 const props = defineProps({
@@ -59,11 +59,11 @@ const props = defineProps({
   },
 
   /**
-   * 剩余时间
+   * 截止时间
    */
-  remainingTime: {
-    type: String,
-    default: "00:00",
+  deadline: {
+    type: [Date, String],
+    default: null,
   },
 
   /**
@@ -87,6 +87,91 @@ const props = defineProps({
 // 本地单题作答模式状态（用于双向绑定）
 const singleQuestionModeLocal = ref(props.singleQuestionMode);
 
+// 倒计时相关状态
+const remainingTime = ref('30:00');
+const isTimeUrgent = ref(false); // 是否紧急（少于30分钟）
+let timerInterval = null;
+
+// =============== 计算属性 ===============
+// 计算剩余秒数
+const calculateRemainingSeconds = () => {
+  if (!props.deadline) {
+    // 如果没有设置截止时间，默认30分钟
+    return 30 * 60;
+  }
+  
+  const now = Date.now();
+  const deadlineTime = props.deadline instanceof Date ? props.deadline.getTime() : new Date(props.deadline).getTime();
+  const diff = deadlineTime - now;
+  return Math.max(0, Math.floor(diff / 1000));
+};
+
+// 格式化时间显示
+const formatTime = (seconds) => {
+  if (seconds <= 0) {
+    return '00:00';
+  }
+  
+  // 计算天数
+  const days = Math.floor(seconds / (24 * 60 * 60));
+  
+  // 如果剩余时间大于1天，显示天数
+  if (days > 0) {
+    return `${days}天`;
+  }
+  
+  // 否则显示时:分:秒
+  const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+  const mins = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+  const secs = (seconds % 60).toString().padStart(2, '0');
+  
+  // 如果小时为0，只显示分:秒
+  if (hours === '00') {
+    return `${mins}:${secs}`;
+  }
+  
+  return `${hours}:${mins}:${secs}`;
+};
+
+// 更新剩余时间
+const updateRemainingTime = () => {
+  const seconds = calculateRemainingSeconds();
+  remainingTime.value = formatTime(seconds);
+  
+  // 判断是否少于30分钟（1800秒）
+  isTimeUrgent.value = seconds > 0 && seconds < 1800;
+  
+  return seconds;
+};
+
+// 启动倒计时
+const startTimer = () => {
+  // 清除可能存在的旧计时器
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+  
+  // 初始化剩余时间
+  const initialSeconds = updateRemainingTime();
+
+  if (initialSeconds <= 0) {
+    console.log('练习时间已结束');
+    emit('time-up');
+    return;
+  }
+
+  timerInterval = setInterval(() => {
+    const seconds = updateRemainingTime();
+    if (seconds <= 0) {
+      // 时间结束，停止计时器
+      clearInterval(timerInterval);
+      timerInterval = null;
+      console.log('练习时间结束');
+      emit('time-up');
+    }
+  }, 1000);
+};
+
 // =============== 监听与响应 ===============
 // 监听父组件传递的单题作答模式变化，同步到本地状态
 watch(
@@ -95,6 +180,20 @@ watch(
     singleQuestionModeLocal.value = newVal;
   },
 );
+
+// =============== 生命周期钩子 ===============
+// 组件挂载时启动倒计时
+onMounted(() => {
+  startTimer();
+});
+
+// 组件卸载时清理计时器
+onUnmounted(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+});
 
 // =============== 事件处理函数 ===============
 /**
@@ -188,6 +287,12 @@ function handleSingleQuestionToggle(value) {
   border-radius: 10px;
   font-weight: 600;
   color: #2563eb;
+}
+
+.timer-urgent {
+  background: linear-gradient(180deg, #fff, #fef2f2);
+  border: 1px solid #fecaca;
+  color: #dc2626;
 }
 
 .timer-icon {
