@@ -1,13 +1,11 @@
-// 主品牌色
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-
-// 渐变背景
-$gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-$gradient-brand: linear-gradient(45deg, #2563eb, #1d4ed8);
-
-// 基础色
-$bg-white: #ffffff;
-$bg-light: #f0f9ff;
-$text-primary: #1e293b;
-$border-light: #e2e8f0;
+// 定义全局CSS变量
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-brand: linear-gradient(45deg, #2563eb, #1d4ed8);
+  --bg-white: #ffffff;
+  --bg-light: #f0f9ff;
+  --text-primary: #1e293b;
+  --border-light: #e2e8f0;
+}
