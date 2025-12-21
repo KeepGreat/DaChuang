@@ -71,11 +71,6 @@ const router = createRouter({
               component: () => import("@/view/teaching/PracticeList.vue"),
             },
             {
-              path: "practice/:practiceId",
-              name: "PracticeDetail",
-              component: () => import("@/view/practice/Practice.vue"),
-            },
-            {
               path: "exam",
               name: "ExamList",
               component: () => import("@/view/teaching/ExamList.vue"),
@@ -129,11 +124,6 @@ const router = createRouter({
           name: "Pracindex",
           component: () => import("@/view/PracticeIndex.vue"),
         },
-        {
-          path: "prac",
-          name: "Practice",
-          component: () => import("@/view/practice/Practice.vue"),
-        },
 
   
         // 其他页面
@@ -150,30 +140,10 @@ const router = createRouter({
       ],
     },
 
-    {
-      path: "/courses/:id/practice/:pracId",
-      name: "Practices",
-      props: true,
+    // 练习页面 - 独立路由，不使用主布局
+    {path: "/prac/:id/:practiceId",
+      name: "Practice",
       component: () => import("@/view/practice/Practice.vue"),
-    },
-
-    {
-      path: "/courses/:id",
-      props: true,
-      component: () => import("@/layout/course/index.vue"),
-      children: [
-        {
-          path: "",
-          name: "t",
-          component: () => import("@/view/teaching/Teaching.vue"),
-        },
-        {
-          path: "pracindex",
-          name: "PracticeIndex",
-          props: true,
-          component: () => import("@/view/practice/PracticeIndex.vue"),
-        },
-      ],
     },
 
     // AI学伴页面 - 独立路由，不使用主布局

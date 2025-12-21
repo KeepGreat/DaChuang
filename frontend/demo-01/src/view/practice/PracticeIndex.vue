@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { Compass, Cpu } from "@element-plus/icons-vue";
+import { Cpu } from "@element-plus/icons-vue";
 import { ElCard, ElIcon, ElMessage } from "element-plus";
 import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -51,12 +51,6 @@ const loading = ref(false);
 // 直接返回所有练习，不进行分页
 const paginatedPractices = computed(() => {
   return practices.value;
-});
-
-// 实验室数据
-const lab = ref({
-  id: 1,
-  description: "",
 });
 
 // 获取练习列表

@@ -7,7 +7,7 @@
           <div class="header-left">
             <h3>练习任务</h3>
             <div class="stats">
-              <span>共 {{ practices.length }} 个练习</span>
+              <span>共 {{ allPractices.length }} 个练习</span>
             </div>
           </div>
           <div class="header-right">
@@ -16,7 +16,7 @@
               v-model:page-size="pageSize"
               :page-sizes="[6, 12, 18]"
               layout="prev, pager, next"
-              :total="practices.length"
+              :total="allPractices.length"
               @size-change="handleSizeChange"
               @current-change="handleCurrentChange"
               small
@@ -41,7 +41,7 @@
         </div>
 
         <!-- 空状态 -->
-        <div v-else-if="practices.length === 0" class="empty-state">
+        <div v-else-if="allPractices.length === 0" class="empty-state">
           <el-icon class="empty-icon"><Edit /></el-icon>
           <p>暂无练习任务</p>
         </div>
@@ -59,12 +59,12 @@
               <el-icon><Cpu /></el-icon>
             </div>
             <div class="practice-info">
-              <h4>{{ practice.name }}</h4>
-              <p>包含 {{ practice.questionNum }} 个问题的练习</p>
+              <h4>{{ practice.title }}</h4>
+              <p>{{ practice.description }}</p>
               <div class="practice-meta">
-                <span class="deadline" v-if="practice.expiredAt">
+                <span class="deadline" v-if="practice.deadline">
                   <el-icon><Clock /></el-icon>
-                  截止: {{ formatDeadline(practice.expiredAt) }}
+                  截止: {{ formatDeadline(practice.deadline) }}
                 </span>
                 <span class="deadline" v-else>
                   <el-icon><Clock /></el-icon>
@@ -184,11 +184,12 @@
 </template>
 
 <script setup>
-import { Compass, Cpu, Clock, Warning, Edit } from "@element-plus/icons-vue";
+import { Cpu, Clock, Warning, Edit, Compass } from "@element-plus/icons-vue";
 import { ElCard, ElIcon, ElPagination, ElButton, ElTag, ElMessage } from "element-plus";
 import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getPractices } from "@/api/modules/practice/practice";
+import { getPracticeIndexes } from "@/api/modules/practice/practiceIndex";
 import { getQuestionByIndex } from "@/api/modules/practice/question";
 import { useQuestionsStore, usePracticeStore } from "@/store";
 
@@ -196,18 +197,20 @@ const router = useRouter();
 const questionsStore = useQuestionsStore();
 const practiceStore = usePracticeStore();
 
-// 选中状态
-const selectedPractice = ref(null);
+// 选中状态 - 使用 store 的 selectedPractice
+const selectedPractice = computed(() => practiceStore.selectedPractice);
 const loadingQuestions = ref(false);
 
 // 滚动条显示控制
 const isScrolling = ref(false);
 let scrollTimeout = null;
 
-// 练习任务数据 - 从API获取
-const practices = ref([]);
+// 练习任务数据 - 从 store 获取
 const loading = ref(false);
 const error = ref(null);
+
+// 从 store 获取所有练习
+const allPractices = computed(() => practiceStore.practices);
 
 // 分页相关
 const currentPage = ref(1);
@@ -215,7 +218,7 @@ const pageSize = ref(6);
 
 const paginatedPractices = computed(() => {
   const startIndex = (currentPage.value - 1) * pageSize.value;
-  return practices.value.slice(startIndex, startIndex + pageSize.value);
+  return allPractices.value.slice(startIndex, startIndex + pageSize.value);
 });
 
 // 当前选中练习的题目数量
@@ -241,7 +244,8 @@ const selectPractice = async (index) => {
     return;
   }
   
-  selectedPractice.value = index;
+  // 使用 store 的 action 设置选中状态
+  practiceStore.setSelectedPractice(index);
   const practice = paginatedPractices.value[index];
   
   if (!practice) {
@@ -291,20 +295,46 @@ const handleScroll = () => {
 const fetchPractices = async () => {
   loading.value = true;
   error.value = null;
-  
+
   try {
-    // 获取当前时间
-    const currentTime = new Date().toISOString();
+    // 步骤1: 获取所有练习索引信息，建立practiceId到courseSectionId的映射
+    const practiceIndexesResponse = await getPracticeIndexes({});
     
-    // 调用API获取练习数据
+    if (practiceIndexesResponse.code !== 200 || !practiceIndexesResponse.data) {
+      throw new Error('获取练习索引信息失败');
+    }
+
+    // 创建practiceId到课程信息的映射
+    const practiceIndexMap = new Map();
+    practiceIndexesResponse.data.forEach(index => {
+      if (index.practiceId) {
+        practiceIndexMap.set(index.practiceId, {
+          courseSectionId: index.courseSectionId,
+          courseId: index.courseId || 0
+        });
+      }
+    });
+
+    // 步骤2: 如果没有练习索引，直接返回空列表
+    if (practiceIndexMap.size === 0) {
+      practiceStore.resetPractices([]);
+      return;
+    }
+
+    // 步骤3: 获取所有可用的练习数据
+    const currentTime = new Date().toISOString();
     const response = await getPractices({
       createdAtEnd: currentTime // 获取创建日期在当前时间之前的练习
     });
     
     if (response.code === 200 && response.data) {
-      // 过滤并排序数据：按截止时间降序排序（截止时间越晚顺序越前）
-      practices.value = response.data
+      // 步骤4: 过滤和转换练习数据，只保留有索引信息的练习
+      const fetchedPractices = response.data
         .filter(practice => {
+          // 只保留有索引信息的练习
+          if (!practiceIndexMap.has(practice.id)) {
+            return false;
+          }
           // 确保创建时间在当前时间之前
           if (!practice.createdAt) return true;
           return new Date(practice.createdAt) <= new Date(currentTime);
@@ -316,16 +346,30 @@ const fetchPractices = async () => {
           if (!b.expiredAt) return 1;
           return new Date(b.expiredAt) - new Date(a.expiredAt);
         })
-        .map(practice => ({
-          id: practice.id,
-          name: practice.name,
-          createdAt: practice.createdAt,
-          expiredAt: practice.expiredAt,
-          questionNum: practice.questionNum || 0
-        }));
-      
-      // 如果获取到了练习，默认选择第一个
-      if (practices.value.length > 0) {
+        .map((practice) => {
+          const practiceInfo = practiceIndexMap.get(practice.id);
+          return {
+            id: practice.id.toString(),
+            courseSectionId: practiceInfo.courseSectionId,
+            courseId: practiceInfo.courseId,
+            title: practice.name,
+            description: `包含 ${practice.questionNum} 个问题的练习`,
+            requirement: "",
+            deadline: practice.expiredAt ? new Date(practice.expiredAt).toISOString() : null,
+            status: "未开始",
+            score: null,
+            totalScore: 100,
+            difficulty: 1,
+            questionNum: practice.questionNum || 0,
+            createTime: practice.createdAt || new Date().toISOString()
+          };
+        });
+
+      // 步骤5: 更新practiceStore中的练习列表
+      practiceStore.resetPractices(fetchedPractices);
+
+      // 步骤6: 如果获取到了练习，默认选择第一个
+      if (allPractices.value.length > 0) {
         selectPractice(0);
       }
     } else {
@@ -370,34 +414,23 @@ const handleClick = (item) => {
       if (selectedPractice.value !== null && paginatedPractices.value[selectedPractice.value]) {
         const selectedPracticeData = paginatedPractices.value[selectedPractice.value];
         
-        // 将练习数据存储到 practiceStore 中，使用 resetPractices 方法
-        practiceStore.resetPractices([{
-          id: selectedPracticeData.id,
-          title: selectedPracticeData.name,
-          deadline: selectedPracticeData.expiredAt,
-          questionNum: selectedPracticeData.questionNum,
-          // 添加必要的字段以符合 practiceStore 的数据结构
-          courseId: '1', // 默认课程ID
-          description: `练习：${selectedPracticeData.name}`,
-          requirement: `<p>请完成本练习的所有题目。</p>`,
-          status: '未开始',
-          score: null,
-          totalScore: 100,
-          difficulty: 1,
-          createTime: new Date().toISOString()
-        }]);
+        // 确保有有效的courseSectionId
+        if (!selectedPracticeData.courseSectionId) {
+          ElMessage.error('练习数据不完整，无法进入练习');
+          return;
+        }
         
-        // 导航到练习页面，传递练习ID
+        // 导航到练习页面，传递课程章节ID和练习ID
         router.push({
           name: "Practice",
-          query: {
-            practiceId: selectedPracticeData.id,
-            practiceName: selectedPracticeData.name
-          }
+          params: {
+            id: selectedPracticeData.courseSectionId, // 使用练习索引中的课程章节ID
+            practiceId: selectedPracticeData.id
+          },
         });
       } else {
-        // 如果没有选中练习，使用默认跳转
-        router.push("/prac");
+        // 如果没有选中练习，显示提示信息
+        ElMessage.warning('请先选择一个练习');
       }
       break;
     case "experiment":
