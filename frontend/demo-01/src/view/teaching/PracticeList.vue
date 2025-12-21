@@ -5,7 +5,13 @@
       <div class="panel-header">
         <h3>练习列表</h3>
         <div class="stats">
-          <span>已完成: {{ completedCount }}/{{ totalCount }}</span>
+          <span>总进度: {{ completedCount }}/{{ totalCount }}</span>
+          <span v-if="seriesPractices.length > 0" class="stat-detail">
+            系列: {{ seriesPracticeStats.completed }}/{{ seriesPracticeStats.total }}
+          </span>
+          <span v-if="coursePractices.length > 0" class="stat-detail">
+            课程: {{ coursePracticeStats.completed }}/{{ coursePracticeStats.total }}
+          </span>
         </div>
       </div>
 
@@ -27,45 +33,95 @@
           暂无练习
         </div>
         <div v-else>
-          <div
-            v-for="(practice, index) in practices"
-            :key="index"
-            class="practice-item"
-            :class="{
-              active: practiceStore.selectedPractice === index,
-              completed: practice.status === '已提交',
-              overdue: isOverdue(practice.deadline),
-            }"
-            @click="selectPractice(index)"
-          >
-            <div class="practice-icon">
-              <el-icon v-if="practice.status === '已提交'">
-                <Check />
-              </el-icon>
-              <el-icon v-else-if="isOverdue(practice.deadline)">
-                <Warning />
-              </el-icon>
-              <el-icon v-else>
-                <Edit />
-              </el-icon>
-            </div>
-            <div class="practice-info">
-              <h4>{{ practice.title }}</h4>
-              <p>{{ practice.description }}</p>
-              <div class="practice-meta">
-                <span class="deadline">
-                  <el-icon>
-                    <Clock />
-                  </el-icon>
-                  截止: {{ formatDeadline(practice.deadline) }}
-                </span>
-                <el-tag :type="getStatusType(practice.status)" size="small">
-                  {{ practice.status }}
-                </el-tag>
+          <!-- 课程系列练习部分 -->
+          <div v-if="seriesPractices.length > 0" class="practice-category">
+            <h4 class="category-title">课程系列练习</h4>
+            <div
+              v-for="(practice, index) in seriesPractices"
+              :key="'series-' + index"
+              class="practice-item"
+              :class="{
+                active: practiceStore.selectedPractice === getPracticeIndex(practice),
+                completed: practice.status === '已提交',
+                overdue: isOverdue(practice.deadline),
+              }"
+              @click="selectPractice(getPracticeIndex(practice))"
+            >
+              <div class="practice-icon">
+                <el-icon v-if="practice.status === '已提交'">
+                  <Check />
+                </el-icon>
+                <el-icon v-else-if="isOverdue(practice.deadline)">
+                  <Warning />
+                </el-icon>
+                <el-icon v-else>
+                  <Edit />
+                </el-icon>
+              </div>
+              <div class="practice-info">
+                <h4>{{ practice.title }}</h4>
+                <p>{{ practice.description }}</p>
+                <div class="practice-meta">
+                  <span class="deadline">
+                    <el-icon>
+                      <Clock />
+                    </el-icon>
+                    截止: {{ formatDeadline(practice.deadline) }}
+                  </span>
+                  <el-tag :type="getStatusType(practice.status)" size="small">
+                    {{ practice.status }}
+                  </el-tag>
+                </div>
+              </div>
+              <div class="practice-score" v-if="practice.score">
+                <span>{{ practice.score }}/{{ practice.totalScore }}</span>
               </div>
             </div>
-            <div class="practice-score" v-if="practice.score">
-              <span>{{ practice.score }}/{{ practice.totalScore }}</span>
+          </div>
+
+          <!-- 课程练习部分 -->
+          <div v-if="coursePractices.length > 0" class="practice-category">
+            <h4 class="category-title">课程练习</h4>
+            <div
+              v-for="(practice, index) in coursePractices"
+              :key="'course-' + index"
+              class="practice-item"
+              :class="{
+                active: practiceStore.selectedPractice === getPracticeIndex(practice),
+                completed: practice.status === '已提交',
+                overdue: isOverdue(practice.deadline),
+              }"
+              @click="selectPractice(getPracticeIndex(practice))"
+            >
+              <div class="practice-icon">
+                <el-icon v-if="practice.status === '已提交'">
+                  <Check />
+                </el-icon>
+                <el-icon v-else-if="isOverdue(practice.deadline)">
+                  <Warning />
+                </el-icon>
+                <el-icon v-else>
+                  <Edit />
+                </el-icon>
+              </div>
+              <div class="practice-info">
+                <h4>{{ practice.title }}</h4>
+                <p>{{ practice.description }}</p>
+                <div class="practice-meta">
+                  <span class="deadline">
+                    <el-icon>
+                      <Clock />
+                    </el-icon>
+                    截止: {{ formatDeadline(practice.deadline) }}
+                  </span>
+                  <el-tag :type="getStatusType(practice.status)" size="small">
+                    {{ practice.status }}
+                  </el-tag>
+                </div>
+              </div>
+              <div class="practice-score" v-if="practice.score">
+                <span>{{ practice.score }}/{{ practice.totalScore }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -134,7 +190,7 @@
 </template>
 
 <script setup>
-import { getPracticesByIndex, getQuestionByIndex } from "@/api";
+import { getPracticesByIndex, getQuestionByIndex, getPracticeIndexes } from "@/api";
 import { usePracticeStore, useQuestionsStore } from "@/store";
 import { Check, Clock, Edit, Warning } from "@element-plus/icons-vue";
 import { ElButton, ElCard, ElMessage, ElTag } from "element-plus";
@@ -153,7 +209,22 @@ const componentLoading = ref(false);
 const componentError = ref(null);
 
 // 计算当前课程的练习列表
-const practices = computed(() => practiceStore.getPracticesByCourseId(route.params.id));
+const practices = computed(() => practiceStore.getPracticesByCourseSectionId(parseInt(route.params.id || 1)));
+
+// 区分课程练习和课程系列练习
+const coursePractices = computed(() => {
+  return practices.value.filter(practice => {
+    // 如果courseId与当前路由的id相同，则为课程练习
+    return practice.courseId === parseInt(route.params.id || 1);
+  });
+});
+
+const seriesPractices = computed(() => {
+  return practices.value.filter(practice => {
+    // 如果courseId与当前路由的id不同，则为课程系列练习
+    return practice.courseId !== parseInt(route.params.id || 1);
+  });
+});
 
 // 加载练习数据
 onMounted(async () => {
@@ -164,15 +235,29 @@ onMounted(async () => {
     // 从路由参数中获取课程章节ID，如果没有则使用默认值1
     const courseSectionId = parseInt(route.params.id || 1);
 
+    // 获取练习索引信息，包含courseId
+    const practiceIndexesResponse = await getPracticeIndexes({
+      courseSectionId: courseSectionId,
+    });
+
+    // 创建一个映射，用于快速查找practiceId对应的courseId
+    const practiceIndexMap = new Map();
+    practiceIndexesResponse.data.forEach(index => {
+      if (index.practiceId) {
+        practiceIndexMap.set(index.practiceId, index.courseId);
+      }
+    });
+
     // 直接调用接口获取练习列表
     const response = await getPracticesByIndex({
       courseSectionId: parseInt(courseSectionId),
     });
 
-    // 转换API返回的Practice数据为Practice格式
+    // 转换API返回的Practice数据为Practice格式，并合并courseId
     const fetchedPractices = response.data.map((practice) => ({
       id: practice.id.toString(),
-      courseId: route.params.id,
+      courseSectionId: courseSectionId,
+      courseId: practiceIndexMap.get(practice.id),
       title: practice.name,
       description: `包含 ${practice.questionNum} 个问题的练习`,
       requirement: "",
@@ -208,6 +293,31 @@ const completedCount = computed(
     practices.value.filter((p) => p.status === "已提交" || p.status === "部分正确").length
 );
 
+// 课程练习统计
+const coursePracticeStats = computed(() => {
+  const completed = coursePractices.value.filter(p => p.status === "已提交" || p.status === "部分正确").length;
+  return {
+    total: coursePractices.value.length,
+    completed: completed,
+    pending: coursePractices.value.length - completed
+  };
+});
+
+// 课程系列练习统计
+const seriesPracticeStats = computed(() => {
+  const completed = seriesPractices.value.filter(p => p.status === "已提交" || p.status === "部分正确").length;
+  return {
+    total: seriesPractices.value.length,
+    completed: completed,
+    pending: seriesPractices.value.length - completed
+  };
+});
+
+// 获取练习在原始列表中的索引
+const getPracticeIndex = (practice) => {
+  return practices.value.findIndex(p => p.id === practice.id);
+};
+
 // 选择练习
 const selectPractice = async (index) => {
   // 如果选择的练习与当前已选练习相同，则不需要重新获取数据
@@ -237,7 +347,12 @@ const selectPractice = async (index) => {
 
 // 打开练习详情
 const openPracticeDetail = () => {
-  const practiceId = practices.value[practiceStore.selectedPractice].id;
+  const selectedPractice = practices.value[practiceStore.selectedPractice];
+  if (!selectedPractice) {
+    ElMessage.warning('请先选择练习');
+    return;
+  }
+  const practiceId = selectedPractice.id;
   const courseId = route.params.id;
   router.push(`/teaching/course/${courseId}/practice/${practiceId}`);
 };
@@ -314,6 +429,20 @@ const getSubmissionType = (status) => {
   font-size: 14px;
 }
 
+/* 统计信息样式 */
+.stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.stat-detail {
+  font-size: 11px;
+  color: #9b7a88;
+  opacity: 0.8;
+}
+
 .practice-list {
   display: flex;
   gap: 20px;
@@ -355,6 +484,25 @@ const getSubmissionType = (status) => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.practice-category {
+  margin-bottom: 20px;
+}
+
+.practice-category:last-child {
+  margin-bottom: 0;
+}
+
+.category-title {
+  margin: 0 0 12px 0;
+  color: #d63384;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #fff0f6, #ffd6e7);
+  border-radius: 8px;
+  border-left: 4px solid #d63384;
 }
 
 .practice-item {
