@@ -1,0 +1,18 @@
+// 定义全局CSS变量
+:root {
+  // 主色调
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-brand: linear-gradient(45deg, #2563eb, #1d4ed8);
+  
+  // 背景色
+  --bg-white: #ffffff;
+  --bg-light: #f0f9ff;
+  
+  // 文本色
+  --text-primary: #1e293b;
+  
+  // 边框色
+  --border-light: #e2e8f0;
+}

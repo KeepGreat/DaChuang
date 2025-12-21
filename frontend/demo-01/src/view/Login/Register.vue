@@ -16,11 +16,7 @@
         @submit.prevent="handleRegister"
       >
         <el-form-item prop="username" label="用户名">
-          <el-input
-            v-model="registerForm.username"
-            placeholder="请输入用户名"
-            size="large"
-          >
+          <el-input v-model="registerForm.username" placeholder="请输入用户名">
             <template #prefix>
               <el-icon class="el-input__icon"><User /></el-icon>
             </template>
@@ -28,12 +24,7 @@
         </el-form-item>
 
         <el-form-item prop="email" label="邮箱">
-          <el-input
-            v-model="registerForm.email"
-            type="email"
-            placeholder="请输入邮箱"
-            size="large"
-          >
+          <el-input v-model="registerForm.email" type="email" placeholder="请输入邮箱">
             <template #prefix>
               <el-icon class="el-input__icon"><Message /></el-icon>
             </template>
@@ -46,7 +37,6 @@
             type="password"
             placeholder="请输入密码"
             show-password
-            size="large"
           >
             <template #prefix>
               <el-icon class="el-input__icon"><Lock /></el-icon>
@@ -60,7 +50,6 @@
             type="password"
             placeholder="请再次输入密码"
             show-password
-            size="large"
           >
             <template #prefix>
               <el-icon class="el-input__icon"><Lock /></el-icon>
@@ -69,7 +58,7 @@
         </el-form-item>
 
         <el-form-item prop="role" label="角色">
-          <el-select v-model="registerForm.role" placeholder="请选择角色" size="large">
+          <el-select v-model="registerForm.role" placeholder="请选择角色">
             <el-option label="学生" value="student" />
             <el-option label="教师" value="teacher" />
             <el-option label="管理员" value="admin" />
@@ -82,7 +71,6 @@
             class="register-btn"
             native-type="submit"
             :loading="loading"
-            size="large"
           >
             <span v-if="!loading">注册</span>
             <span v-else>注册中...</span>
@@ -199,13 +187,13 @@ const goLogin = () => {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .register-page {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   font-family: "Segoe UI", Helvetica, Arial;
   padding: 20px;
   position: relative;
@@ -234,7 +222,7 @@ const goLogin = () => {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 40px;
+  padding: 36px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
@@ -256,17 +244,17 @@ const goLogin = () => {
 .platform-name {
   font-size: 22px;
   font-weight: 700;
-  color: #2563eb;
+  color: var(--primary);
   margin-bottom: 16px;
   letter-spacing: 0.5px;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .register-header h2 {
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
   font-size: 28px;
   font-weight: 600;
@@ -282,7 +270,7 @@ const goLogin = () => {
 
 .register-btn {
   width: 100%;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: var(--gradient-brand);
   border: none;
   border-radius: 12px;
   padding: 14px 0;
@@ -330,7 +318,7 @@ const goLogin = () => {
 }
 
 .login-link {
-  color: #2563eb;
+  color: var(--primary);
   font-weight: 600;
   margin-left: 4px;
   transition: color 0.2s ease;
@@ -344,7 +332,7 @@ const goLogin = () => {
   left: 0;
   width: 0;
   height: 2px;
-  background: #2563eb;
+  background: var(--primary);
   transition: width 0.3s ease;
 }
 
@@ -353,7 +341,7 @@ const goLogin = () => {
 }
 
 .login-link:hover {
-  color: #1d4ed8;
+  color: var(--primary-hover);
 }
 
 /* 适配Element Plus组件样式 - 修复标签对齐和输入框间距问题 */
@@ -394,15 +382,15 @@ const goLogin = () => {
   border-radius: 10px;
   padding-left: 12px;
   box-sizing: border-box;
-  border: 2px solid #e2e8f0;
-  background: #f8fafc;
+  border: 2px solid var(--border-light);
+  background: var(--bg-light);
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .register-form :deep(.el-input__wrapper:hover) {
   border-color: #cbd5e1;
-  background: #ffffff;
+  background: var(--bg-white);
 }
 
 /* 调整图标位置 */
@@ -422,7 +410,7 @@ const goLogin = () => {
   padding-left: 8px;
   padding-right: 8px;
   box-sizing: border-box;
-  color: #1e293b;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -438,15 +426,15 @@ const goLogin = () => {
 }
 
 .register-form :deep(.el-input__wrapper:focus-within) {
-  border-color: #2563eb;
-  background: #ffffff;
+  border-color: var(--primary);
+  background: var(--bg-white);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* 用deep修改Element Plus组件的样式，使得和上方的输入框UI更一致 */
 .register-form :deep(.el-select__wrapper) {
   border-radius: 10px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-light);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .register-form :deep(.el-select__wrapper):hover {
