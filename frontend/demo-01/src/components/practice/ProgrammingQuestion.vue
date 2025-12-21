@@ -253,6 +253,11 @@ async function submitCode() {
   // 验证代码是否为空
   if (!codeInput.value.trim()) {
     ElMessage.error("请输入代码");
+    emit("answer-submitted", {
+    questionId: props.question.id,
+    answer: codeInput.value,
+    isEmpty: true,
+  });
     return;
   }
 
