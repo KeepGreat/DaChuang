@@ -47,8 +47,13 @@ const router = createRouter({
           children: [
             {
               path: "learn",
-              name: "CourseContent",
-              component: () => import("@/view/teaching/CourseContent.vue"),
+              name: "CourseList",
+              component: () => import("@/view/teaching/CourseList.vue"),
+            },
+            {
+              path: "learn/series/:seriesId",
+              name: "CourseSeriesDetail",
+              component: () => import("@/view/teaching/CourseSeriesDetail.vue"),
             },
             {
               path: "task",
@@ -130,6 +135,7 @@ const router = createRouter({
           component: () => import("@/view/practice/Practice.vue"),
         },
 
+  
         // 其他页面
         {
           path: "exp",
@@ -165,14 +171,29 @@ const router = createRouter({
           path: "pracindex",
           name: "PracticeIndex",
           props: true,
-          component: () => import("@/view/practice/PracticeIndex.vue")
-        }
-      ]
+          component: () => import("@/view/practice/PracticeIndex.vue"),
+        },
+      ],
+    },
+
+    // AI学伴页面 - 独立路由，不使用主布局
+    {
+      path: "/ai-companion",
+      name: "AICompanion",
+      component: () => import("@/view/ai/AICompanion.vue"),
     },
 
     // 登录页面
-    { path: "/login", name: "Login", component: () => import("@/view/Login/Login.vue") },
-    { path: "/register", name: "register", component: () => import("@/view/Login/Register.vue") },
+    {
+      path: "/login",
+      name: "Login",
+      component: () => import("@/view/Login/Login.vue"),
+    },
+    {
+      path: "/register",
+      name: "register",
+      component: () => import("@/view/Login/Register.vue"),
+    },
   ],
 });
 

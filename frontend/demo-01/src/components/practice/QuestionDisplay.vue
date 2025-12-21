@@ -205,7 +205,7 @@
 
       <!-- 操作按钮区域 -->
       <div class="question-actions">
-        <el-button v-if="singleQuestionMode" @click="previousQuestion">上一题</el-button>
+        <el-button v-if="singleQuestionMode || isProgrammingQuestion" @click="previousQuestion">上一题</el-button>
 
         <div class="right-buttons">
           <el-button type="info" @click="toggleCorrectness">
@@ -214,7 +214,7 @@
           <el-button type="primary" @click="submitAnswer" :disabled="showCorrectness">
             提交答案
           </el-button>
-          <el-button v-if="singleQuestionMode" type="success" @click="nextQuestion"
+          <el-button v-if="singleQuestionMode || isProgrammingQuestion" type="success" @click="nextQuestion"
             >下一题</el-button
           >
         </div>
