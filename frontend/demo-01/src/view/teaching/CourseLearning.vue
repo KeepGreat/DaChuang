@@ -30,8 +30,8 @@
         </div> -->
         <div
           class="nav-item"
-          :class="{ active: activeModule === 'assignment' }"
-          @click="switchModule('assignment')"
+          :class="{ active: activeModule === 'practice' }"
+          @click="switchModule('practice')"
           :title="'作业'"
         >
           <el-icon>
