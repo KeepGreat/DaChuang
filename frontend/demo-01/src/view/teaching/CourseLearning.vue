@@ -3,12 +3,10 @@
     <!-- 左侧导航栏 -->
     <div class="nav-sidebar">
       <!-- 返回按钮 -->
-      <div
-        class="nav-item back-item"
-        @click="handleBack"
-        :title="'返回课程列表'"
-      >
-        <el-icon><ArrowLeft /></el-icon>
+      <div class="nav-item back-item" @click="handleBack" :title="'返回课程列表'">
+        <el-icon>
+          <ArrowLeft />
+        </el-icon>
         <span class="nav-tooltip">返回课程列表</span>
       </div>
 
@@ -19,26 +17,27 @@
           @click="switchModule('course')"
           :title="'课程学习'"
         >
-          <el-icon><VideoPlay /></el-icon>
+          <el-icon>
+            <VideoPlay />
+          </el-icon>
           <span class="nav-tooltip">课程学习</span>
         </div>
-        <div
-          class="nav-item"
-          :class="{ active: activeModule === 'task' }"
-          @click="switchModule('task')"
-          :title="'任务'"
-        >
-          <el-icon><Bell /></el-icon>
+        <!-- <div class="nav-item" :class="{ active: activeModule === 'task' }" @click="switchModule('task')" :title="'任务'">
+          <el-icon>
+            <Bell />
+          </el-icon>
           <span class="nav-tooltip">任务</span>
-        </div>
+        </div> -->
         <div
           class="nav-item"
           :class="{ active: activeModule === 'practice' }"
           @click="switchModule('practice')"
-          :title="'练习'"
+          :title="'作业'"
         >
-          <el-icon><Edit /></el-icon>
-          <span class="nav-tooltip">练习</span>
+          <el-icon>
+            <Edit />
+          </el-icon>
+          <span class="nav-tooltip">作业</span>
         </div>
         <div
           class="nav-item"
@@ -46,34 +45,34 @@
           @click="switchModule('exam')"
           :title="'考试'"
         >
-          <el-icon><Document /></el-icon>
+          <el-icon>
+            <Document />
+          </el-icon>
           <span class="nav-tooltip">考试</span>
         </div>
-        <div
-          class="nav-item"
-          :class="{ active: activeModule === 'resource' }"
-          @click="switchModule('resource')"
-          :title="'资料'"
-        >
-          <el-icon><FolderOpened /></el-icon>
+        <!-- <div class="nav-item" :class="{ active: activeModule === 'resource' }" @click="switchModule('resource')"
+          :title="'资料'">
+          <el-icon>
+            <FolderOpened />
+          </el-icon>
           <span class="nav-tooltip">资料</span>
-        </div>
-        <div
-          class="nav-item"
-          :class="{ active: activeModule === 'discussion' }"
-          @click="switchModule('discussion')"
-          :title="'讨论'"
-        >
-          <el-icon><ChatDotRound /></el-icon>
+        </div> -->
+        <!-- <div class="nav-item" :class="{ active: activeModule === 'discussion' }" @click="switchModule('discussion')"
+          :title="'讨论'">
+          <el-icon>
+            <ChatDotRound />
+          </el-icon>
           <span class="nav-tooltip">讨论</span>
-        </div>
+        </div> -->
         <div
           class="nav-item"
           :class="{ active: activeModule === 'knowledge' }"
           @click="switchModule('knowledge')"
           :title="'知识图谱'"
         >
-          <el-icon><Share /></el-icon>
+          <el-icon>
+            <Share />
+          </el-icon>
           <span class="nav-tooltip">知识图谱</span>
         </div>
       </div>
@@ -91,18 +90,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import {
-  ArrowLeft, VideoPlay, Share, Edit, Document, Folder, FolderOpened,
-  Bell, ChatDotRound
-} from '@element-plus/icons-vue';
+  ArrowLeft,
+  VideoPlay,
+  Share,
+  Edit,
+  Document,
+  Folder,
+  FolderOpened,
+  Bell,
+  ChatDotRound,
+} from "@element-plus/icons-vue";
 
 const router = useRouter();
 const route = useRoute();
 
 // 当前激活的模块
-const activeModule = ref('course');
+const activeModule = ref("course");
 
 // 切换模块
 const switchModule = (module) => {
@@ -110,26 +116,26 @@ const switchModule = (module) => {
 
   // 根据模块跳转到不同的路由
   const courseId = route.params.id;
-  switch(module) {
-    case 'course':
+  switch (module) {
+    case "course":
       router.push(`/teaching/course/${courseId}/learn`);
       break;
-    case 'task':
+    case "task":
       router.push(`/teaching/course/${courseId}/task`);
       break;
-    case 'practice':
+    case "practice":
       router.push(`/teaching/course/${courseId}/practice`);
       break;
-    case 'exam':
+    case "exam":
       router.push(`/teaching/course/${courseId}/exam`);
       break;
-    case 'resource':
+    case "resource":
       router.push(`/teaching/course/${courseId}/resource`);
       break;
-    case 'discussion':
+    case "discussion":
       router.push(`/teaching/course/${courseId}/discussion`);
       break;
-    case 'knowledge':
+    case "knowledge":
       router.push(`/teaching/course/${courseId}/knowledge`);
       break;
   }
@@ -137,39 +143,42 @@ const switchModule = (module) => {
 
 // 返回课程列表
 const handleBack = () => {
-  router.push('/coursesection');
+  router.push("/coursesection");
 };
 
 // 初始化模块
 const initModule = () => {
   const path = route.path;
-  if (path.includes('/learn')) {
-    activeModule.value = 'course';
-  } else if (path.includes('/task')) {
-    activeModule.value = 'task';
-  } else if (path.includes('/practice')) {
-    activeModule.value = 'practice';
-  } else if (path.includes('/exam')) {
-    activeModule.value = 'exam';
-  } else if (path.includes('/resource')) {
-    activeModule.value = 'resource';
-  } else if (path.includes('/discussion')) {
-    activeModule.value = 'discussion';
-  } else if (path.includes('/knowledge')) {
-    activeModule.value = 'knowledge';
+  if (path.includes("/learn")) {
+    activeModule.value = "course";
+  } else if (path.includes("/task")) {
+    activeModule.value = "task";
+  } else if (path.includes("/practice")) {
+    activeModule.value = "practice";
+  } else if (path.includes("/exam")) {
+    activeModule.value = "exam";
+  } else if (path.includes("/resource")) {
+    activeModule.value = "resource";
+  } else if (path.includes("/discussion")) {
+    activeModule.value = "discussion";
+  } else if (path.includes("/knowledge")) {
+    activeModule.value = "knowledge";
   }
 };
 
 // 监听路由变化
-import { watch } from 'vue';
-watch(() => route.path, () => {
-  initModule();
-});
+import { watch } from "vue";
+watch(
+  () => route.path,
+  () => {
+    initModule();
+  }
+);
 
 // 初始化
 initModule();
 
-// 如果访问的是 /teaching/course/:id（没有子路径），默认跳转到学习页面
+// 如果访问的是 /teaching/course/:id（没有子路径），默认跳转到课程列表页面
 if (route.path.match(/^\/teaching\/course\/\w+$/)) {
   const courseId = route.params.id;
   router.replace(`/teaching/course/${courseId}/learn`);
@@ -192,10 +201,10 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
   top: 50%;
   transform: translateY(-50%);
   z-index: 100;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
   padding: 20px 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(10px);
 }
 
@@ -271,7 +280,7 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
 }
 
 .nav-tooltip::before {
-  content: '';
+  content: "";
   position: absolute;
   left: -4px;
   top: 50%;
@@ -290,9 +299,9 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
 .main-content {
   margin-left: 100px;
   width: calc(100% - 100px);
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
   min-height: calc(100vh - 40px);
   overflow: hidden;
 }
@@ -348,9 +357,11 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
   0% {
     box-shadow: 0 0 0 0 rgba(214, 51, 132, 0.4);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(214, 51, 132, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(214, 51, 132, 0);
   }

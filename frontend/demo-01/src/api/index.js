@@ -17,8 +17,12 @@ export * from "./modules/practice/questionIndex";
 export * from "./modules/practice/questionResource";
 export * from "./modules/practice/userAnswer";
 
+// profiling
+export * from "./modules/profiling/api";
+export * from "./modules/profiling/calcScore";
+
+// experiment & practice
 export * from "./modules/ExperimentAPI";
 export * from "./modules/PracticeAPI";
-export * from "./modules/profiling/api";
 export * from "./modules/user";
 

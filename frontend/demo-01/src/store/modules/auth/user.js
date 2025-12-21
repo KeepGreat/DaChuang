@@ -18,6 +18,7 @@ export const useUserStore = defineStore(
      * 用户角色信息
      */
     const role = ref("");
+    const userId = ref(""); // 添加用户ID字段
 
     /**
      * 认证头信息
@@ -30,6 +31,11 @@ export const useUserStore = defineStore(
     const setToken = (newToken) => {
       token.value = newToken;
       isLoggedIn.value = newToken ? true : false;
+    };
+
+    // 设置用户ID
+    const setUserId = (id) => {
+      userId.value = id;
     };
 
     /**
@@ -65,17 +71,20 @@ export const useUserStore = defineStore(
       role.value = "";
       isLoggedIn.value = false;
       token.value = "";
+      userId.value = "";
     };
 
     return {
       role,
       isLoggedIn,
       token,
+      userId,
       authHeader,
       setToken,
       setUserRole,
       getDefaultRoute,
       hasPermission,
+      setUserId,
       logout,
     };
   },
@@ -85,7 +94,7 @@ export const useUserStore = defineStore(
       key: "user-store",
       storage: localStorage,
       // 需要持久化的状态字段
-      pick: ["role", "isLoggedIn", "token"],
+      pick: ["role", "isLoggedIn", "token", "userId"],
     },
   }
 );
