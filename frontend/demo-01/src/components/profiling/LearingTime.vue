@@ -2,7 +2,6 @@
   <!-- 外层 wrapper 用于背景色 -->
   <div class="page-wrapper">
     <div class="profile-page">
-
       <!-- 顶部个人信息 -->
       <UserHeader
         :username="user.name"
@@ -32,6 +31,19 @@
         <PracticeProgress />
       </div>
 
+      <!-- 学习能力雷达图 -->
+      <RadarStats
+        :data="{
+          codeAccuracy: 80,
+          aiDependence: 60,
+          knowledgeConversion: 75,
+          expressionAbility: 70,
+          knowledgeDepth: 85,
+          codeQuality: 90,
+        }"
+        class="card chart-full"
+      />
+
       <!-- 新增四个图表 -->
       <div class="section-title">学习维度统计</div>
 
@@ -49,7 +61,7 @@
       <!-- 第二行：效率趋势 -->
       <div class="card">
         <EfficiencyTrend
-          :days="['周一','周二','周三','周四','周五','周六','周日']"
+          :days="['周一', '周二', '周三', '周四', '周五', '周六', '周日']"
           :timePerTask="[15, 12, 14, 10, 9, 13, 16]"
         />
       </div>
@@ -58,24 +70,24 @@
       <div class="card">
         <StudyPunchCard :calendarData="calendarMock" />
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
+import avatarDefault from "@/assets/avatar-default.png";
 import { ref } from "vue";
 import UserHeader from "./UserHeader.vue";
-import avatarDefault from '@/assets/avatar-default.png';
 
-import StatCard from "@/components/profiling/learingtime/StatCard.vue";
 import LearningTrend from "@/components/profiling/learingtime/LearningTrend.vue";
 import PracticeProgress from "@/components/profiling/learingtime/PracticeProgress.vue";
+import StatCard from "@/components/profiling/learingtime/StatCard.vue";
 
-import StudyTypeDistribution from "@/components/profiling/learingtime/StudyTypeDistribution.vue";
 import DifficultyAccuracy from "@/components/profiling/learingtime/DifficultyAccuracy.vue";
 import EfficiencyTrend from "@/components/profiling/learingtime/EfficiencyTrend.vue";
+import RadarStats from "@/components/profiling/learingtime/RadarStats.vue";
 import StudyPunchCard from "@/components/profiling/learingtime/StudyPunchCard.vue";
+import StudyTypeDistribution from "@/components/profiling/learingtime/StudyTypeDistribution.vue";
 
 const user = ref({
   name: "Qingtian1111",
@@ -83,7 +95,7 @@ const user = ref({
   avatar: avatarDefault,
   progress: 2,
   finished: 0,
-  hours: 0
+  hours: 0,
 });
 
 const openEdit = () => console.log("打开编辑弹窗");
@@ -93,22 +105,19 @@ const studyTypeMock = ref({
   video: 120,
   practice: 80,
   homework: 40,
-  quiz: 25
+  quiz: 25,
 });
 
 const difficultyMock = ref({
   easy: 90,
   medium: 72,
-  hard: 48
+  hard: 48,
 });
 
 // 打卡模拟数据 (随机生成 30 天)
 const calendarMock = ref(
   Array.from({ length: 30 }, (_, i) => {
-    return [
-      `2025-01-${String(i + 1).padStart(2, "0")}`,
-      Math.random() > 0.3 ? 1 : 0
-    ];
+    return [`2025-01-${String(i + 1).padStart(2, "0")}`, Math.random() > 0.3 ? 1 : 0];
   })
 );
 </script>
@@ -151,7 +160,7 @@ const calendarMock = ref(
   background: #fffefeb9;
   padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   margin-bottom: 24px; /* 上下间隔 */
 }
 
@@ -166,5 +175,11 @@ const calendarMock = ref(
 /* 并列组件高度略矮 */
 .small-card {
   height: 420px;
+}
+
+.chart-full {
+  width: 100%;
+  height: 480px; /* 根据雷达图高度调整 */
+  margin-bottom: 24px;
 }
 </style>

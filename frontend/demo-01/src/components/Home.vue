@@ -3,10 +3,6 @@
     <!-- 顶部导航栏 -->
     <header class="top-nav">
       <div class="nav-left">
-        <!-- 折叠按钮 -->
-        <div class="menu-toggle" @click="toggleSidebar">
-          <i class="icon">☰</i>
-        </div>
         <div class="platform-name">慧编未来 · AI 教学平台</div>
       </div>
 
@@ -29,13 +25,9 @@
       </div>
     </header>
 
-    <!-- 主体 -->
+    <!-- 主体（侧栏已移除） -->
     <div class="main-content">
-      <div :class="['sidebar-wrapper', { collapsed: isCollapsed }]">
-        <SiderBar :collapsed="isCollapsed" />
-      </div>
-
-      <div class="content">
+      <div class="content full">
         <router-view></router-view>
       </div>
     </div>
@@ -43,11 +35,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import SiderBar from "./Siderbar.vue";
-
-const isCollapsed = ref(false);
-const toggleSidebar = () => (isCollapsed.value = !isCollapsed.value);
+// sidebar removed; keep layout simple
 </script>
 
 <style scoped>
@@ -136,16 +124,13 @@ const toggleSidebar = () => (isCollapsed.value = !isCollapsed.value);
   flex: 1;
   display: flex;
 }
-.sidebar-wrapper {
-  width: 220px;
-  transition: width 0.25s ease;
-}
-.sidebar-wrapper.collapsed {
-  width: 64px;
-}
 .content {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
+  width: 100%;
+}
+.content.full {
+  width: 100%;
 }
 </style>

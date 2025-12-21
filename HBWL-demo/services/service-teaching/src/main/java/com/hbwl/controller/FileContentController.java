@@ -36,7 +36,6 @@ public class FileContentController {
         } catch (Exception e) {
             return "文件上传失败" + e.getMessage();
         }
-
     }
 
     @DeleteMapping("/{id}")
@@ -81,11 +80,13 @@ public class FileContentController {
 
     @GetMapping("/{page}/{size}")
     public Page<FileContent> getFileContentsPage(@PathVariable("page") Integer pageNo, @PathVariable("size") Integer pageSize,
+                                                 @RequestParam(required = false) Integer id,
                                                  @RequestParam(required = false) String type,
                                                  @RequestParam(required = false) String name,
                                                  @RequestParam(required = false) Integer size,
                                                  @RequestParam(required = false) Integer matId){
         FileContent fileContent = new FileContent();
+        fileContent.setId(id);
         fileContent.setMatId(matId);
         fileContent.setType(type);
         fileContent.setName(name);

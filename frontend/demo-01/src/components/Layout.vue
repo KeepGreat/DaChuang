@@ -3,10 +3,7 @@
   <div class="layout-root">
     <TopNav />
     <div class="main-container">
-      <div class="sidebar">
-        <SiderBar />
-      </div>
-      <div class="content-container">
+      <div class="content-container full">
         <router-view />
       </div>
     </div>
@@ -15,7 +12,7 @@
 
 <script setup>
 import TopNav from './TopNav.vue';
-import SiderBar from './Siderbar.vue';
+// sidebar removed to allow content full width
 </script>
 
 <style scoped>
@@ -31,14 +28,13 @@ import SiderBar from './Siderbar.vue';
   width: 100%;
 }
 
-.sidebar {
-  width: 220px;
-  height: calc(100vh - 64px); /* 顶部导航高度 */
-}
-
 .content-container {
   flex: 1;
   overflow-y: auto;
   height: calc(100vh - 64px);
+  width: 100%;
+}
+.content-container.full {
+  width: 100%;
 }
 </style>

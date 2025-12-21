@@ -6,7 +6,7 @@
 
 <script setup>
 import * as echarts from "echarts";
-import { ref, onMounted } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 
 const chartRef = ref(null);
 
@@ -23,7 +23,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
-  const chart = echarts.init(chartRef.value);
+  let chart = echarts.init(chartRef.value);
 
   chart.setOption({
     backgroundColor: "transparent",
@@ -69,7 +69,16 @@ onMounted(() => {
     ],
   });
 
-  window.addEventListener("resize", () => chart.resize());
+  const handleResize = () => chart && chart.resize();
+  window.addEventListener("resize", handleResize);
+
+  onBeforeUnmount(() => {
+    window.removeEventListener("resize", handleResize);
+    try {
+      chart && chart.dispose();
+    } catch (e) {}
+    chart = null;
+  });
 });
 </script>
 

@@ -16,3 +16,13 @@ spring:
           uri: lb://service-teaching
           predicates:
             - Path=/api/teaching/**
+
+        - id: practice-route
+          uri: lb://service-practice
+          predicates:
+            - Path=/api/practice/**
+
+        - id: user-route
+          uri: lb://service-user
+          predicates:
+            - Path=/user/**
