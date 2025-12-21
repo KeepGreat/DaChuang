@@ -147,31 +147,6 @@
         </el-card>
       </div>
 
-      <!-- 实践实验室 -->
-      <div class="lab-preview">
-        <el-card class="lab-card" @click="handleClick('experiment')">
-          <template #header>
-            <div class="lab-header">
-              <h4>代码实验室</h4>
-              <el-button type="success" text>
-                进入实验
-              </el-button>
-            </div>
-          </template>
-          <div class="lab-content">
-            <div class="lab-icon-container">
-              <el-icon class="lab-icon"><Compass /></el-icon>
-            </div>
-            <p class="lab-description">在代码实验室中，您可以自由练习编程，尝试各种算法实现，提升编程技能。</p>
-            <div class="lab-features">
-              <el-tag size="small" type="success">实时运行</el-tag>
-              <el-tag size="small" type="success">在线调试</el-tag>
-              <el-tag size="small" type="success">代码分享</el-tag>
-            </div>
-          </div>
-        </el-card>
-      </div>
-
       <!-- 空状态 -->
       <div v-if="selectedPractice === null" class="empty-preview">
         <el-icon size="60">
@@ -184,7 +159,7 @@
 </template>
 
 <script setup>
-import { Cpu, Clock, Warning, Edit, Compass } from "@element-plus/icons-vue";
+import { Cpu, Clock, Warning, Edit } from "@element-plus/icons-vue";
 import { ElCard, ElIcon, ElPagination, ElButton, ElTag, ElMessage } from "element-plus";
 import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -263,7 +238,6 @@ const selectPractice = async (index) => {
     if (response.code === 200 && response.data) {
       // 将获取到的问题存入questionStore，store会自动处理结构转换
       questionsStore.setQuestions(response.data);
-      ElMessage.success('练习数据加载成功');
     } else {
       ElMessage.warning('获取题目失败: ' + response.message);
     }
@@ -433,9 +407,7 @@ const handleClick = (item) => {
         ElMessage.warning('请先选择一个练习');
       }
       break;
-    case "experiment":
-      router.push("/exp");
-      break;
+
   }
 };
 </script>
@@ -737,61 +709,7 @@ const handleClick = (item) => {
   color: #606266;
 }
 
-/* 实验室预览 */
-.lab-preview {
-  margin-top: 20px;
-}
 
-.lab-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.lab-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(103, 194, 58, 0.15);
-}
-
-.lab-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.lab-header h4 {
-  margin: 0;
-  color: #67c23a;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.lab-content {
-  text-align: center;
-}
-
-.lab-icon-container {
-  margin-bottom: 15px;
-}
-
-.lab-icon {
-  font-size: 48px;
-  color: #67c23a;
-}
-
-.lab-description {
-  color: #606266;
-  line-height: 1.6;
-  margin: 0 0 15px 0;
-}
-
-.lab-features {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
 
 /* 空状态 */
 .empty-preview {
