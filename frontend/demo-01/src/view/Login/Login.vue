@@ -138,12 +138,13 @@ function goRegister() {
 </script>
 
 <style lang="scss" scoped>
+@import "@/styles/modules/variables.scss";
 .login-page {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--gradient-primary);
+  background: $gradient-primary;
   font-family: "Segoe UI", Helvetica, Arial;
   padding: 20px;
   position: relative;
@@ -168,11 +169,11 @@ function goRegister() {
 
 .login-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 36px;
+  padding: 40px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
@@ -194,17 +195,17 @@ function goRegister() {
 .platform-name {
   font-size: 22px;
   font-weight: 700;
-  color: var(--primary);
+  color: $primary;
   margin-bottom: 16px;
   letter-spacing: 0.5px;
-  background: var(--gradient-brand);
+  background: $gradient-brand;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .login-header h2 {
-  color: var(--text-primary);
+  color: $text-primary;
   margin: 0;
   font-size: 28px;
   font-weight: 600;
@@ -217,19 +218,19 @@ function goRegister() {
 }
 
 .forgot-link {
-  color: var(--primary);
+  color: $primary;
   font-size: 14px;
   font-weight: 500;
   transition: color 0.2s ease;
 }
 
 .forgot-link:hover {
-  color: var(--primary-hover);
+  color: $primary-hover;
 }
 
 .login-btn {
   width: 100%;
-  background: var(--gradient-brand);
+  background: $gradient-brand;
   border: none;
   border-radius: 12px;
   padding: 14px 0;
@@ -277,7 +278,7 @@ function goRegister() {
 }
 
 .register-link {
-  color: var(--primary);
+  color: $primary;
   font-weight: 600;
   margin-left: 4px;
   transition: color 0.2s ease;
@@ -291,7 +292,7 @@ function goRegister() {
   left: 0;
   width: 0;
   height: 2px;
-  background: var(--primary);
+  background: $primary;
   transition: width 0.3s ease;
 }
 
@@ -300,7 +301,7 @@ function goRegister() {
 }
 
 .register-link:hover {
-  color: var(--primary-hover);
+  color: $primary-hover;
 }
 
 /* 适配Element Plus组件样式 - 修复标签对齐和输入框间距问题 */
@@ -341,15 +342,15 @@ function goRegister() {
   border-radius: 10px;
   padding-left: 12px;
   box-sizing: border-box;
-  border: 2px solid var(--border-light);
-  background: var(--bg-light);
+  border: 2px solid $border-light;
+  background: $bg-light;
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .login-form :deep(.el-input__wrapper:hover) {
   border-color: #cbd5e1;
-  background: var(--bg-white);
+  background: $bg-white;
 }
 
 /* 调整图标位置 */
@@ -369,7 +370,7 @@ function goRegister() {
   padding-left: 8px;
   padding-right: 8px;
   box-sizing: border-box;
-  color: var(--text-primary);
+  color: $text-primary;
   font-weight: 500;
 }
 
@@ -385,8 +386,8 @@ function goRegister() {
 }
 
 .login-form :deep(.el-input__wrapper:focus-within) {
-  border-color: var(--primary);
-  background: var(--bg-white);
+  border-color: $primary;
+  background: $bg-white;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
