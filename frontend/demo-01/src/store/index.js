@@ -16,6 +16,7 @@ export * from "./modules/practice/questionsStore";
 export * from "./modules/practice/userAnswerStore";
 export * from "./modules/resourceStore";
 export * from "./modules/taskStore";
+export * from "./modules/teachingStore";
 export * from "./modules/testClassifm";
 export * from "./modules/testCountStore";
 

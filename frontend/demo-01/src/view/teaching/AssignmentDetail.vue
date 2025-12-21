@@ -2,8 +2,10 @@
   <div class="assignment-detail">
     <!-- 返回按钮 -->
     <el-button class="back-button" @click="handleBack">
-      <el-icon><ArrowLeft /></el-icon>
-      返回练习列表
+      <el-icon>
+        <ArrowLeft />
+      </el-icon>
+      返回作业列表
     </el-button>
 
     <div class="assignment-content">
@@ -21,7 +23,7 @@
 
           <div class="assignment-details">
             <div class="detail-item">
-              <span class="label">截止��间：</span>
+              <span class="label">截止时间：</span>
               <span class="value">{{ assignment.deadline }}</span>
             </div>
             <div class="detail-item">
@@ -30,14 +32,8 @@
             </div>
             <div class="detail-item">
               <span class="label">难度：</span>
-              <el-rate
-                v-model="assignment.difficulty"
-                :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                disabled
-                show-score
-                text-color="#ff9900"
-                score-template="{value}"
-              >
+              <el-rate v-model="assignment.difficulty" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" disabled show-score
+                text-color="#ff9900" score-template="{value}">
               </el-rate>
             </div>
           </div>
@@ -50,12 +46,8 @@
           <div class="test-cases">
             <h4>测试用例</h4>
             <el-collapse v-model="activeTestCase">
-              <el-collapse-item
-                v-for="(testCase, index) in assignment.testCases"
-                :key="index"
-                :title="`测试用例 ${index + 1}`"
-                :name="index"
-              >
+              <el-collapse-item v-for="(testCase, index) in assignment.testCases" :key="index"
+                :title="`测试用例 ${index + 1}`" :name="index">
                 <div class="test-case-content">
                   <div class="test-input">
                     <span class="test-label">输入：</span>
@@ -83,11 +75,7 @@
           </template>
 
           <div v-if="showHistory" class="submission-history">
-            <div
-              v-for="(record, index) in submissionHistory"
-              :key="index"
-              class="submission-record"
-            >
+            <div v-for="(record, index) in submissionHistory" :key="index" class="submission-record">
               <div class="record-header">
                 <span class="record-time">{{ record.submitTime }}</span>
                 <el-tag :type="getSubmissionType(record.status)">
@@ -99,10 +87,8 @@
               </div>
               <div class="record-details" v-if="record.details">
                 <p>通过测试：{{ record.passedTests }}/{{ record.totalTests }}</p>
-                <el-progress
-                  :percentage="Math.round((record.passedTests / record.totalTests) * 100)"
-                  :color="getProgressColor((record.passedTests / record.totalTests) * 100)"
-                ></el-progress>
+                <el-progress :percentage="Math.round((record.passedTests / record.totalTests) * 100)"
+                  :color="getProgressColor((record.passedTests / record.totalTests) * 100)"></el-progress>
               </div>
             </div>
           </div>
@@ -120,8 +106,10 @@
               <el-option label="Java" value="java"></el-option>
             </el-select>
             <el-button type="success" @click="submitAssignment">
-              <el-icon><Upload /></el-icon>
-              提交练习
+              <el-icon>
+                <Upload />
+              </el-icon>
+              提交作业
             </el-button>
           </div>
         </div>
@@ -130,15 +118,9 @@
           <div ref="codeEditor" class="code-editor">
             <code ref="codeBlock" :class="`language-${selectedLanguage}`">{{ codeContent }}</code>
           </div>
-          <textarea
-            ref="codeInput"
-            v-model="codeContent"
-            class="code-input"
-            :placeholder="`请输入${languageMap[selectedLanguage]}代码...`"
-            @input="highlightCode"
-            @keydown="handleKeyDown"
-            @scroll="syncScroll"
-          ></textarea>
+          <textarea ref="codeInput" v-model="codeContent" class="code-input"
+            :placeholder="`请输入${languageMap[selectedLanguage]}代码...`" @input="highlightCode" @keydown="handleKeyDown"
+            @scroll="syncScroll"></textarea>
         </div>
 
         <div class="test-section">
@@ -147,16 +129,14 @@
               <div class="card-header">
                 <span class="header-title">测试输入</span>
                 <el-button size="small" @click="runTest">
-                  <el-icon><Flag /></el-icon>
+                  <el-icon>
+                    <Flag />
+                  </el-icon>
                   运行测试
                 </el-button>
               </div>
             </template>
-            <textarea
-              v-model="testInput"
-              class="test-input-area"
-              placeholder="输入测试数据..."
-            ></textarea>
+            <textarea v-model="testInput" class="test-input-area" placeholder="输入测试数据..."></textarea>
           </el-card>
 
           <el-card class="test-output-card">
@@ -392,7 +372,7 @@ onMounted(() => {
 
 .back-button {
   margin-bottom: 20px;
-  background: linear-gradient(90deg,#ff7ab1,#d63384);
+  background: linear-gradient(90deg, #ff7ab1, #d63384);
   border-color: #d63384;
   color: white;
   display: flex;
@@ -405,7 +385,7 @@ onMounted(() => {
 }
 
 .back-button:hover {
-  background: linear-gradient(90deg,#ff8fc0,#e04577);
+  background: linear-gradient(90deg, #ff8fc0, #e04577);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(214, 51, 132, 0.2);
 }
@@ -427,9 +407,9 @@ onMounted(() => {
 
 .info-card,
 .submission-card {
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
 }
 
 .card-header {
@@ -538,9 +518,9 @@ onMounted(() => {
 /* 右侧代码面板 */
 .code-panel {
   flex: 1;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
   padding: 20px;
   display: flex;
   flex-direction: column;
