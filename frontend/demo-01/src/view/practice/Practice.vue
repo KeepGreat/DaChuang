@@ -166,11 +166,11 @@ const deadline = computed(() => {
   if (practiceStore.practices && practiceStore.practices.length > 0) {
     const assignmentDeadline = practiceStore.practices[0].deadline;
     // 将 deadline 字符串转换为 Date 对象
-    return new Date(assignmentDeadline);
+    return assignmentDeadline ? new Date(assignmentDeadline) : null;
   }
 
-  // 如果没有练习数据，使用默认值：当前时间后30分钟
-  return new Date(Date.now() + 30 * 60 * 1000);
+  // 如果没有练习数据，返回null表示长期有效
+  return null;
 });
 
 // 当前激活的题型，初始值设为第一个具体题型（判断题）
