@@ -354,7 +354,7 @@ const openPracticeDetail = () => {
   }
   const practiceId = selectedPractice.id;
   const courseId = route.params.id;
-  router.push(`/prac/${courseId}/${practiceId}`);
+  router.push(`/practice/${courseId}/${practiceId}`);
 };
 
 // 判断是否过期

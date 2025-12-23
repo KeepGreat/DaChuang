@@ -141,7 +141,7 @@ const router = createRouter({
     },
 
     // 练习页面 - 独立路由，不使用主布局
-    {path: "/prac/:id/:practiceId",
+    {path: "/practice/:courseSectionId/:practiceId",
       name: "Practice",
       component: () => import("@/view/practice/Practice.vue"),
     },

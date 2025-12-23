@@ -119,9 +119,13 @@ const fetchUserIdFromToken = async () => {
   }
 };
 
-// 路由参数获取当前练习ID
+// 路由参数获取当前练习ID和课程章节ID
 const currentPracticeId = computed(() => {
   return route.params.practiceId || null;
+});
+
+const currentCourseSectionId = computed(() => {
+  return route.params.courseSectionId || null;
 });
 
 // 练习基本信息 - 从practiceStore中根据practiceId动态获取

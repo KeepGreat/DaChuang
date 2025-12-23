@@ -398,7 +398,7 @@ const handleClick = (item) => {
         router.push({
           name: "Practice",
           params: {
-            id: selectedPracticeData.courseSectionId, // 使用练习索引中的课程章节ID
+            courseSectionId: selectedPracticeData.courseSectionId, // 使用练习索引中的课程章节ID
             practiceId: selectedPracticeData.id
           },
         });
