@@ -587,6 +587,7 @@ const handleTimeUp = () => {
 // 处理题型切换
 const handleTypeChange = (typeId) => {
   activeType.value = typeId;
+  showCorrectness.value = false;
   currentQuestionIndex.value = 0; // 切换题型时，重置到第一个问题
 };
 
