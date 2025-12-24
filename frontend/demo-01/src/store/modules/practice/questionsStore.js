@@ -63,15 +63,24 @@ export const useQuestionsStore = defineStore(
 
     // 判断题目是否已回答的辅助函数
     const isQuestionAnswered = (questionId, userAnswersMap = null) => {
+      const question = questions.value.find((q) => q.id === questionId);
+      if (!question) return false;
+
+      // 编程题：必须已提交评测（status不为null）才算完成
+      if (question.type === 3) {
+        return question.status !== null;
+      }
+
+      // 其他题型（判断题、选择题、简答题）：有答案内容就算完成
+
       // 优先使用传入的 userAnswersMap（本地填写的答案）
       if (userAnswersMap && userAnswersMap[questionId]) {
         const userAnswer = userAnswersMap[questionId];
         return userAnswer && userAnswer.length > 0;
       }
-      
+
       // 如果没有 userAnswersMap，则检查 questionsStore 中的 status 字段（已提交到后端的答案）
-      const question = questions.value.find((q) => q.id === questionId);
-      if (question && question.status !== null) {
+      if (question.status !== null) {
         return true;
       }
 

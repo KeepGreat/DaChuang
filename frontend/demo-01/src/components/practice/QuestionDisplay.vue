@@ -605,27 +605,39 @@ const getCalculatedQuestionStatus = (q) => {
 // 检查单个题目是否已提交
 const isQuestionSubmitted = (question) => {
   if (!question) return true; // 没有题目时认为已提交
-  
+
+  // 编程题：必须已提交评测（status不为null）才算完成
+  if (question.type === 3) {
+    return question.status !== null;
+  }
+
+  // 其他题型（判断题、选择题、简答题）：有答案内容就算完成
+
   // 检查用户是否有答案
   const userAnswer = getUserAnswer(question.id);
-  const hasUserAnswer = userAnswer && (
-    Array.isArray(userAnswer) ? userAnswer.length > 0 : userAnswer.toString().trim() !== ""
-  );
-  
+  const hasUserAnswer =
+    userAnswer &&
+    (Array.isArray(userAnswer)
+      ? userAnswer.length > 0
+      : userAnswer.toString().trim() !== "");
+
   // 如果用户没有答案，则认为未提交（需要用户至少选择或填写一个答案）
   if (!hasUserAnswer) {
     return false;
   }
-  
+
   // 如果用户有答案但状态为null，则认为未提交
   if (question.status === null) {
     return false;
   }
-  
-  // 只有当用户有答案且状态为已提交状态时，才认为已提交
-  return question.status === "answered" || question.status === "correct" || question.status === "incorrect";
-};
 
+  // 只有当用户有答案且状态为已提交状态时，才认为已提交
+  return (
+    question.status === "answered" ||
+    question.status === "correct" ||
+    question.status === "incorrect"
+  );
+};
 // 计算所有题目是否都已提交
 const allQuestionsSubmitted = computed(() => {
   if (props.singleQuestionMode) {
@@ -633,7 +645,7 @@ const allQuestionsSubmitted = computed(() => {
     return isQuestionSubmitted(props.question);
   } else {
     // 多题模式：检查所有题目是否都已提交
-    return props.sameTypeQuestions.every(q => isQuestionSubmitted(q));
+    return props.sameTypeQuestions.every((q) => isQuestionSubmitted(q));
   }
 });
 
@@ -644,7 +656,7 @@ const unsubmittedCount = computed(() => {
     return isQuestionSubmitted(props.question) ? 0 : 1;
   } else {
     // 多题模式：统计未提交的题目数量
-    return props.sameTypeQuestions.filter(q => !isQuestionSubmitted(q)).length;
+    return props.sameTypeQuestions.filter((q) => !isQuestionSubmitted(q)).length;
   }
 });
 
@@ -670,7 +682,7 @@ const getTooltipContent = () => {
   if (props.showCorrectness) {
     return ""; // 已经显示答案时不需要提示
   }
-  
+
   if (props.singleQuestionMode) {
     // 单题模式
     if (unsubmittedCount.value > 0) {
@@ -682,7 +694,7 @@ const getTooltipContent = () => {
       return `还有${unsubmittedCount.value}道题目未提交答案，请先提交所有题目答案`;
     }
   }
-  
+
   return "";
 };
 
