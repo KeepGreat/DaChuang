@@ -77,7 +77,7 @@ import {
 	useUserStore,
 } from "@/store";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, customRef, onMounted, onUnmounted, ref, watch } from "vue";
 import { onBeforeRouteLeave, useRoute } from "vue-router";
 
 // 使用store
@@ -154,8 +154,23 @@ const practiceTitle = computed(() => {
 const userId = ref(null);
 const userInfo = ref({ name: "张三", avatar: "" });
 
-// 单题作答模式，默认为false
-const singleQuestionMode = ref(false);
+// 单题作答模式，默认为false - 使用customRef在值变化时自动设置showCorrectness为false
+const singleQuestionMode = customRef((track, trigger) => {
+  let value = false;
+  return {
+    get() {
+      track();
+      return value;
+    },
+    set(newValue) {
+      if (value !== newValue) {
+        value = newValue;
+        showCorrectness.value = false;
+        trigger();
+      }
+    }
+  };
+});
 
 // 倒计时相关 - 从 practiceStore 根据practiceId动态获取 deadline
 const deadline = computed(() => {
@@ -618,6 +633,8 @@ const handleAnswerSubmitted = async (result) => {
 
 // 处理上一题
 const handlePreviousQuestion = () => {
+  showCorrectness.value = false;
+
   if (currentQuestionIndex.value > 0) {
     // 不是当前题型的第一题，直接切换到上一题
     currentQuestionIndex.value--;
@@ -654,6 +671,8 @@ const handlePreviousQuestion = () => {
 
 // 处理下一题
 const handleNextQuestion = () => {
+  showCorrectness.value = false;
+  
   if (currentQuestionIndex.value < filteredQuestions.value.length - 1) {
     // 不是当前题型的最后一题，直接切换到下一题
     currentQuestionIndex.value++;
