@@ -72,14 +72,33 @@
             <div class="card-body">
               <!-- 视频播放器 -->
               <div v-if="item.type === 'video'" class="video-wrapper">
-                <video :src="item.url" controls preload="metadata">
+                <video v-if="fileUrls[item.id]" :src="fileUrls[item.id]" controls preload="metadata">
                   您的浏览器不支持视频播放
                 </video>
+                <div v-else class="loading-placeholder">
+                  <el-skeleton animated>
+                    <template #template>
+                      <el-skeleton-item variant="rect" style="width: 100%; height: 300px;" />
+                    </template>
+                  </el-skeleton>
+                </div>
               </div>
 
               <!-- PDF 查看器 -->
               <div v-else-if="item.type === 'pdf'" class="pdf-wrapper">
-                <iframe :src="item.url" width="100%" height="600" frameborder="0"></iframe>
+                <iframe v-if="fileUrls[item.id]" :src="fileUrls[item.id]" width="100%" height="600" frameborder="0"></iframe>
+                <div v-else class="loading-placeholder">
+                  <el-skeleton animated>
+                    <template #template>
+                      <el-skeleton-item variant="rect" style="width: 100%; height: 600px;" />
+                    </template>
+                  </el-skeleton>
+                </div>
+              </div>
+
+              <!-- 未知类型 -->
+              <div v-else class="unknown-type">
+                <el-empty description="不支持的资料类型" />
               </div>
             </div>
           </div>
@@ -95,7 +114,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   ArrowLeft, VideoPlay, Document
@@ -105,6 +124,8 @@ import { ElMessage } from 'element-plus'
 import { useTeachingStore } from '@/store'
 // 导入 AI 助手图标组件
 import AIAssistantIcon from '@/components/AIAssistantIcon.vue'
+// 导入文件下载 API
+import { downloadFile } from '@/api/modules/teaching/FileContentAPI'
 
 const router = useRouter()
 const route = useRoute()
@@ -117,6 +138,7 @@ const loading = teachingStore.loading
 const seriesInfo = ref(null)
 const contentList = ref([])
 const hasFetched = ref(false)
+const fileUrls = ref({}) // 存储文件的 blob URL
 
 // 返回上一页
 const goBack = () => {
@@ -133,6 +155,35 @@ const goToAICompanion = () => {
     }
   })
 }
+
+// 加载文件内容并生成 blob URL
+const loadFileContent = async (item) => {
+  if (!item.fileId) {
+    console.warn('资料没有关联的文件:', item.title)
+    return
+  }
+
+  // 如果已经加载过，直接返回
+  if (fileUrls.value[item.id]) {
+    return
+  }
+
+  try {
+    const response = await downloadFile(item.fileId)
+    const blob = new Blob([response.data], { type: item.fileType || 'application/octet-stream' })
+    fileUrls.value[item.id] = window.URL.createObjectURL(blob)
+  } catch (err) {
+    console.error('加载文件失败:', err)
+    ElMessage.error(`加载文件 "${item.title}" 失败`)
+  }
+}
+
+// 组件卸载时释放 blob URL
+onUnmounted(() => {
+  Object.values(fileUrls.value).forEach(url => {
+    if (url) window.URL.revokeObjectURL(url)
+  })
+})
 
 
 // 初始化页面数据（统一管理顶部汇总和课程内容）
@@ -183,13 +234,17 @@ const loadSeriesContent = async (seriesId) => {
       seriesInfo.value.videoCount = videoCount
       seriesInfo.value.pdfCount = pdfCount
       seriesInfo.value.totalCount = contentData.length
+
+      // 加载所有文件内容
+      await Promise.all(contentData.map(item => loadFileContent(item)))
+
+      ElMessage.success('课程数据加载完成！')
     } else if (response.code >= 200 && response.data && response.data.length === 0) {
       // 没有数据但请求成功
       ElMessage.warning('该课程系列暂无内容')
     }
 
     hasFetched.value = true
-    ElMessage.success('课程数据加载完成！')
   } catch (error) {
     console.error('加载内容失败:', error)
     ElMessage.error('加载课程内容失败，请重试')
@@ -595,6 +650,16 @@ onMounted(() => {
 .pdf-wrapper iframe {
   display: block;
   width: 100%;
+}
+
+.loading-placeholder {
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+.unknown-type {
+  padding: 40px;
+  text-align: center;
 }
 
 .empty-state {

@@ -34,9 +34,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public int deleteUserById(UUID id) {
+    public int deleteUserById(String id) {
         if (id == null) return -1;
-        return userMapper.deleteById(id);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id);
+        return userMapper.delete(queryWrapper);
     }
 
     @Override
@@ -46,11 +48,12 @@ public class UserServiceImpl implements UserService {
         updateWrapper.eq("id", user.getId());
         if (user.getUsername() != null) updateWrapper.set("username", user.getUsername());
         if (user.getPassword() != null) updateWrapper.set("password", user.getPassword());
+        if (user.getRole() != null) updateWrapper.set("role", user.getRole());
         return userMapper.update(null, updateWrapper);
     }
 
     @Override
-    public User getUserById(UUID id) {
+    public User getUserById(String id) {
         return userMapper.selectById(id);
     }
 
@@ -59,6 +62,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) return userMapper.selectList(null);
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (user.getUsername() != null) queryWrapper.like("username", user.getUsername());
+        if (user.getRole() != null) queryWrapper.eq("role", user.getRole());
         return userMapper.selectList(queryWrapper);
     }
 

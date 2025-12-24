@@ -11,9 +11,7 @@ public interface FileContentService {
 
     int addFileContent(FileContent fileContent, MultipartFile file);
 
-    int deleteFileContent(FileContent fileContent);
-
-    int deleteFileContentById(Integer id, String fileName);
+    int deleteFileContentById(Integer id);
 
     int updateFileContentById(FileContent fileContent, MultipartFile file);
 
@@ -22,5 +20,5 @@ public interface FileContentService {
     Page<FileContent> getFileContentsPage(int pageNo, int pageSize, FileContent fileContent);
 
     //资料:文件内容 = 1:1
-    Resource loadFileContent(String fileName);
+    Resource loadFileContent(Integer id);
 }

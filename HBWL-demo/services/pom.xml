@@ -17,6 +17,7 @@
         <module>service-teaching</module>
         <module>service-practice</module>
         <module>service-user</module>
+        <module>service-evaluation</module>
     </modules>
 
     <properties>

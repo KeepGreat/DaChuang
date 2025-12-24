@@ -501,9 +501,7 @@ const getImageUrl = (resource) => {
 // 异步加载图片
 const loadImage = async (resource) => {
   try {
-    console.log("正在加载图片:", resource.name, "ID:", resource.id);
     const response = await downloadQuestionResource(resource.id);
-    console.log("图片下载成功:", resource.name, "数据大小:", response.data.size);
 
     // 验证响应数据
     if (!response.data || response.data.size === 0) {
@@ -522,9 +520,7 @@ const loadImage = async (resource) => {
     imageUrls.value.set(resource.id, imageUrl);
     // 强制更新界面
     imageUpdateCounter.value++;
-    console.log("图片URL创建成功:", resource.name);
   } catch (error) {
-    console.error("图片加载失败:", error);
     handleImageError(resource);
     // 设置一个空URL避免重复加载，并标记为失败
     imageUrls.value.set(resource.id, "");
@@ -695,7 +691,6 @@ const toggleGroup = (groupName) => {
 
 // 组件挂载时加载所有图片
 onMounted(() => {
-  console.log("组件挂载，开始加载图片资源...");
   loadAllImages();
 });
 
@@ -703,7 +698,6 @@ onMounted(() => {
 watch(
   imageResources,
   (newResources) => {
-    console.log("图片资源发生变化，重新加载...", newResources);
     loadAllImages();
   },
   { immediate: true }
@@ -714,9 +708,9 @@ watch(
 .question-resources {
   margin-top: 20px;
   padding: 16px;
-  background: #f8f9fa;
+  background: var(--bg-primary-grey);
   border-radius: 6px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border-primary-lighter);
   max-height: 600px;
   overflow-y: auto;
 }
@@ -743,14 +737,14 @@ watch(
 .resources-header {
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border-primary-lighter);
 }
 
 .resources-title {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -772,20 +766,20 @@ watch(
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #606266;
+  color: var(--text-regular);
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: #fff;
+  background: var(--bg-white);
   border-radius: 4px;
-  border: 1px solid #e4e7ed;
+  border: 1px solid var(--border-light);
   transition: all 0.2s ease;
 }
 
 .resource-group-title:hover {
-  background: #f5f7fa;
-  border-color: #c0c4cc;
+  background: var(--bg-primary-lighter);
+  border-color: var(--border-base);
 }
 
 .resource-list {
@@ -800,14 +794,14 @@ watch(
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: #fff;
+  background: var(--bg-white);
   border-radius: 4px;
-  border: 1px solid #e4e7ed;
+  border: 1px solid var(--border-light);
   transition: all 0.2s ease;
 }
 
 .resource-item:hover {
-  border-color: #409eff;
+  border-color: var(--primary);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -821,17 +815,17 @@ watch(
 .resource-name {
   font-size: 14px;
   font-weight: 500;
-  color: #303133;
+  color: var(--text-primary);
 }
 
 .resource-size {
   font-size: 12px;
-  color: #909399;
+  color: var(--text-placeholder);
 }
 
 .resource-description {
   font-size: 12px;
-  color: #606266;
+  color: var(--text-regular);
   margin-top: 4px;
 }
 
@@ -839,7 +833,7 @@ watch(
 .image-resources-group {
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border-primary-lighter);
 }
 
 /* 图片直接展示样式 */
@@ -852,7 +846,7 @@ watch(
   max-width: 100%;
   max-height: 200px;
   border-radius: 4px;
-  border: 1px solid #e4e7ed;
+  border: 1px solid var(--border-light);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -863,22 +857,22 @@ watch(
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: #f5f7fa;
+  background: var(--bg-primary-lighter);
   border-radius: 4px;
-  border: 1px dashed #dcdfe6;
+  border: 1px dashed var(--border-light);
   min-height: 100px;
 }
 
 .loading-icon {
   font-size: 24px;
-  color: #409eff;
+  color: var(--primary);
   animation: rotating 2s linear infinite;
   margin-bottom: 8px;
 }
 
 .loading-text {
   font-size: 12px;
-  color: #909399;
+  color: var(--text-placeholder);
 }
 
 @keyframes rotating {
@@ -897,21 +891,21 @@ watch(
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: #fef0f0;
+  background: var(--danger-alpha-10);
   border-radius: 4px;
-  border: 1px dashed #fbc4c4;
+  border: 1px dashed var(--danger-alpha-30);
   min-height: 100px;
 }
 
 .error-icon {
   font-size: 24px;
-  color: #f56c6c;
+  color: var(--danger);
   margin-bottom: 8px;
 }
 
 .error-text {
   font-size: 12px;
-  color: #f56c6c;
+  color: var(--danger);
   margin-bottom: 8px;
 }
 
@@ -919,8 +913,8 @@ watch(
 .file-preview-container {
   margin-top: 16px;
   padding: 16px;
-  background: #fff;
-  border: 1px solid #e4e7ed;
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   max-height: 400px;
@@ -948,13 +942,13 @@ watch(
   align-items: center;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e4e7ed;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .preview-title {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-primary);
 }
 
 .preview-image {
@@ -982,14 +976,14 @@ watch(
   justify-content: center;
   align-items: center;
   height: 200px;
-  background: #f8f9fa;
-  border: 1px solid #e4e7ed;
+  background: var(--bg-primary-lighter);
+  border: 1px solid var(--border-light);
   border-radius: 4px;
 }
 
 .pdf-preview-error p {
   margin-bottom: 12px;
-  color: #606266;
+  color: var(--text-regular);
   text-align: center;
 }
 
@@ -1021,8 +1015,8 @@ watch(
 .preview-json {
   margin: 0;
   padding: 12px;
-  background: #f8f9fa;
-  border: 1px solid #e4e7ed;
+  background: var(--bg-primary-lighter);
+  border: 1px solid var(--border-light);
   border-radius: 4px;
   font-family: "Consolas", "Monaco", monospace;
   font-size: 13px;
@@ -1032,7 +1026,7 @@ watch(
 }
 
 .preview-json {
-  color: #e6a23c;
+  color: var(--warning);
 }
 
 .ppt-preview-container,
@@ -1041,8 +1035,8 @@ watch(
   justify-content: center;
   align-items: center;
   height: 200px;
-  background: #f8f9fa;
-  border: 1px solid #e4e7ed;
+  background: var(--bg-primary-lighter);
+  border: 1px solid var(--border-light);
   border-radius: 4px;
 }
 

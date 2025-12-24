@@ -89,7 +89,7 @@ const initCourseSeries = async () => {
       // 将返回的课程数据作为课程系列
       courseSeries.value = response.data.map(course => ({
         id: course.id,
-        title: course.title,
+        title: course.name,
         description: course.description
       }))
     } else {

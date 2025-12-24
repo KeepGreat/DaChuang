@@ -11,7 +11,7 @@
 
     <div class="practice-content">
       <!-- 侧边栏组件 -->
-      <div style="background: #f5f7fa">
+      <div style="background: var(--bg-primary-grey)">
         <PracticeSiderbar
           :question-types="computedSidebarQuestionTypes"
           :active-type-id="activeType"
@@ -62,6 +62,7 @@ import {
 	getQuestionResources,
 	getUserAnswers,
 	getUserId,
+	judgeAnswersAuto,
 	updateUserAnswerById,
 } from "@/api";
 import PracticeNavbar from "@/components/practice/PracticeNavbar.vue";
@@ -75,8 +76,9 @@ import {
 	useUserAnswerStore,
 	useUserStore,
 } from "@/store";
-import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { onBeforeRouteLeave, useRoute } from "vue-router";
 
 // 使用store
 const questionsStore = useQuestionsStore();
@@ -119,9 +121,13 @@ const fetchUserIdFromToken = async () => {
   }
 };
 
-// 路由参数获取当前练习ID
+// 路由参数获取当前练习ID和课程章节ID
 const currentPracticeId = computed(() => {
   return route.params.practiceId || null;
+});
+
+const currentCourseSectionId = computed(() => {
+  return route.params.courseSectionId || null;
 });
 
 // 练习基本信息 - 从practiceStore中根据practiceId动态获取
@@ -166,11 +172,11 @@ const deadline = computed(() => {
   if (practiceStore.practices && practiceStore.practices.length > 0) {
     const assignmentDeadline = practiceStore.practices[0].deadline;
     // 将 deadline 字符串转换为 Date 对象
-    return new Date(assignmentDeadline);
+    return assignmentDeadline ? new Date(assignmentDeadline) : null;
   }
 
-  // 如果没有练习数据，使用默认值：当前时间后30分钟
-  return new Date(Date.now() + 30 * 60 * 1000);
+  // 如果没有练习数据，返回null表示长期有效
+  return null;
 });
 
 // 当前激活的题型，初始值设为第一个具体题型（判断题）
@@ -448,6 +454,27 @@ const updateUserAnswer = (questionId, answer) => {
   }
 };
 
+// 监听用户答案变化，重置对应题目的状态
+watch(
+  () => userAnswerStore.getUserAnswersMap,
+  (newUserAnswersMap, oldUserAnswersMap) => {
+    // 检查哪些题目的答案发生了变化
+    for (const questionId in newUserAnswersMap) {
+      const newAnswer = newUserAnswersMap[questionId];
+      const oldAnswer = oldUserAnswersMap[questionId];
+
+      // 只有当答案确实发生了变化时才重置状态
+      if (JSON.stringify(newAnswer) !== JSON.stringify(oldAnswer)) {
+        const question = questionsStore.questions.find((q) => q.id === questionId);
+        if (question && question.status === "answered") {
+          // 用户修改了已提交的答案，重置状态为null表示未提交
+          question.status = null;
+        }
+      }
+    }
+  },
+  { deep: true }
+);
 // 提交用户答案到后端
 const submitUserAnswerToBackend = async (questionId, answer) => {
   try {
@@ -497,8 +524,63 @@ const submitUserAnswerToBackend = async (questionId, answer) => {
 };
 
 // 切换显示正确答案
-const toggleShowCorrectness = () => {
+const toggleShowCorrectness = async () => {
   showCorrectness.value = !showCorrectness.value;
+
+  // 当显示答案时，调用判题接口进行判题
+  if (showCorrectness.value) {
+    await judgeAllAnswers();
+  }
+};
+
+// 判题方法：调用judgeAnswersAuto接口对所有已回答的题目进行判题
+const judgeAllAnswers = async () => {
+  try {
+    // 获取所有已回答的题目（判断题和选择题）
+    const answeredQuestions = questionsStore.questions.filter((q) => {
+      // 只处理已回答的判断题(0)和选择题(1)
+      return (q.type === 0 || q.type === 1) && userAnswerStore.isQuestionAnswered(q.id);
+    });
+
+    if (answeredQuestions.length === 0) {
+      console.log("没有需要判题的已回答题目");
+      return;
+    }
+
+    // 准备判题数据
+    const judgeData = answeredQuestions.map((question) => {
+      const userAnswer = userAnswerStore.getUserAnswerByQuestionId(question.id);
+      return {
+        questionId: question.id,
+        questionType: question.type,
+        content: Array.isArray(userAnswer) ? userAnswer.join(",") : String(userAnswer),
+        userId: userId.value,
+      };
+    });
+
+    console.log("开始判题，题目数量:", judgeData.length);
+
+    // 调用判题接口
+    const res = await judgeAnswersAuto(judgeData);
+    const judgedAnswers = res.data; // 用变量获取res.data
+
+    // 更新题目状态
+    judgedAnswers.forEach((judgedAnswer) => {
+      const question = questionsStore.questions.find(
+        (q) => q.id === judgedAnswer.questionId
+      );
+      if (question) {
+        // 根据分数判断正确性
+        question.status = judgedAnswer.score > 0 ? "correct" : "incorrect";
+        console.log(
+          `题目 ${judgedAnswer.questionId} 判题完成，状态: ${question.status}, 分数: ${judgedAnswer.score}`
+        );
+      }
+    });
+    console.log("判题完成，已更新题目状态");
+  } catch (error) {
+    console.error("判题过程异常:", error);
+  }
 };
 
 // 处理时间结束
@@ -509,6 +591,7 @@ const handleTimeUp = () => {
 // 处理题型切换
 const handleTypeChange = (typeId) => {
   activeType.value = typeId;
+  showCorrectness.value = false;
   currentQuestionIndex.value = 0; // 切换题型时，重置到第一个问题
 };
 
@@ -528,6 +611,8 @@ const handleAnswerSubmitted = async (result) => {
       // 答案为空时，保持状态为null（未回答）
       question.status = null;
     }
+  } else {
+    console.error("未找到对应问题:", result.questionId);
   }
 };
 
@@ -627,10 +712,169 @@ onMounted(async () => {
   }, 100);
 });
 
+// 检查是否有未提交的答案
+const hasUnsubmittedAnswers = computed(() => {
+  const userAnswersMap = userAnswers.value;
+
+  // 检查是否有用户填写但未提交的答案
+  let unsubmittedCount = 0;
+  const unsubmittedDetails = [];
+  const allDetails = [];
+
+  // 遍历所有题目，检查用户是否有填写但未提交的答案
+  questionsStore.questions.forEach((question) => {
+    const userAnswer = userAnswersMap[question.id];
+
+    // 记录每个题目的详细信息
+    const detail = {
+      questionId: question.id,
+      userAnswer: userAnswer,
+      userAnswerLength: userAnswer ? userAnswer.length : 0,
+      questionStatus: question.status,
+      isArray: Array.isArray(userAnswer),
+      isEmpty:
+        !userAnswer || (Array.isArray(userAnswer) ? userAnswer.length === 0 : false),
+      isUnsubmitted: false,
+    };
+
+    // 如果用户有答案但题目状态为null（未提交），则认为是未提交的答案
+    if (userAnswer && userAnswer.length > 0 && question.status === null) {
+      unsubmittedCount++;
+      detail.isUnsubmitted = true;
+      unsubmittedDetails.push({
+        questionId: question.id,
+        userAnswer: userAnswer,
+        questionStatus: question.status,
+        reason: "用户有答案但状态为null",
+      });
+    }
+
+    allDetails.push(detail);
+  });
+
+  console.log(`未提交答案数量: ${unsubmittedCount}`);
+  console.log(`未提交答案详情:`, unsubmittedDetails);
+
+  return unsubmittedCount > 0;
+});
+
+// 提交所有未提交的答案
+const submitAllUnsubmittedAnswers = async () => {
+  try {
+    const userAnswersMap = userAnswers.value;
+    let submitCount = 0;
+
+    for (const question of questionsStore.questions) {
+      const userAnswer = userAnswersMap[question.id];
+
+      // 如果用户有答案但题目状态为null（未提交），则提交
+      if (userAnswer && userAnswer.length > 0 && question.status === null) {
+        await submitUserAnswerToBackend(question.id, userAnswer);
+        // 提交成功后标记为已回答
+        question.status = "answered";
+        submitCount++;
+      }
+    }
+
+    if (submitCount > 0) {
+      ElMessage.success(`已自动提交 ${submitCount} 个未提交的答案`);
+    }
+
+    return submitCount;
+  } catch (error) {
+    console.error("自动提交未提交答案失败:", error);
+    ElMessage.error("自动提交答案失败，请手动保存");
+    return 0;
+  }
+};
+
+// 标记是否正在处理路由导航
+let isNavigating = ref(false);
+
+// 路由离开守卫
+onBeforeRouteLeave(async (to, from, next) => {
+  console.log("准备离开练习页面，检查未提交答案...");
+
+  // 标记正在处理路由导航
+  isNavigating.value = true;
+
+  // 如果没有未提交的答案，直接允许离开
+  if (!hasUnsubmittedAnswers.value) {
+    console.log("没有未提交的答案，允许离开");
+    isNavigating.value = false; // 重置导航状态
+    next();
+    return;
+  }
+
+  // 有未提交答案，显示确认对话框
+  try {
+    await ElMessageBox.confirm(
+      "您有未提交的答案，离开页面将自动保存您的答案。是否确认离开？",
+      "离开确认",
+      {
+        confirmButtonText: "确认离开",
+        cancelButtonText: "取消",
+        type: "warning",
+        beforeClose: async (action, instance, done) => {
+          if (action === "confirm") {
+            // 用户确认离开，先提交未提交的答案
+            instance.confirmButtonLoading = true;
+            instance.confirmButtonText = "提交中...";
+
+            try {
+              await submitAllUnsubmittedAnswers();
+              done();
+            } catch (error) {
+              // 如果提交失败，仍然允许用户离开，但提示用户
+              ElMessage.warning("部分答案提交失败，建议您稍后检查并重新提交");
+              done();
+            } finally {
+              instance.confirmButtonLoading = false;
+            }
+          } else {
+            done();
+          }
+        },
+      }
+    );
+
+    // 用户确认离开
+    console.log("用户确认离开练习页面");
+    next();
+  } catch (error) {
+    // 用户取消离开（点击取消或ESC键）
+    console.log("用户取消离开练习页面");
+    // 阻止路由跳转
+    next(false);
+  } finally {
+    // 无论结果如何，都要重置导航状态
+    isNavigating.value = false;
+  }
+});
+
+// 监听浏览器刷新/关闭事件
+const handleBeforeUnload = (event) => {
+  // 如果正在处理路由导航，则不显示原生弹窗
+  if (isNavigating.value) {
+    return;
+  }
+
+  if (hasUnsubmittedAnswers.value) {
+    event.preventDefault();
+    event.returnValue = "您有未提交的答案，确定要离开吗？";
+    return event.returnValue;
+  }
+};
+
 // 组件卸载时清理
 onUnmounted(() => {
   // 不再需要清理计时器，因为计时器已经移到 PracticeNavbar 组件中
+  // 移除浏览器刷新/关闭事件监听
+  window.removeEventListener("beforeunload", handleBeforeUnload);
 });
+
+// 添加浏览器刷新/关闭事件监听
+window.addEventListener("beforeunload", handleBeforeUnload);
 </script>
 
 <style scoped>
@@ -656,7 +900,7 @@ onUnmounted(() => {
   flex-direction: column;
   overflow: hidden;
   padding: 20px;
-  background: #f5f7fa;
+  background: var(--bg-primary-grey);
 }
 
 /* 题目容器 */
@@ -671,7 +915,7 @@ onUnmounted(() => {
 
 /* 进度信息容器 */
 .progress-info {
-  background: #fff;
+  background: var(--bg-white);
   padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -679,7 +923,7 @@ onUnmounted(() => {
 
 /* 侧边栏下方的进度信息容器 */
 .progress-info-sidebar {
-  background: #fff;
+  background: var(--bg-white);
   padding: 16px;
   border-radius: 0 0 8px 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -698,7 +942,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
-  color: #606266;
+  color: var(--text-primary);
 }
 
 /* 响应式设计 */
