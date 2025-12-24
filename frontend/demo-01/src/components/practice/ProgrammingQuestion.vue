@@ -80,14 +80,6 @@
           <h4>运行结果：</h4>
           <pre>{{ codeResult }}</pre>
         </div>
-
-        <!-- 正确答案展示（查看答案时显示） -->
-        <div v-if="showCorrectness && question.answer" class="correct-answer">
-          <h4>参考答案：</h4>
-          <div class="code-editor">
-            <pre>{{ question.answer }}</pre>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -254,10 +246,10 @@ async function submitCode() {
   if (!codeInput.value.trim()) {
     ElMessage.error("请输入代码");
     emit("answer-submitted", {
-    questionId: props.question.id,
-    answer: codeInput.value,
-    isEmpty: true,
-  });
+      questionId: props.question.id,
+      answer: codeInput.value,
+      isEmpty: true,
+    });
     return;
   }
 

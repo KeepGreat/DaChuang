@@ -213,6 +213,7 @@
 
         <div class="right-buttons">
           <el-tooltip
+            v-if="!isProgrammingQuestion"
             :content="getTooltipContent()"
             placement="top"
             :disabled="allQuestionsSubmitted || showCorrectness"
