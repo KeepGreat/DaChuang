@@ -76,8 +76,9 @@ import {
 	useUserAnswerStore,
 	useUserStore,
 } from "@/store";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { onBeforeRouteLeave, useRoute } from "vue-router";
 
 // 使用store
 const questionsStore = useQuestionsStore();
@@ -683,10 +684,150 @@ onMounted(async () => {
   }, 100);
 });
 
+// 检查是否有未提交的答案
+const hasUnsubmittedAnswers = computed(() => {
+  const userAnswersMap = userAnswers.value;
+
+  // 检查是否有用户填写但未提交的答案
+  let unsubmittedCount = 0;
+
+  // 遍历所有题目，检查用户是否有填写但未提交的答案
+  questionsStore.questions.forEach((question) => {
+    const userAnswer = userAnswersMap[question.id];
+
+    // 如果用户有答案但题目状态为null（未提交），则认为是未提交的答案
+    if (userAnswer && userAnswer.length > 0 && question.status === null) {
+      unsubmittedCount++;
+    }
+  });
+
+  console.log(`未提交答案数量: ${unsubmittedCount}`);
+  console.log(`用户答案Map:`, userAnswersMap);
+  console.log(
+    `题目状态:`,
+    questionsStore.questions.map((q) => ({ id: q.id, status: q.status }))
+  );
+
+  return unsubmittedCount > 0;
+});
+
+// 提交所有未提交的答案
+const submitAllUnsubmittedAnswers = async () => {
+  try {
+    const userAnswersMap = userAnswers.value;
+    let submitCount = 0;
+
+    for (const question of questionsStore.questions) {
+      const userAnswer = userAnswersMap[question.id];
+
+      // 如果用户有答案但题目状态为null（未提交），则提交
+      if (userAnswer && userAnswer.length > 0 && question.status === null) {
+        await submitUserAnswerToBackend(question.id, userAnswer);
+        // 提交成功后标记为已回答
+        question.status = "answered";
+        submitCount++;
+      }
+    }
+
+    if (submitCount > 0) {
+      ElMessage.success(`已自动提交 ${submitCount} 个未提交的答案`);
+    }
+
+    return submitCount;
+  } catch (error) {
+    console.error("自动提交未提交答案失败:", error);
+    ElMessage.error("自动提交答案失败，请手动保存");
+    return 0;
+  }
+};
+
+// 标记是否正在处理路由导航
+let isNavigating = ref(false);
+
+// 路由离开守卫
+onBeforeRouteLeave(async (to, from, next) => {
+  console.log("准备离开练习页面，检查未提交答案...");
+
+  // 标记正在处理路由导航
+  isNavigating.value = true;
+
+  // 如果没有未提交的答案，直接允许离开
+  if (!hasUnsubmittedAnswers.value) {
+    console.log("没有未提交的答案，允许离开");
+    isNavigating.value = false; // 重置导航状态
+    next();
+    return;
+  }
+
+  // 有未提交答案，显示确认对话框
+  try {
+    await ElMessageBox.confirm(
+      "您有未提交的答案，离开页面将自动保存您的答案。是否确认离开？",
+      "离开确认",
+      {
+        confirmButtonText: "确认离开",
+        cancelButtonText: "取消",
+        type: "warning",
+        beforeClose: async (action, instance, done) => {
+          if (action === "confirm") {
+            // 用户确认离开，先提交未提交的答案
+            instance.confirmButtonLoading = true;
+            instance.confirmButtonText = "提交中...";
+
+            try {
+              await submitAllUnsubmittedAnswers();
+              done();
+            } catch (error) {
+              // 如果提交失败，仍然允许用户离开，但提示用户
+              ElMessage.warning("部分答案提交失败，建议您稍后检查并重新提交");
+              done();
+            } finally {
+              instance.confirmButtonLoading = false;
+            }
+          } else {
+            done();
+          }
+        },
+      }
+    );
+
+    // 用户确认离开
+    console.log("用户确认离开练习页面");
+    next();
+  } catch (error) {
+    // 用户取消离开（点击取消或ESC键）
+    console.log("用户取消离开练习页面");
+    // 阻止路由跳转
+    next(false);
+  } finally {
+    // 无论结果如何，都要重置导航状态
+    isNavigating.value = false;
+  }
+});
+
+// 监听浏览器刷新/关闭事件
+const handleBeforeUnload = (event) => {
+  // 如果正在处理路由导航，则不显示原生弹窗
+  if (isNavigating.value) {
+    return;
+  }
+
+  if (hasUnsubmittedAnswers.value) {
+    event.preventDefault();
+    event.returnValue = "您有未提交的答案，确定要离开吗？";
+    return event.returnValue;
+  }
+};
+
 // 组件卸载时清理
 onUnmounted(() => {
   // 不再需要清理计时器，因为计时器已经移到 PracticeNavbar 组件中
+  // 移除浏览器刷新/关闭事件监听
+  window.removeEventListener("beforeunload", handleBeforeUnload);
 });
+
+// 添加浏览器刷新/关闭事件监听
+window.addEventListener("beforeunload", handleBeforeUnload);
 </script>
 
 <style scoped>
