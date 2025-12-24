@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from "vue-router";
+import { useUserStore } from "@/store";
 
 // 主界面路由
 const mainRoutes = [
@@ -192,6 +193,27 @@ const routes = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
+});
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+  const isLoggedIn = userStore.isLoggedIn;
+  const publicRoutes = ["/login", "/register"];
+
+  if (isLoggedIn) {
+    if (publicRoutes.includes(to.path)) {
+      next("/");
+    } else {
+      next();
+    }
+  } else {
+    if (publicRoutes.includes(to.path)) {
+      next();
+    } else {
+      next("/login");
+    }
+  }
 });
 
 export default router;
