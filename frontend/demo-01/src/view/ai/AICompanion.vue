@@ -39,7 +39,7 @@
                 <div class="pulse-ring"></div>
               </div>
               <h2 class="welcome-title">你好！我是你的智能学伴</h2>
-              <p class="welcome-subtitle">我可以帮助你解答问题、制定学习计划、推荐资源等</p>
+              <p class="welcome-subtitle">快来和我一起愉快学习吧！</p>
               <el-button type="primary" size="large" class="start-btn" @click="startChat" :loading="isCreatingSession">
                 开始引导式学习
               </el-button>

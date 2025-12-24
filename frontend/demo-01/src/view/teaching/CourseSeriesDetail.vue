@@ -338,33 +338,31 @@ onMounted(() => {
   height: 120px;
   padding: 15px;
   background: linear-gradient(135deg,
-    rgba(240, 253, 244, 0.95) 0%,
-    rgba(236, 253, 245, 0.95) 25%,
-    rgba(240, 253, 250, 0.95) 50%,
-    rgba(240, 253, 244, 0.95) 100%);
+    rgba(239, 246, 255, 0.95) 0%,
+    rgba(224, 242, 254, 0.95) 50%,
+    rgba(239, 246, 255, 0.95) 100%);
   border-radius: 20px;
   box-shadow:
-    0 4px 20px rgba(34, 197, 94, 0.2),
-    0 1px 3px rgba(6, 182, 212, 0.1),
+    0 4px 20px var(--primary-alpha-10),
+    0 1px 3px rgba(59, 130, 246, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(34, 197, 94, 0.1);
+  border: 1px solid var(--border-primary-lighter);
 }
 
 .companion-icon-wrapper:hover {
   transform: translateY(-6px) scale(1.05);
   box-shadow:
-    0 10px 40px rgba(34, 197, 94, 0.3),
-    0 5px 15px rgba(6, 182, 212, 0.2),
+    0 10px 40px var(--primary-alpha-10),
+    0 5px 15px rgba(59, 130, 246, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 1);
   background: linear-gradient(135deg,
-    rgba(240, 253, 244, 1) 0%,
-    rgba(236, 253, 245, 1) 25%,
-    rgba(240, 253, 250, 1) 50%,
-    rgba(240, 253, 244, 1) 100%);
+    rgba(239, 246, 255, 1) 0%,
+    rgba(224, 242, 254, 1) 50%,
+    rgba(239, 246, 255, 1) 100%);
 }
 
 .companion-icon-wrapper::before {
@@ -375,11 +373,9 @@ onMounted(() => {
   right: 0;
   height: 3px;
   background: linear-gradient(90deg,
-    #22c55e 0%,
-    #06b6d4 25%,
-    #fbbf24 50%,
-    #22c55e 75%,
-    #06b6d4 100%);
+    var(--primary) 0%,
+    var(--primary-light) 50%,
+    var(--primary) 100%);
   background-size: 200% 100%;
   animation: shimmer-flow 3s linear infinite;
 }
@@ -400,7 +396,7 @@ onMounted(() => {
   inset: -2px;
   background: linear-gradient(45deg,
     transparent 30%,
-    rgba(34, 197, 94, 0.3) 50%,
+    var(--primary-alpha-10) 50%,
     transparent 70%);
   border-radius: 22px;
   opacity: 0;
@@ -422,12 +418,8 @@ onMounted(() => {
 .companion-text {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--primary);
   margin-top: 8px;
-  background: linear-gradient(135deg, #22c55e, #06b6d4, #fbbf24);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* 内容部分 */
