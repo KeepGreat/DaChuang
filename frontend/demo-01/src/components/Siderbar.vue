@@ -29,7 +29,7 @@ const go = (page) => {
   sessionStorage.clear();
   switch(page) {
     case 'profile': router.push('/profile'); break;
-    case 'practice': router.push('/pracindex'); break;
+    case 'practice': router.push('/practiceIndex'); break;
     case 'teaching': router.push('/coursesection'); break;
   }
 };

@@ -21,25 +21,14 @@ request.interceptors.request.use(
       return config;
     }
 
-    // 创建userStore实例
+    // 检查token是否存在
     const userStore = useUserStore();
-
-    // TODO 暂时注释登录和token检查，后续功能完善后再处理，这里需要检查token是否存在
-    /* 
-    if (!userStore.token) {
-			console.warn("用户未登录");
-      return Promise.reject(new Error("用户未登录"));
-    }
-		*/
-
-    // 在Headers携带token，key是JwtToken，value是实际的token
-    // TODO 暂时这样处理，避免传undefined
-    if (userStore.authHeader) {
-      config.headers.JwtToken = userStore.authHeader;
+    if (userStore.token) {
+      config.headers.JwtToken = userStore.token;
     } else {
-      console.warn("authHeader 为空，未携带 JwtToken 请求头");
+      console.warn("用户未登录");
+      return Promise.reject(new Error("用户未登录，请先登录"));
     }
-
     return config;
   },
   (error) => {
@@ -47,7 +36,6 @@ request.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
