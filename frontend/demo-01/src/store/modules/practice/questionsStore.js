@@ -62,8 +62,14 @@ export const useQuestionsStore = defineStore(
     };
 
     // 判断题目是否已回答的辅助函数
-    const isQuestionAnswered = (questionId) => {
-      // 只检查 questionsStore 中的 status 字段（已提交到后端的答案），不再检查userAnswersMap，因为那只是本地填写的答案，未必已提交
+    const isQuestionAnswered = (questionId, userAnswersMap = null) => {
+      // 优先使用传入的 userAnswersMap（本地填写的答案）
+      if (userAnswersMap && userAnswersMap[questionId]) {
+        const userAnswer = userAnswersMap[questionId];
+        return userAnswer && userAnswer.length > 0;
+      }
+      
+      // 如果没有 userAnswersMap，则检查 questionsStore 中的 status 字段（已提交到后端的答案）
       const question = questions.value.find((q) => q.id === questionId);
       if (question && question.status !== null) {
         return true;
