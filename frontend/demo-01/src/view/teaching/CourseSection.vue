@@ -18,12 +18,7 @@
       <ElSkeleton :rows="4" animated :throttle="500">
         <template #template>
           <div class="skeleton-grid">
-            <ElSkeletonItem
-              v-for="i in 8"
-              :key="i"
-              variant="rect"
-              class="skeleton-card"
-            />
+            <ElSkeletonItem v-for="i in 8" :key="i" variant="rect" class="skeleton-card" />
           </div>
         </template>
       </ElSkeleton>
@@ -48,8 +43,8 @@
       <ElCard v-for="course in courses" :key="course.id" class="course-card" :body-style="{ padding: '0' }"
         @click="handleCardClick(course)">
         <div class="course-image">
-          <ElIcon size="60" class="image-placeholder">
-            <Document />
+          <ElIcon size="80" class="image-placeholder">
+            <Document style="font-size: 60px;opacity: 0.8;" />
           </ElIcon>
         </div>
         <div class="course-info">
@@ -211,6 +206,7 @@ onMounted(async () => {
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -324,7 +320,14 @@ onMounted(async () => {
 }
 
 .image-placeholder {
-  opacity: 0.7;
+  opacity: 0.8;
+  filter: drop-shadow(0 4px 8px var(--primary-alpha-20));
+  transition: all 0.3s ease;
+}
+
+.course-card:hover .image-placeholder {
+  transform: scale(1.1);
+  opacity: 1;
 }
 
 .course-info {
