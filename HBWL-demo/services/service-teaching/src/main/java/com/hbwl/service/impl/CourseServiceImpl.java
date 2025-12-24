@@ -21,7 +21,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public int addCourse(Course course) {
-        if (course == null) return -1;
+        if (course == null || course.getName() == null || course.getSectionId() == null) return -1;
         return courseMapper.insert(course);
     }
 

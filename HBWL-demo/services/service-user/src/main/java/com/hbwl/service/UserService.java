@@ -10,11 +10,11 @@ public interface UserService {
 
     int addUser(User user);
 
-    int deleteUserById(UUID id);
+    int deleteUserById(String id);
 
     int updateUserById(User user);
 
-    User getUserById(UUID id);
+    User getUserById(String id);
 
     List<User> getUsers(User user);
 

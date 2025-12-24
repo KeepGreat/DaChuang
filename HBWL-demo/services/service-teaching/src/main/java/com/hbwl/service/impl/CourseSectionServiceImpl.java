@@ -21,7 +21,7 @@ public class CourseSectionServiceImpl implements CourseSectionService {
 
     @Override
     public int addCourseSection(CourseSection courseSection) {
-        if (courseSection == null) return -1;
+        if (courseSection == null || courseSection.getName() == null) return -1;
         return courseSectionMapper.insert(courseSection);
     }
 

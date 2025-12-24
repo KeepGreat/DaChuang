@@ -4,7 +4,6 @@ import com.hbwl.ai.AITeacherService;
 import com.hbwl.ai.listener.CustomChatModelListener;
 import com.hbwl.ai.tool.CodeSandboxTool;
 import com.hbwl.ai.properties.TeachingProperties;
-import dev.langchain4j.data.document.splitter.DocumentByParagraphSplitter;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -15,7 +14,6 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.embedding.EmbeddingStore;
-import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -69,7 +67,7 @@ public class ModelConfig {
                 .user("postgres")
                 .password("123456")
                 .table("teaching_material")
-                .dimension(embeddingModel.dimension())
+                .dimension(embeddingModel.dimension()) //1024维
                 .createTable(true)
                 .build();
     }

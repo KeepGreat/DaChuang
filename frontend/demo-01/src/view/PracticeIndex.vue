@@ -95,7 +95,7 @@
         <el-card class="preview-card">
           <template #header>
             <div class="preview-header">
-              <h4>{{ paginatedPractices[selectedPractice].name }}</h4>
+              <h4>{{ paginatedPractices[selectedPractice].title }}</h4>
               <el-button type="primary" @click="handleClick('practice')">
                 开始练习
               </el-button>
@@ -109,14 +109,21 @@
                 本练习包含 {{ paginatedPractices[selectedPractice].questionNum }} 个算法题目，
                 旨在帮助您掌握基础算法思想和编程技巧。
               </p>
-              <div v-if="paginatedPractices[selectedPractice].expiredAt" class="deadline-info">
+              <div v-if="paginatedPractices[selectedPractice].deadline" class="deadline-info">
                 <el-icon><Clock /></el-icon>
-                截止时间: {{ new Date(paginatedPractices[selectedPractice].expiredAt).toLocaleString() }}
+                截止时间: {{ new Date(paginatedPractices[selectedPractice].deadline).toLocaleString() }}
                 <el-tag 
-                  :type="new Date(paginatedPractices[selectedPractice].expiredAt) < new Date() ? 'danger' : 'info'"
+                  :type="new Date(paginatedPractices[selectedPractice].deadline) < new Date() ? 'danger' : 'info'"
                   size="small"
                 >
-                  {{ formatDeadline(paginatedPractices[selectedPractice].expiredAt) }}
+                  {{ formatDeadline(paginatedPractices[selectedPractice].deadline) }}
+                </el-tag>
+              </div>
+              <div v-else class="deadline-info">
+                <el-icon><Clock /></el-icon>
+                截止时间: 长期有效
+                <el-tag type="success" size="small">
+                  长期有效
                 </el-tag>
               </div>
             </div>
@@ -365,7 +372,7 @@ onMounted(() => {
 
 // 格式化截止时间
 const formatDeadline = (deadline) => {
-  if (!deadline) return '无截止时间';
+  if (!deadline) return '长期有效';
   
   const date = new Date(deadline);
   const now = new Date();

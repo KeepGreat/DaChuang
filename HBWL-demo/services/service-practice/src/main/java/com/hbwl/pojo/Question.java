@@ -10,8 +10,8 @@ public class Question {
     private Integer id;
 
     private String name;
-    private Integer type;
-    private Integer location;
-    private String content;
+    private Integer type; //0：判断，1：选择，2：简答，3：编程
+    private String content; //<65535字
+    private Integer score;
     private Boolean hasResource;
 }

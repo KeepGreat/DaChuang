@@ -2,6 +2,7 @@ package com.hbwl.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hbwl.mapper.AnswerMapper;
 import com.hbwl.pojo.Answer;
 import com.hbwl.service.AnswerService;
@@ -48,6 +49,16 @@ public class AnswerServiceImpl implements AnswerService {
         if (answer.getId() != null) queryWrapper.eq("id", answer.getId());
         if (answer.getQuestionId() != null) queryWrapper.eq("question_id", answer.getQuestionId());
         return answerMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public Page<Answer> getAnswersPage(int pageNo, int pageSize, Answer answer) {
+        Page<Answer> page = new Page<>(pageNo, pageSize);
+        if (answer == null) return answerMapper.selectPage(page, null);
+        QueryWrapper<Answer> queryWrapper = new QueryWrapper<>();
+        if (answer.getId() != null) queryWrapper.eq("id", answer.getId());
+        if (answer.getQuestionId() != null) queryWrapper.eq("question_id", answer.getQuestionId());
+        return answerMapper.selectPage(page, queryWrapper);
     }
 
     @Override

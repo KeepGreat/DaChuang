@@ -35,7 +35,8 @@ public class JwtAuthCheckFilter implements GlobalFilter, Ordered {
 
         if (!requestUrl.equals("/authenticate") &&
                 !requestUrl.equals("/refreshtoken") &&
-                !requestUrl.startsWith("/user")){
+                !requestUrl.equals("/identify") &&
+                !requestUrl.equals("/user/register")){
             String token = request.getHeaders().getFirst(jwtProperties.getHeaderName());
             boolean isExpired = jwtTokenUtil.isTokenExpired(token);
             if (isExpired){
@@ -45,6 +46,7 @@ public class JwtAuthCheckFilter implements GlobalFilter, Ordered {
             ServerHttpRequest mutableReq = request
                     .mutate()
                     .header("userId", jwtTokenUtil.getUserIdFromToken(token))
+                    .header("role", jwtTokenUtil.getUserRoleFromToken(token))
                     .build();
             ServerWebExchange mutableExchange = exchange.mutate().request(mutableReq).build();
             return chain.filter(mutableExchange);

@@ -200,7 +200,8 @@ onUnmounted(() => {
  * 返回上一页
  */
 function goBack() {
-  router.back();
+  // 使用明确的路由导航而不是 router.back()，避免多个导航事件同时触发
+  router.push('/pracindex');
 }
 
 /**
