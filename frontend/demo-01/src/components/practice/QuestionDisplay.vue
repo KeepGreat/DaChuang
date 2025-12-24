@@ -212,9 +212,19 @@
         >
 
         <div class="right-buttons">
-          <el-button type="info" @click="toggleCorrectness">
-            {{ showCorrectness ? "隐藏答案" : "查看答案" }}
-          </el-button>
+          <el-tooltip
+            :content="getTooltipContent()"
+            placement="top"
+            :disabled="allQuestionsSubmitted || showCorrectness"
+          >
+            <el-button
+              type="info"
+              @click="toggleCorrectness"
+              :disabled="!allQuestionsSubmitted && !showCorrectness"
+            >
+              {{ showCorrectness ? "隐藏答案" : "查看答案" }}
+            </el-button>
+          </el-tooltip>
           <el-button type="primary" @click="submitAnswer" :disabled="showCorrectness">
             提交答案
           </el-button>
@@ -467,7 +477,7 @@ const handleOptionSelection = (value, questionId = props.question?.id) => {
 
   // 更新答案
   updateUserAnswer(questionId, currentAnswer);
-  
+
   // 重置题目状态为null，表示有未提交的更改
   if (targetQuestion.status === "answered") {
     targetQuestion.status = null;
@@ -581,15 +591,61 @@ const getCalculatedQuestionStatus = (q) => {
   if (props.showCorrectness && (q.status === "correct" || q.status === "incorrect")) {
     return q.status;
   }
-  
+
   // 如果用户已回答，显示已作答
   if (userAnswerStore.isQuestionAnswered(q.id)) {
     return "answered";
   }
-  
+
   // 其他情况不显示状态
   return null;
 };
+
+// 检查单个题目是否已提交
+const isQuestionSubmitted = (question) => {
+  if (!question) return true; // 没有题目时认为已提交
+  
+  // 检查用户是否有答案
+  const userAnswer = getUserAnswer(question.id);
+  const hasUserAnswer = userAnswer && (
+    Array.isArray(userAnswer) ? userAnswer.length > 0 : userAnswer.toString().trim() !== ""
+  );
+  
+  // 如果用户没有答案，则认为未提交（需要用户至少选择或填写一个答案）
+  if (!hasUserAnswer) {
+    return false;
+  }
+  
+  // 如果用户有答案但状态为null，则认为未提交
+  if (question.status === null) {
+    return false;
+  }
+  
+  // 只有当用户有答案且状态为已提交状态时，才认为已提交
+  return question.status === "answered" || question.status === "correct" || question.status === "incorrect";
+};
+
+// 计算所有题目是否都已提交
+const allQuestionsSubmitted = computed(() => {
+  if (props.singleQuestionMode) {
+    // 单题模式：检查当前题目是否已提交
+    return isQuestionSubmitted(props.question);
+  } else {
+    // 多题模式：检查所有题目是否都已提交
+    return props.sameTypeQuestions.every(q => isQuestionSubmitted(q));
+  }
+});
+
+// 获取未提交题目的数量
+const unsubmittedCount = computed(() => {
+  if (props.singleQuestionMode) {
+    // 单题模式：检查当前题目
+    return isQuestionSubmitted(props.question) ? 0 : 1;
+  } else {
+    // 多题模式：统计未提交的题目数量
+    return props.sameTypeQuestions.filter(q => !isQuestionSubmitted(q)).length;
+  }
+});
 
 // 事件处理
 // 处理编程题答案提交
@@ -606,6 +662,27 @@ const handleShortAnswerBlur = (questionId, answer) => {
 // 切换显示正确性
 const toggleCorrectness = () => {
   emit("set-show-correctness");
+};
+
+// 获取提示文本内容
+const getTooltipContent = () => {
+  if (props.showCorrectness) {
+    return ""; // 已经显示答案时不需要提示
+  }
+  
+  if (props.singleQuestionMode) {
+    // 单题模式
+    if (unsubmittedCount.value > 0) {
+      return "请先提交当前题目的答案";
+    }
+  } else {
+    // 多题模式
+    if (unsubmittedCount.value > 0) {
+      return `还有${unsubmittedCount.value}道题目未提交答案，请先提交所有题目答案`;
+    }
+  }
+  
+  return "";
 };
 
 // 导航控制
