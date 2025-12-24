@@ -278,7 +278,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: flex-start;
   padding: 24px;
-  background: linear-gradient(135deg, #fff0f6, #ffd6e7);
+  background: linear-gradient(135deg, var(--bg-primary-light), var(--primary-lightest));
   border-radius: 12px;
   margin-bottom: 32px;
 }
@@ -290,14 +290,14 @@ onMounted(() => {
 .series-title {
   margin: 0 0 12px 0;
   font-size: 28px;
-  color: #333;
+  color: var(--primary-dark);
   font-weight: 500;
 }
 
 .series-description {
   margin: 0 0 20px 0;
   font-size: 16px;
-  color: #666;
+  color: var(--text-regular);
   line-height: 1.6;
   max-width: 600px;
 }
@@ -434,7 +434,7 @@ onMounted(() => {
 .contents-section h2 {
   margin: 0 0 20px 0;
   font-size: 20px;
-  color: #333;
+  color: var(--primary-dark);
   font-weight: 500;
 }
 
@@ -456,15 +456,15 @@ onMounted(() => {
   gap: 16px;
   padding: 20px;
   background: #fff;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .content-item:hover {
-  border-color: #ff7ab1;
-  box-shadow: 0 4px 12px rgba(255, 122, 177, 0.1);
+  border-color: var(--primary-light);
+  box-shadow: 0 4px 12px var(--primary-alpha-10);
   transform: translateX(4px);
 }
 
@@ -480,7 +480,7 @@ onMounted(() => {
 
 .content-item.locked:hover {
   transform: none;
-  border-color: #e8e8e8;
+  border-color: var(--border-light);
   box-shadow: none;
 }
 
@@ -498,10 +498,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--bg-light);
   border-radius: 50%;
   font-weight: 500;
-  color: #666;
+  color: var(--text-regular);
   font-size: 14px;
 }
 
@@ -509,7 +509,7 @@ onMounted(() => {
   position: absolute;
   right: -16px;
   font-size: 20px;
-  color: #d63384;
+  color: var(--primary);
 }
 
 /* 内容信息 */
@@ -521,13 +521,13 @@ onMounted(() => {
   margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--primary-dark);
 }
 
 .content-description {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #666;
+  color: var(--text-regular);
   line-height: 1.5;
 }
 
@@ -543,7 +543,7 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #999;
+  color: var(--text-secondary);
 }
 
 /* 内容状态 */
@@ -561,12 +561,12 @@ onMounted(() => {
 
 .lock-icon {
   font-size: 20px;
-  color: #999;
+  color: var(--text-secondary);
 }
 
 .status-text {
   font-size: 14px;
-  color: #999;
+  color: var(--text-secondary);
 }
 
 /* 内容展示区域 */
@@ -583,7 +583,7 @@ onMounted(() => {
 
 .content-card {
   background: #fff;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -591,21 +591,22 @@ onMounted(() => {
 }
 
 .content-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px var(--primary-alpha-10);
   transform: translateY(-2px);
+  border-color: var(--primary-lighter);
 }
 
 .card-header {
   padding: 16px 20px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e8e8e8;
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .card-header h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--primary-dark);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -654,7 +655,7 @@ onMounted(() => {
 
 .loading-placeholder {
   padding: 20px;
-  background: #f5f5f5;
+  background: var(--bg-light);
 }
 
 .unknown-type {

@@ -189,7 +189,7 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
 .course-learning {
   display: flex;
   padding: 20px;
-  background: #fff6fb;
+  background: var(--bg-light);
   min-height: 100vh;
   font-family: "Inter", Arial, sans-serif;
 }
@@ -224,31 +224,31 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
   cursor: pointer;
   border-radius: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #9b7a88;
+  color: var(--text-regular);
   background: transparent;
 }
 
 .nav-item.back-item {
   margin-bottom: 12px;
-  border: 1px solid #ffd6e7;
+  border: 1px solid var(--border-primary-lighter);
 }
 
 .nav-item.back-item:hover {
-  background: linear-gradient(135deg, #fff0f6, #ffd6e7);
+  background: linear-gradient(135deg, var(--bg-primary-light), var(--primary-lightest));
   transform: scale(1.05);
-  color: #d63384;
+  color: var(--primary);
 }
 
 .nav-item:hover {
-  background: linear-gradient(135deg, #fff0f6, #ffd6e7);
+  background: linear-gradient(135deg, var(--bg-primary-light), var(--primary-lightest));
   transform: scale(1.1);
-  color: #d63384;
+  color: var(--primary);
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, #d63384, #ff7ab1);
+  background: var(--gradient-primary-soft);
   color: white;
-  box-shadow: 0 4px 12px rgba(214, 51, 132, 0.3);
+  box-shadow: 0 4px 12px var(--primary-alpha-20);
   transform: scale(1.05);
 }
 
@@ -355,15 +355,15 @@ if (route.path.match(/^\/teaching\/course\/\w+$/)) {
 /* 动画效果 */
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(214, 51, 132, 0.4);
+    box-shadow: 0 0 0 0 var(--primary-alpha-50);
   }
 
   70% {
-    box-shadow: 0 0 0 10px rgba(214, 51, 132, 0);
+    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
   }
 
   100% {
-    box-shadow: 0 0 0 0 rgba(214, 51, 132, 0);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
   }
 }
 

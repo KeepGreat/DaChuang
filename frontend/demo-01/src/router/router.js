@@ -30,7 +30,8 @@ const profilingRoutes = [
   {
     path: "CoursePlaceholder",
     name: "CoursePlaceholder",
-    component: () => import("@/components/profiling/image/CoursePlaceholder.vue"),
+    component: () =>
+      import("@/components/profiling/image/CoursePlaceholder.vue"),
   },
 ];
 
@@ -56,16 +57,16 @@ const teachingRoutes = [
         name: "CourseSeriesDetail",
         component: () => import("@/view/teaching/CourseSeriesDetail.vue"),
       },
-      {
-        path: "task",
-        name: "TaskList",
-        component: () => import("@/view/teaching/TaskList.vue"),
-      },
-      {
-        path: "task/:taskId",
-        name: "TaskDetail",
-        component: () => import("@/view/teaching/TaskDetail.vue"),
-      },
+      // {
+      //   path: "task",
+      //   name: "TaskList",
+      //   component: () => import("@/view/teaching/TaskList.vue"),
+      // },
+      // {
+      //   path: "task/:taskId",
+      //   name: "TaskDetail",
+      //   component: () => import("@/view/teaching/TaskDetail.vue"),
+      // },
       {
         path: "practice",
         name: "PracticeList",
@@ -81,26 +82,26 @@ const teachingRoutes = [
         name: "ExamDetail",
         component: () => import("@/view/teaching/ExamDetail.vue"),
       },
-      {
-        path: "resource",
-        name: "ResourceList",
-        component: () => import("@/view/teaching/ResourceList.vue"),
-      },
-      {
-        path: "resource/:resourceId",
-        name: "ResourceDetail",
-        component: () => import("@/view/teaching/ResourceDetail.vue"),
-      },
-      {
-        path: "discussion",
-        name: "DiscussionList",
-        component: () => import("@/view/teaching/DiscussionList.vue"),
-      },
-      {
-        path: "discussion/:discussionId",
-        name: "DiscussionDetail",
-        component: () => import("@/view/teaching/DiscussionDetail.vue"),
-      },
+      // {
+      //   path: "resource",
+      //   name: "ResourceList",
+      //   component: () => import("@/view/teaching/ResourceList.vue"),
+      // },
+      // {
+      //   path: "resource/:resourceId",
+      //   name: "ResourceDetail",
+      //   component: () => import("@/view/teaching/ResourceDetail.vue"),
+      // },
+      // {
+      //   path: "discussion",
+      //   name: "DiscussionList",
+      //   component: () => import("@/view/teaching/DiscussionList.vue"),
+      // },
+      // {
+      //   path: "discussion/:discussionId",
+      //   name: "DiscussionDetail",
+      //   component: () => import("@/view/teaching/DiscussionDetail.vue"),
+      // },
       {
         path: "knowledge",
         name: "KnowledgeGraph",
@@ -108,16 +109,16 @@ const teachingRoutes = [
       },
     ],
   },
-  {
-    path: "teach",
-    name: "Teaching",
-    component: () => import("@/view/teaching/Teaching.vue"),
-  },
-  {
-    path: "teachindex",
-    name: "TeachingIndex",
-    component: () => import("@/view/teaching/TeachingIndex.vue"),
-  },
+  // {
+  //   path: "teach",
+  //   name: "Teaching",
+  //   component: () => import("@/view/teaching/Teaching.vue"),
+  // },
+  // {
+  //   path: "teachindex",
+  //   name: "TeachingIndex",
+  //   component: () => import("@/view/teaching/TeachingIndex.vue"),
+  // },
 ];
 
 // Practice 页面路由

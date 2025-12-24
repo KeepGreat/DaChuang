@@ -23,7 +23,6 @@
               :key="i"
               variant="rect"
               class="skeleton-card"
-              style="height: 280px; background: linear-gradient(90deg, #fff0f4 25%, #ffe8f1 50%, #fff0f4 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite;"
             />
           </div>
         </template>
@@ -182,6 +181,10 @@ onMounted(async () => {
 
 .skeleton-card {
   border-radius: 12px;
+  height: 280px;
+  background: linear-gradient(90deg, var(--bg-primary-light) 25%, var(--primary-lightest) 50%, var(--bg-primary-light) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
 }
 
 .loading-text {
@@ -189,18 +192,18 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  color: #9b7a88;
+  color: var(--text-regular);
   margin-top: 30px;
   gap: 8px;
-  background: linear-gradient(135deg, #fff0f4 0%, #fff6fb 100%);
+  background: linear-gradient(135deg, var(--bg-primary-light) 0%, var(--bg-light) 100%);
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(214, 51, 132, 0.04);
+  box-shadow: 0 6px 18px var(--primary-alpha-10);
 }
 
 .loading-text .el-icon {
   font-size: 24px;
-  color: #ff7ab1;
+  color: var(--primary-light);
 }
 
 /* 骨架屏动画 */
@@ -224,7 +227,7 @@ onMounted(async () => {
 }
 
 .section-title {
-  color: #d63384;
+  color: var(--primary);
   font-size: 22px;
   font-weight: 700;
   margin: 0;
@@ -238,13 +241,13 @@ onMounted(async () => {
 /* 其余样式（.empty-state, .course-grid 等）保持不变 */
 .course-section {
   padding: 24px;
-  background: #fff6fb;
+  background: var(--bg-light);
   min-height: 100vh;
   font-family: "Inter", Arial, sans-serif;
 }
 
 .section-title {
-  color: #d63384;
+  color: var(--primary);
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 24px;
@@ -257,7 +260,7 @@ onMounted(async () => {
   display: block;
   width: 40px;
   height: 3px;
-  background: linear-gradient(to right, #ff7ab1, #d63384);
+  background: var(--gradient-primary-soft);
   border-radius: 2px;
   margin-top: 8px;
 }
@@ -274,7 +277,7 @@ onMounted(async () => {
 }
 
 .empty-icon {
-  color: #ffb6d9;
+  color: var(--primary-lighter);
   margin-bottom: 16px;
 }
 
@@ -301,23 +304,23 @@ onMounted(async () => {
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  border: 1px solid #ffd6e7;
+  border: 1px solid var(--border-primary-lighter);
 }
 
 .course-card:hover {
-  box-shadow: 0 12px 28px rgba(214, 51, 132, 0.08);
+  box-shadow: 0 12px 28px var(--primary-alpha-10);
   transform: translateY(-6px);
-  border-color: #ffb6d9;
+  border-color: var(--primary-lighter);
 }
 
 .course-image {
   flex: 1;
   min-height: 180px;
-  background: linear-gradient(135deg, #ffd6e8 0%, #fff0f4 100%);
+  background: linear-gradient(135deg, var(--primary-lightest) 0%, var(--bg-primary-light) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #d63384;
+  color: var(--primary);
 }
 
 .image-placeholder {
@@ -334,7 +337,7 @@ onMounted(async () => {
 .course-title {
   font-size: 16px;
   font-weight: 700;
-  color: #7b2a53;
+  color: var(--primary-dark);
   margin: 0 0 10px 0;
   line-height: 1.4;
   overflow: hidden;
@@ -347,7 +350,7 @@ onMounted(async () => {
 
 .course-description {
   font-size: 14px;
-  color: #9b7a88;
+  color: var(--text-regular);
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;

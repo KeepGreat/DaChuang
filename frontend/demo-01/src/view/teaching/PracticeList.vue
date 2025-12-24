@@ -413,7 +413,7 @@ const getSubmissionType = (status) => {
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: #666;
+  color: var(--text-regular);
   text-align: center;
 }
 
@@ -442,7 +442,7 @@ const getSubmissionType = (status) => {
 
 .stat-detail {
   font-size: 11px;
-  color: #9b7a88;
+  color: var(--text-secondary);
   opacity: 0.8;
 }
 
@@ -468,18 +468,18 @@ const getSubmissionType = (status) => {
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #f5dbe7;
+  border-bottom: 1px solid var(--border-primary-lighter);
 }
 
 .panel-header h3 {
   margin: 0;
-  color: #d63384;
+  color: var(--primary);
   font-size: 18px;
   font-weight: 700;
 }
 
 .stats {
-  color: #9b7a88;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
