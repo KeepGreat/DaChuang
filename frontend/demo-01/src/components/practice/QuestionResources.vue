@@ -501,9 +501,7 @@ const getImageUrl = (resource) => {
 // 异步加载图片
 const loadImage = async (resource) => {
   try {
-    console.log("正在加载图片:", resource.name, "ID:", resource.id);
     const response = await downloadQuestionResource(resource.id);
-    console.log("图片下载成功:", resource.name, "数据大小:", response.data.size);
 
     // 验证响应数据
     if (!response.data || response.data.size === 0) {
@@ -522,9 +520,7 @@ const loadImage = async (resource) => {
     imageUrls.value.set(resource.id, imageUrl);
     // 强制更新界面
     imageUpdateCounter.value++;
-    console.log("图片URL创建成功:", resource.name);
   } catch (error) {
-    console.error("图片加载失败:", error);
     handleImageError(resource);
     // 设置一个空URL避免重复加载，并标记为失败
     imageUrls.value.set(resource.id, "");
@@ -695,7 +691,6 @@ const toggleGroup = (groupName) => {
 
 // 组件挂载时加载所有图片
 onMounted(() => {
-  console.log("组件挂载，开始加载图片资源...");
   loadAllImages();
 });
 
@@ -703,7 +698,6 @@ onMounted(() => {
 watch(
   imageResources,
   (newResources) => {
-    console.log("图片资源发生变化，重新加载...", newResources);
     loadAllImages();
   },
   { immediate: true }
