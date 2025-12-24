@@ -122,9 +122,9 @@
                   <span class="question-type">{{ getQuestionTypeLabel(q) }}</span>
                   <span class="question-number">第 {{ index + 1 }} 题</span>
                 </div>
-                <div class="question-status" v-if="q.status">
-                  <el-tag :type="getStatusType(q.status)">{{
-                    getStatusText(q.status)
+                <div class="question-status" v-if="getCalculatedQuestionStatus(q)">
+                  <el-tag :type="getStatusType(getCalculatedQuestionStatus(q))">{{
+                    getStatusText(getCalculatedQuestionStatus(q))
                   }}</el-tag>
                 </div>
               </div>
@@ -398,16 +398,6 @@ const isOptionCorrect = (value, q) => {
 
     const isCorrect = normalizedCorrectAnswers.includes(normalizedValue);
 
-    // 调试信息
-    console.log(`Question ${q.id}:`, {
-      optionValue: value,
-      normalizedValue,
-      standardAnswer: answerArray,
-      normalizedCorrectAnswers,
-      isCorrect,
-      questionStatus: q.status,
-    });
-
     return isCorrect;
   }
   // 如果没有标准答案，返回false
@@ -578,6 +568,22 @@ const handleProgrammingQuestionSubmit = () => {
 const getQuestionStandardAnswer = (questionId) => {
   const answers = answerStore.getAnswersByQuestionId(questionId);
   return answers && answers.length > 0 ? answers[0] : null;
+};
+
+// 根据最新判题结果动态计算题目状态
+const getCalculatedQuestionStatus = (q) => {
+  // 只有在显示答案时，才显示判题结果（correct/incorrect）
+  if (props.showCorrectness && (q.status === "correct" || q.status === "incorrect")) {
+    return q.status;
+  }
+  
+  // 如果用户已回答，显示已作答
+  if (userAnswerStore.isQuestionAnswered(q.id)) {
+    return "answered";
+  }
+  
+  // 其他情况不显示状态
+  return null;
 };
 
 // 事件处理
