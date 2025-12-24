@@ -205,7 +205,11 @@
 
       <!-- 操作按钮区域 -->
       <div class="question-actions">
-        <el-button v-if="singleQuestionMode || isProgrammingQuestion" @click="previousQuestion">上一题</el-button>
+        <el-button
+          v-if="singleQuestionMode || isProgrammingQuestion"
+          @click="previousQuestion"
+          >上一题</el-button
+        >
 
         <div class="right-buttons">
           <el-button type="info" @click="toggleCorrectness">
@@ -214,7 +218,10 @@
           <el-button type="primary" @click="submitAnswer" :disabled="showCorrectness">
             提交答案
           </el-button>
-          <el-button v-if="singleQuestionMode || isProgrammingQuestion" type="success" @click="nextQuestion"
+          <el-button
+            v-if="singleQuestionMode || isProgrammingQuestion"
+            type="success"
+            @click="nextQuestion"
             >下一题</el-button
           >
         </div>
@@ -351,9 +358,9 @@ const isShortAnswerQuestion = (q) => {
   return q.type === 2; // 2:简答题
 };
 
-// 辅助函数：判断是否应显示选项正确性
+// 辅助函数：判断是否应显示选项正确性（只在显示答案时才显示颜色）
 const shouldShowOptionCorrectness = (q) => {
-  return props.showCorrectness || q.status === "correct" || q.status === "incorrect";
+  return props.showCorrectness;
 };
 
 // 选项状态判断函数
@@ -369,24 +376,58 @@ const getOptionClasses = (value, q, questionId = q.id) => {
 
 // 判断选项是否被选中
 const isOptionSelected = (value, questionId) => {
-  return getUserAnswer(questionId).includes(value);
+  const userAnswer = getUserAnswer(questionId);
+  return Array.isArray(userAnswer) ? userAnswer.includes(value) : userAnswer === value;
 };
 
 // 判断选项是否正确
 const isOptionCorrect = (value, q) => {
-  const answer = Array.isArray(q.answer) ? q.answer : [q.answer];
-  return answer.includes(value);
+  // 只使用标准答案
+  const standardAnswers = answerStore.getAnswersByQuestionId(q.id);
+  if (standardAnswers && standardAnswers.length > 0) {
+    const correctAnswer = standardAnswers[0];
+    const answerArray = Array.isArray(correctAnswer.content)
+      ? correctAnswer.content
+      : correctAnswer.content.split(",").map((item) => item.trim());
+
+    // 进行大小写不敏感的比较
+    const normalizedValue = value.toString().toLowerCase().trim();
+    const normalizedCorrectAnswers = answerArray.map((answer) =>
+      answer.toString().toLowerCase().trim()
+    );
+
+    const isCorrect = normalizedCorrectAnswers.includes(normalizedValue);
+
+    // 调试信息
+    console.log(`Question ${q.id}:`, {
+      optionValue: value,
+      normalizedValue,
+      standardAnswer: answerArray,
+      normalizedCorrectAnswers,
+      isCorrect,
+      questionStatus: q.status,
+    });
+
+    return isCorrect;
+  }
+  // 如果没有标准答案，返回false
+  console.error("No standard answer found for question ID:", q.id);
+  return false;
 };
 
 // 判断选项是否错误（选中但不正确）
 const isOptionIncorrect = (value, q, questionId) => {
+  // 只有用户选择的选项才可能是错误的
   return isOptionSelected(value, questionId) && !isOptionCorrect(value, q);
 };
 
 // 判断选项是否被遗漏（正确但未选中，仅多选题）
 const isOptionMissed = (value, q, questionId) => {
+  // 只有多选题才有遗漏概念，且必须是正确答案但用户没有选择的
   return (
-    !isSingleType(q) && !isOptionSelected(value, questionId) && isOptionCorrect(value, q)
+    !isSingleType(q) && // 不是单选题/判断题
+    !isOptionSelected(value, questionId) && // 用户没有选择
+    isOptionCorrect(value, q) // 但是这是正确答案
   );
 };
 

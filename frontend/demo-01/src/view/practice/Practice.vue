@@ -62,6 +62,7 @@ import {
 	getQuestionResources,
 	getUserAnswers,
 	getUserId,
+	judgeAnswersAuto,
 	updateUserAnswerById,
 } from "@/api";
 import PracticeNavbar from "@/components/practice/PracticeNavbar.vue";
@@ -497,8 +498,63 @@ const submitUserAnswerToBackend = async (questionId, answer) => {
 };
 
 // 切换显示正确答案
-const toggleShowCorrectness = () => {
+const toggleShowCorrectness = async () => {
   showCorrectness.value = !showCorrectness.value;
+
+  // 当显示答案时，调用判题接口进行判题
+  if (showCorrectness.value) {
+    await judgeAllAnswers();
+  }
+};
+
+// 判题方法：调用judgeAnswersAuto接口对所有已回答的题目进行判题
+const judgeAllAnswers = async () => {
+  try {
+    // 获取所有已回答的题目（判断题和选择题）
+    const answeredQuestions = questionsStore.questions.filter((q) => {
+      // 只处理已回答的判断题(0)和选择题(1)
+      return (q.type === 0 || q.type === 1) && userAnswerStore.isQuestionAnswered(q.id);
+    });
+
+    if (answeredQuestions.length === 0) {
+      console.log("没有需要判题的已回答题目");
+      return;
+    }
+
+    // 准备判题数据
+    const judgeData = answeredQuestions.map((question) => {
+      const userAnswer = userAnswerStore.getUserAnswerByQuestionId(question.id);
+      return {
+        questionId: question.id,
+        questionType: question.type,
+        content: Array.isArray(userAnswer) ? userAnswer.join(",") : String(userAnswer),
+        userId: userId.value,
+      };
+    });
+
+    console.log("开始判题，题目数量:", judgeData.length);
+
+    // 调用判题接口
+    const res = await judgeAnswersAuto(judgeData);
+    const judgedAnswers = res.data; // 用变量获取res.data
+
+    // 更新题目状态
+    judgedAnswers.forEach((judgedAnswer) => {
+      const question = questionsStore.questions.find(
+        (q) => q.id === judgedAnswer.questionId
+      );
+      if (question) {
+        // 根据分数判断正确性
+        question.status = judgedAnswer.score > 0 ? "correct" : "incorrect";
+        console.log(
+          `题目 ${judgedAnswer.questionId} 判题完成，状态: ${question.status}, 分数: ${judgedAnswer.score}`
+        );
+      }
+    });
+    console.log("判题完成，已更新题目状态");
+  } catch (error) {
+    console.error("判题过程异常:", error);
+  }
 };
 
 // 处理时间结束
