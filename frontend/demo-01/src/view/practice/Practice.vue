@@ -77,7 +77,7 @@ import {
 	useUserStore,
 } from "@/store";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { onBeforeRouteLeave, useRoute } from "vue-router";
 
 // 使用store
@@ -450,6 +450,27 @@ const updateUserAnswer = (questionId, answer) => {
   }
 };
 
+// 监听用户答案变化，重置对应题目的状态
+watch(
+  () => userAnswerStore.getUserAnswersMap,
+  (newUserAnswersMap, oldUserAnswersMap) => {
+    // 检查哪些题目的答案发生了变化
+    for (const questionId in newUserAnswersMap) {
+      const newAnswer = newUserAnswersMap[questionId];
+      const oldAnswer = oldUserAnswersMap[questionId];
+
+      // 只有当答案确实发生了变化时才重置状态
+      if (JSON.stringify(newAnswer) !== JSON.stringify(oldAnswer)) {
+        const question = questionsStore.questions.find((q) => q.id === questionId);
+        if (question && question.status === "answered") {
+          // 用户修改了已提交的答案，重置状态为null表示未提交
+          question.status = null;
+        }
+      }
+    }
+  },
+  { deep: true }
+);
 // 提交用户答案到后端
 const submitUserAnswerToBackend = async (questionId, answer) => {
   try {
@@ -585,6 +606,8 @@ const handleAnswerSubmitted = async (result) => {
       // 答案为空时，保持状态为null（未回答）
       question.status = null;
     }
+  } else {
+    console.error("未找到对应问题:", result.questionId);
   }
 };
 
@@ -690,23 +713,42 @@ const hasUnsubmittedAnswers = computed(() => {
 
   // 检查是否有用户填写但未提交的答案
   let unsubmittedCount = 0;
+  const unsubmittedDetails = [];
+  const allDetails = [];
 
   // 遍历所有题目，检查用户是否有填写但未提交的答案
   questionsStore.questions.forEach((question) => {
     const userAnswer = userAnswersMap[question.id];
 
+    // 记录每个题目的详细信息
+    const detail = {
+      questionId: question.id,
+      userAnswer: userAnswer,
+      userAnswerLength: userAnswer ? userAnswer.length : 0,
+      questionStatus: question.status,
+      isArray: Array.isArray(userAnswer),
+      isEmpty:
+        !userAnswer || (Array.isArray(userAnswer) ? userAnswer.length === 0 : false),
+      isUnsubmitted: false,
+    };
+
     // 如果用户有答案但题目状态为null（未提交），则认为是未提交的答案
     if (userAnswer && userAnswer.length > 0 && question.status === null) {
       unsubmittedCount++;
+      detail.isUnsubmitted = true;
+      unsubmittedDetails.push({
+        questionId: question.id,
+        userAnswer: userAnswer,
+        questionStatus: question.status,
+        reason: "用户有答案但状态为null",
+      });
     }
+
+    allDetails.push(detail);
   });
 
   console.log(`未提交答案数量: ${unsubmittedCount}`);
-  console.log(`用户答案Map:`, userAnswersMap);
-  console.log(
-    `题目状态:`,
-    questionsStore.questions.map((q) => ({ id: q.id, status: q.status }))
-  );
+  console.log(`未提交答案详情:`, unsubmittedDetails);
 
   return unsubmittedCount > 0;
 });

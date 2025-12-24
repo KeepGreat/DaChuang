@@ -467,6 +467,11 @@ const handleOptionSelection = (value, questionId = props.question?.id) => {
 
   // 更新答案
   updateUserAnswer(questionId, currentAnswer);
+  
+  // 重置题目状态为null，表示有未提交的更改
+  if (targetQuestion.status === "answered") {
+    targetQuestion.status = null;
+  }
 };
 
 // 统一的答案提交处理
