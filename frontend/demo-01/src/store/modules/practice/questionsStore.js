@@ -5,147 +5,7 @@ export const useQuestionsStore = defineStore(
   "questions",
   () => {
     // State
-    const questions = ref([
-      {
-        id: 0,
-        name: "JavaScript是一种编译型语言。",
-        type: 0,
-        content: "",
-        hasResource: false,
-        options: [
-          { label: "A", value: "true", text: "正确" },
-          { label: "B", value: "false", text: "错误" },
-        ],
-        answer: ["false"],
-        status: null,
-      },
-      {
-        id: 1,
-        name: "在JavaScript中，null是一个对象类型。",
-        type: 0,
-        content: "",
-        hasResource: false,
-        options: [
-          { label: "A", value: "true", text: "正确" },
-          { label: "B", value: "false", text: "错误" },
-        ],
-        answer: ["true"],
-        status: null,
-      },
-      {
-        id: 2,
-        name: "以下哪个不是JavaScript的数据类型？",
-        type: 1,
-        content: "",
-        hasResource: false,
-        options: [
-          { label: "A", value: "string", text: "字符串" },
-          { label: "B", value: "number", text: "数字" },
-          { label: "C", value: "boolean", text: "布尔值" },
-          { label: "D", value: "class", text: "类" },
-        ],
-        answer: ["class"],
-        status: null,
-      },
-      {
-        id: 3,
-        name: "JavaScript中，以下哪个方法可以将字符串转换为数字？",
-        type: 1,
-        content: "",
-        hasResource: false,
-        options: [
-          { label: "A", value: "parseInt()", text: "parseInt()" },
-          { label: "B", value: "toString()", text: "toString()" },
-          { label: "C", value: "split()", text: "split()" },
-          { label: "D", value: "join()", text: "join()" },
-        ],
-        answer: ["parseInt()"],
-        status: null,
-      },
-      {
-        id: 4,
-        name: "以下哪个关键字用于声明块级作用域的变量？",
-        type: 1,
-        content: "",
-        hasResource: false,
-        options: [
-          { label: "A", value: "var", text: "var" },
-          { label: "B", value: "let", text: "let" },
-          { label: "C", value: "const", text: "const" },
-          { label: "D", value: "function", text: "function" },
-        ],
-        answer: ["let"],
-        status: null,
-      },
-      {
-        id: 5,
-        name: "以下哪些是JavaScript的内置对象？",
-        type: 1,
-        content: "",
-        hasResource: false,
-        options: [
-          { label: "A", value: "Object", text: "Object" },
-          { label: "B", value: "Array", text: "Array" },
-          { label: "C", value: "String", text: "String" },
-          { label: "D", value: "jQuery", text: "jQuery" },
-        ],
-        answer: ["Object", "Array", "String"],
-        status: null,
-      },
-      {
-        id: 6,
-        name: "以下哪些方法可以用于数组遍历？",
-        type: 1,
-        content: "",
-        hasResource: false,
-        options: [
-          { label: "A", value: "forEach()", text: "forEach()" },
-          { label: "B", value: "map()", text: "map()" },
-          { label: "C", value: "filter()", text: "filter()" },
-          { label: "D", value: "push()", text: "push()" },
-        ],
-        answer: ["forEach()", "map()", "filter()"],
-        status: null,
-      },
-      {
-        id: 7,
-        name: "请简述JavaScript中事件冒泡和事件捕获的区别。",
-        type: 2,
-        content: "",
-        hasResource: false,
-        options: [],
-        answer: [
-          "事件冒泡是指事件从最具体的元素开始触发，然后逐级向上传播到更不具体的元素；事件捕获则相反，事件从最不具体的元素开始触发，然后逐级向下传播到最具体的元素。",
-        ],
-        status: null,
-      },
-      {
-        id: 8,
-        name: "编写一个函数，计算数组中所有元素的和。",
-        type: 3,
-        content:
-          "请实现一个sum函数，接收一个数组作为参数，返回数组中所有元素的和。例如：sum([1, 2, 3, 4]) 应返回 10。",
-        hasResource: false,
-        options: [],
-        answer: [
-          "function sum(arr) {\n  return arr.reduce((acc, curr) => acc + curr, 0);\n}",
-        ],
-        status: null,
-      },
-      {
-        id: 9,
-        name: "实现一个简单的防抖函数。",
-        type: 3,
-        content:
-          "请实现一个debounce函数，接收一个函数和延迟时间作为参数，返回一个新的函数，该函数在连续调用时，只在最后一次调用后等待指定时间才执行。",
-        hasResource: false,
-        options: [],
-        answer: [
-          "function debounce(func, delay) {\n  let timer = null;\n  return function() {\n    const context = this;\n    const args = arguments;\n    clearTimeout(timer);\n    timer = setTimeout(() => {\n      func.apply(context, args);\n    }, delay);\n  };\n}",
-        ],
-        status: null,
-      },
-    ]);
+    const questions = ref([]);
 
     const questionTypes = ref([
       { type: 0, name: "判断题" },
@@ -202,10 +62,25 @@ export const useQuestionsStore = defineStore(
     };
 
     // 判断题目是否已回答的辅助函数
-    const isQuestionAnswered = (questionId) => {
-      // 只检查 questionsStore 中的 status 字段（已提交到后端的答案），不再检查userAnswersMap，因为那只是本地填写的答案，未必已提交
+    const isQuestionAnswered = (questionId, userAnswersMap = null) => {
       const question = questions.value.find((q) => q.id === questionId);
-      if (question && question.status !== null) {
+      if (!question) return false;
+
+      // 编程题：必须已提交评测（status不为null）才算完成
+      if (question.type === 3) {
+        return question.status !== null;
+      }
+
+      // 其他题型（判断题、选择题、简答题）：有答案内容就算完成
+
+      // 优先使用传入的 userAnswersMap（本地填写的答案）
+      if (userAnswersMap && userAnswersMap[questionId]) {
+        const userAnswer = userAnswersMap[questionId];
+        return userAnswer && userAnswer.length > 0;
+      }
+
+      // 如果没有 userAnswersMap，则检查 questionsStore 中的 status 字段（已提交到后端的答案）
+      if (question.status !== null) {
         return true;
       }
 

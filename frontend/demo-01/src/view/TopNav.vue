@@ -26,7 +26,7 @@ const router = useRouter();
 function go(target) {
   if (target === "profile") router.push("/profile");
   else if (target === "courses") router.push("/coursesection");
-  else if (target === "practice") router.push("/pracindex");
+  else if (target === "practice") router.push("/practiceIndex");
   else if (target === "community") router.push("/community");
 }
 

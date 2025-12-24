@@ -46,6 +46,28 @@ public class JwtTokenUtil {
         return userId;
     }
 
+    public String getUsernameFromToken(String token) {
+        String username;
+        try {
+            Claims claims = getClaimsFromToken(token);
+            username = (String) claims.get("username");
+        } catch (Exception e){
+            username = null;
+        }
+        return username;
+    }
+
+    public String getUserRoleFromToken(String token) {
+        String userRole;
+        try {
+            Claims claims = getClaimsFromToken(token);
+            userRole = (String) claims.get("role");
+        } catch (Exception e){
+            userRole = null;
+        }
+        return userRole;
+    }
+
     public Boolean isTokenExpired(String token){
         try {
             Claims claims = getClaimsFromToken(token);

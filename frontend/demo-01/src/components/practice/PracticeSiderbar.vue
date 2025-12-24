@@ -189,8 +189,8 @@ function findActiveQuestionTypeItem() {
 .practice-sidebar {
   width: 240px;
   height: 500px;
-  background-color: #ffffff;
-  border-right: 1px solid #dbeafe;
+  background-color: var(--bg-white);
+  border-right: 1px solid var(--border-primary-lighter);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -202,8 +202,8 @@ function findActiveQuestionTypeItem() {
 /* 侧边栏头部样式 */
 .sidebar-header {
   padding: 16px 20px;
-  border-bottom: 1px solid #dbeafe;
-  background-color: #f0f9ff;
+  border-bottom: 1px solid var(--border-primary-lighter);
+  background-color: var(--bg-primary-light);
   width: 100%;
   box-sizing: border-box;
 }
@@ -212,7 +212,7 @@ function findActiveQuestionTypeItem() {
   font-size: 18px;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -232,10 +232,10 @@ function findActiveQuestionTypeItem() {
   position: absolute;
   left: 0;
   width: 100%;
-  background-color: rgba(37, 99, 235, 0.12);
+  background-color: var(--primary-alpha-10);
   transition: top 0.25s ease, height 0.25s ease;
   z-index: 0;
-  border-left: 3px solid #2563eb;
+  border-left: 3px solid var(--primary);
 }
 
 /* 题型列表样式 */
@@ -287,13 +287,13 @@ function findActiveQuestionTypeItem() {
 
 .type-name {
   font-size: 14px;
-  color: #333;
+  color: var(--text-primary);
   transition: color 0.18s ease;
 }
 
 .question-type-item.active .type-name {
-  color: #2563eb;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  color: var(--primary);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -302,7 +302,7 @@ function findActiveQuestionTypeItem() {
 .type-count {
   font-size: 12px;
   color: #999;
-  background-color: #f8f9fa;
+  background-color: var(--bg-light);
   padding: 2px 8px;
   border-radius: 10px;
   align-self: flex-start;
@@ -317,7 +317,7 @@ function findActiveQuestionTypeItem() {
 
 .question-type-item:hover .type-icon,
 .question-type-item.active .type-icon {
-  color: #2563eb;
+  color: var(--primary);
   transform: translateX(2px);
 }
 

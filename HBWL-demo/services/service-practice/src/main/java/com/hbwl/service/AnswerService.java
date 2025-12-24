@@ -15,5 +15,9 @@ public interface AnswerService {
 
     List<Answer> getAnswers(Answer answer);
 
+    Page<Answer> getAnswersPage(int pageNo, int pageSize, Answer answer);
+
     List<Answer> getAnswersByQuestionIds(List<Integer> ids);
+
+
 }

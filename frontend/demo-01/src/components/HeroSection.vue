@@ -38,7 +38,7 @@ import image2 from '@/assets/mainimage2.png';
 const router = useRouter();
 function go(target) {
   if (target === "courses") router.push("/coursesection");
-  else if (target === "practice") router.push("/pracindex");
+  else if (target === "practice") router.push("/practiceIndex");
 }
 
 const images = [image1, image2];

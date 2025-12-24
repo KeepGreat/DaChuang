@@ -12,13 +12,11 @@ export let updateMaterial = (Material) => {
     return request.put('api/teaching/material', Material)
 }
 
-export let getMaterials = (id, type, createdTime, updatedTime, courseId) => {
+export let getMaterials = (id, type, courseId) => {
     return request.get('api/teaching/material', {
         params: {
             id: id,
             type: type,
-            createdTime: createdTime,
-            updatedTime: updatedTime,
             courseId: courseId
         }
     })
