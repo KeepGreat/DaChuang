@@ -137,7 +137,7 @@ function goRegister() {
 }
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .login-page {
   height: 100vh;
   display: flex;

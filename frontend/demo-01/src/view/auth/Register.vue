@@ -187,7 +187,7 @@ const goLogin = () => {
 };
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .register-page {
   height: 100vh;
   display: flex;
