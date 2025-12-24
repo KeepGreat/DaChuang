@@ -708,7 +708,7 @@ watch(
 .question-resources {
   margin-top: 20px;
   padding: 16px;
-  background: var(--bg-primary-lighter);
+  background: var(--bg-primary-grey);
   border-radius: 6px;
   border: 1px solid var(--border-primary-lighter);
   max-height: 600px;

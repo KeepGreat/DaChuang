@@ -11,7 +11,7 @@
 
     <div class="practice-content">
       <!-- 侧边栏组件 -->
-      <div style="background: #f5f7fa">
+      <div style="background: var(--bg-primary-grey)">
         <PracticeSiderbar
           :question-types="computedSidebarQuestionTypes"
           :active-type-id="activeType"
@@ -900,7 +900,7 @@ window.addEventListener("beforeunload", handleBeforeUnload);
   flex-direction: column;
   overflow: hidden;
   padding: 20px;
-  background: #f5f7fa;
+  background: var(--bg-primary-grey);
 }
 
 /* 题目容器 */

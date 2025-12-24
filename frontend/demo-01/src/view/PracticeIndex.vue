@@ -537,7 +537,7 @@ const handleClick = (item) => {
 :deep(.el-pagination .btn-next),
 :deep(.el-pagination .el-pager li) {
   background: rgba(255, 255, 255, 0.6);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-light);
   margin: 0 2px;
   border-radius: 6px;
   transition: all 0.3s ease;
@@ -552,8 +552,8 @@ const handleClick = (item) => {
 }
 
 :deep(.el-pagination .el-pager li.active) {
-  background: linear-gradient(135deg, #409eff, #66b1ff);
-  border-color: #409eff;
+  background: var(--gradient-brand);
+  border-color: var(--primary);
   color: white;
 }
 
@@ -612,7 +612,7 @@ const handleClick = (item) => {
 
 .practice-info p {
   margin: 0 0 10px 0;
-  color: #909399;
+  color: var(--text-placeholder);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -669,7 +669,7 @@ const handleClick = (item) => {
 
 .preview-header h4 {
   margin: 0;
-  color: #409eff;
+  color: var(--primary);
   font-size: 18px;
   font-weight: 700;
 }
@@ -710,10 +710,10 @@ const handleClick = (item) => {
   gap: 8px;
   margin-top: 10px;
   padding: 8px 12px;
-  background: rgba(64, 158, 255, 0.1);
+  background: var(--bg-primary-alpha);
   border-radius: 6px;
   font-size: 13px;
-  color: #606266;
+  color: var(--text-regular);
 }
 
 
@@ -725,7 +725,7 @@ const handleClick = (item) => {
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: #909399;
+  color: var(--text-placeholder);
 }
 
 .empty-preview .el-icon {
@@ -742,7 +742,7 @@ const handleClick = (item) => {
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: #909399;
+  color: var(--text-placeholder);
   text-align: center;
 }
 
@@ -759,7 +759,7 @@ const handleClick = (item) => {
 .error-state .error-icon {
   font-size: 32px;
   margin-bottom: 12px;
-  color: #f56c6c;
+  color: var(--danger);
 }
 
 .empty-state .empty-icon {
