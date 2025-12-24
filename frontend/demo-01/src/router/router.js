@@ -120,8 +120,8 @@ const router = createRouter({
 
         // Practice 页面
         {
-          path: "pracindex",
-          name: "Pracindex",
+          path: "practiceIndex",
+          name: "PracticeIndex",
           component: () => import("@/view/PracticeIndex.vue"),
         },
 

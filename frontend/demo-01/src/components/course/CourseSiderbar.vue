@@ -29,7 +29,7 @@
         </el-icon>
         <span>掌握度</span>
       </el-menu-item>
-      <el-menu-item index="pracindex">
+      <el-menu-item index="practiceIndex">
         <el-icon>
           <Document />
         </el-icon>
