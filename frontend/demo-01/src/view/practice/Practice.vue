@@ -915,7 +915,7 @@ window.addEventListener("beforeunload", handleBeforeUnload);
 
 /* 进度信息容器 */
 .progress-info {
-  background: #fff;
+  background: var(--bg-white);
   padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -923,7 +923,7 @@ window.addEventListener("beforeunload", handleBeforeUnload);
 
 /* 侧边栏下方的进度信息容器 */
 .progress-info-sidebar {
-  background: #fff;
+  background: var(--bg-white);
   padding: 16px;
   border-radius: 0 0 8px 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -942,7 +942,7 @@ window.addEventListener("beforeunload", handleBeforeUnload);
   display: flex;
   justify-content: space-between;
   font-size: 14px;
-  color: #606266;
+  color: var(--text-primary);
 }
 
 /* 响应式设计 */

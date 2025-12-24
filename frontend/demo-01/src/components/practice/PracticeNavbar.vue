@@ -220,8 +220,8 @@ function handleSingleQuestionToggle(value) {
   justify-content: space-between;
   align-items: center;
   padding: 0 36px;
-  background: rgba(255, 255, 255, 0.9);
-  border-bottom: 1px solid #dbeafe;
+  background: rgba(var(--bg-white-rgb), 0.9);
+  border-bottom: 1px solid var(--border-primary-lighter);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -244,12 +244,12 @@ function handleSingleQuestionToggle(value) {
   background: transparent;
   border-radius: 8px;
   cursor: pointer;
-  color: #2563eb;
+  color: var(--primary);
   transition: all 0.18s ease;
 }
 
 .back-btn:hover {
-  background: rgba(37, 99, 235, 0.08);
+  background: var(--primary-alpha-10);
   transform: translateX(-2px);
 }
 
@@ -266,7 +266,7 @@ function handleSingleQuestionToggle(value) {
   font-size: 18px;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -283,15 +283,15 @@ function handleSingleQuestionToggle(value) {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: linear-gradient(180deg, #fff, #f0f9ff);
-  border: 1px solid #bfdbfe;
+  background: linear-gradient(180deg, var(--bg-white), var(--bg-primary-light));
+  border: 1px solid var(--border-primary-lighter);
   border-radius: 10px;
   font-weight: 600;
-  color: #2563eb;
+  color: var(--primary);
 }
 
 .timer-urgent {
-  background: linear-gradient(180deg, #fff, #fef2f2);
+  background: linear-gradient(180deg, var(--bg-white), #fef2f2);
   border: 1px solid #fecaca;
   color: #dc2626;
 }
@@ -314,12 +314,12 @@ function handleSingleQuestionToggle(value) {
   background: transparent;
   border-radius: 8px;
   cursor: pointer;
-  color: #2563eb;
+  color: var(--primary);
   transition: all 0.18s ease;
 }
 
 .user-btn:hover {
-  background: rgba(37, 99, 235, 0.08);
+  background: var(--primary-alpha-10);
   transform: translateY(-2px);
 }
 
@@ -332,11 +332,11 @@ function handleSingleQuestionToggle(value) {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: linear-gradient(180deg, #fff, #f0f9ff);
-  border: 1px solid #bfdbfe;
+  background: linear-gradient(180deg, var(--bg-white), var(--bg-primary-light));
+  border: 1px solid var(--border-primary-lighter);
   border-radius: 10px;
   font-weight: 600;
-  color: #2563eb;
+  color: var(--primary);
 }
 
 .toggle-label {

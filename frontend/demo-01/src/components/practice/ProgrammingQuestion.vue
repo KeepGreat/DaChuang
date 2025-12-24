@@ -410,33 +410,33 @@ function parseMarkdown(text) {
 }
 
 .section-card {
-  background-color: #ffffff;
+  background-color: var(--bg-white);
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e6f7ff;
+  border: 1px solid var(--bg-primary-light);
 }
 
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1890ff;
+  color: var(--primary-light);
   margin-bottom: 15px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .problem-title {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   line-height: 1.6;
 }
 
 .problem-content {
   font-size: 14px;
   line-height: 1.6;
-  color: #666;
+  color: var(--text-primary);
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -444,7 +444,7 @@ function parseMarkdown(text) {
 .note-content {
   font-size: 14px;
   line-height: 1.6;
-  color: #666;
+  color: var(--text-primary);
 }
 
 .note-item {
@@ -453,7 +453,7 @@ function parseMarkdown(text) {
 
 .note-label {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin-right: 5px;
 }
 
@@ -467,10 +467,10 @@ function parseMarkdown(text) {
 }
 
 .code-card {
-  background-color: #ffffff;
+  background-color: var(--bg-white);
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e6f7ff;
+  border: 1px solid var(--bg-primary-light);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -482,14 +482,14 @@ function parseMarkdown(text) {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  border-bottom: 1px solid #f0f0f0;
-  background-color: #fafafa;
+  border-bottom: 1px solid var(--border-light);
+  background-color: var(--bg-light);
 }
 
 .code-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1890ff;
+  color: var(--primary-light);
 }
 
 .code-actions {
@@ -508,15 +508,15 @@ function parseMarkdown(text) {
   width: 100%;
   height: 100%;
   margin: 0;
-  background-color: #fafafa;
-  border: 1px solid #e8e8e8;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-light);
   border-radius: 4px;
   outline: none;
   resize: none;
   font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.5;
-  color: #333;
+  color: var(--text-primary);
   caret-color: #000;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -529,14 +529,14 @@ function parseMarkdown(text) {
 .code-result {
   margin: 0 20px 20px 20px;
   padding: 12px;
-  background: #f0f9eb;
-  border: 1px solid #e1f3d8;
+  background: var(--bg-primary-lighter);
+  border: 1px solid var(--border-primary-lighter);
   border-radius: 6px;
 }
 
 .code-result h4 {
   margin: 0 0 10px 0;
-  color: #67c23a;
+  color: var(--primary-light);
   font-size: 14px;
   font-weight: 600;
 }
@@ -546,7 +546,7 @@ function parseMarkdown(text) {
   font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.5;
-  color: #67c23a;
+  color: var(--primary-light);
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -555,24 +555,24 @@ function parseMarkdown(text) {
 .correct-answer {
   margin: 0 20px 20px 20px;
   padding: 16px;
-  background: #f0f9eb;
-  border: 1px solid #e1f3d8;
+  background: var(--bg-primary-lighter);
+  border: 1px solid var(--border-primary-lighter);
   border-radius: 6px;
 }
 
 .correct-answer h4 {
   margin: 0 0 12px 0;
-  color: #67c23a;
+  color: var(--primary-light);
   font-size: 16px;
   font-weight: 600;
 }
 
 .correct-answer .code-editor {
-  background-color: #f5f5f5;
+  background-color: var(--bg-light);
   padding: 12px;
   border-radius: 4px;
   overflow-x: auto;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-light);
 }
 
 .correct-answer pre {
@@ -580,7 +580,7 @@ function parseMarkdown(text) {
   font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.5;
-  color: #333;
+  color: var(--text-primary);
   white-space: pre-wrap;
   word-wrap: break-word;
 }
