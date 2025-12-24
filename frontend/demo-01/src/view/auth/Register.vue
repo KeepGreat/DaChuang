@@ -1,50 +1,85 @@
 <template>
-  <div class="login-page">
-    <div class="login-card">
-      <div class="login-header">
+  <div class="register-page">
+    <div class="register-card">
+      <div class="register-header">
         <div class="platform-name">慧编未来 · AI 教学平台</div>
-        <h2>账号登录</h2>
+        <h2>创建新账号</h2>
+        <p class="register-subtitle">加入我们，开启编程学习之旅</p>
       </div>
 
-      <!-- 用 label-position="left" 来设置label左对齐 -->
       <el-form
-        :model="loginForm"
-        :rules="loginRules"
-        ref="loginFormRef"
-        class="login-form"
+        :model="registerForm"
+        :rules="registerRules"
+        ref="registerFormRef"
+        class="register-form"
         label-position="left"
-        @submit.prevent="handleLogin"
+        @submit.prevent="handleRegister"
       >
         <el-form-item prop="username" label="用户名">
-          <el-input v-model="loginForm.username" placeholder="请输入用户名">
+          <el-input v-model="registerForm.username" placeholder="请输入用户名">
             <template #prefix>
-              <el-icon><User /></el-icon>
+              <el-icon class="el-input__icon"><User /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item prop="email" label="邮箱">
+          <el-input v-model="registerForm.email" type="email" placeholder="请输入邮箱">
+            <template #prefix>
+              <el-icon class="el-input__icon"><Message /></el-icon>
             </template>
           </el-input>
         </el-form-item>
 
         <el-form-item prop="password" label="密码">
           <el-input
-            v-model="loginForm.password"
+            v-model="registerForm.password"
             type="password"
             placeholder="请输入密码"
             show-password
           >
             <template #prefix>
-              <el-icon><Lock /></el-icon>
+              <el-icon class="el-input__icon"><Lock /></el-icon>
             </template>
           </el-input>
         </el-form-item>
 
+        <el-form-item prop="confirmPassword" label="确认密码">
+          <el-input
+            v-model="registerForm.confirmPassword"
+            type="password"
+            placeholder="请再次输入密码"
+            show-password
+          >
+            <template #prefix>
+              <el-icon class="el-input__icon"><Lock /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item prop="role" label="角色">
+          <el-select v-model="registerForm.role" placeholder="请选择角色">
+            <el-option label="学生" value="student" />
+            <el-option label="教师" value="teacher" />
+            <el-option label="管理员" value="admin" />
+          </el-select>
+        </el-form-item>
+
         <el-form-item>
-          <el-button class="login-btn" native-type="submit" :loading="loading">
-            登录
+          <el-button
+            type="primary"
+            class="register-btn"
+            native-type="submit"
+            :loading="loading"
+          >
+            <span v-if="!loading">注册</span>
+            <span v-else>注册中...</span>
           </el-button>
         </el-form-item>
 
-        <div class="register-section">
-          还没有账号？
-          <el-link @click.prevent="goRegister" class="register-link">立即注册</el-link>
+        <div class="login-section">
+          已有账号？
+          <el-link @click.prevent="goLogin" class="login-link">立即登录</el-link>
         </div>
       </el-form>
     </div>
@@ -52,11 +87,10 @@
 </template>
 
 <script setup>
-import { getUserRole, login } from "@/api";
+import { register } from "@/api";
 import { useFormValidation } from "@/hooks";
-import { useUserStore } from "@/store";
 import { BusinessError } from "@/utils/error";
-import { Lock, User } from "@element-plus/icons-vue";
+import { Lock, Message, User } from "@element-plus/icons-vue";
 import {
 	ElButton,
 	ElForm,
@@ -65,63 +99,80 @@ import {
 	ElInput,
 	ElLink,
 	ElMessage,
+	ElOption,
+	ElSelect,
 } from "element-plus";
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const userStore = useUserStore();
 const loading = ref(false);
-const loginFormRef = ref(null);
+const registerFormRef = ref(null);
 
-const loginForm = reactive({
+const registerForm = reactive({
   username: "",
+  email: "",
   password: "",
+  confirmPassword: "",
+  role: "",
 });
 
-const loginRules = reactive({
+const registerRules = reactive({
   username: [
     { required: true, message: "请输入用户名", trigger: "blur" },
     { min: 3, max: 20, message: "用户名长度在 3 到 20 个字符", trigger: "blur" },
+  ],
+  email: [
+    { required: true, message: "请输入邮箱", trigger: "blur" },
+    { type: "email", message: "请输入正确的邮箱格式", trigger: ["blur", "change"] },
   ],
   password: [
     { required: true, message: "请输入密码", trigger: "blur" },
     { min: 6, message: "密码长度不能少于 6 个字符", trigger: "blur" },
   ],
+  confirmPassword: [
+    { required: true, message: "请确认密码", trigger: "blur" },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== registerForm.password) {
+          callback(new Error("两次输入的密码不一致"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  role: [{ required: true, message: "请选择角色", trigger: "change" }],
 });
 
-async function handleLogin() {
+async function handleRegister() {
   try {
     loading.value = true;
     // 表单验证
     const { validateForm } = useFormValidation();
-    const isValid = await validateForm(loginFormRef.value);
+    const isValid = await validateForm(registerFormRef.value);
     if (!isValid) return;
 
-    const tokenRes = await login(loginForm);
+    const res = await register({
+      username: registerForm.username,
+      password: registerForm.password,
+      role: registerForm.role,
+    });
 
-    // 登录成功, 保存token
-    userStore.setToken(tokenRes.data);
-
-    // 调用getUserRole接口获取用户角色
-    const roleRes = await getUserRole({ token: tokenRes.data });
-
-    // 保存角色到store
-    userStore.setUserRole(roleRes.data);
-    ElMessage.success("登录成功");
-
-    // 根据角色跳转到不同页面
-    const roleDefaultRoute = userStore.getDefaultRoute();
-    router.push(roleDefaultRoute);
+    // 注册成功
+    if (res) {
+      ElMessage.success("注册成功，请登录");
+      // 注册成功跳转到登录页
+      router.push("/login");
+    }
   } catch (error) {
-    console.error("登录失败:", error);
+    console.error("注册失败:", error);
     if (error instanceof BusinessError) {
-      if (error.code === 401) {
-        ElMessage.error("密码错误");
-      } else if (error.code === 404) {
-        ElMessage.error("用户不存在");
+      if (error.code === 400) {
+        ElMessage.error("用户名已存在");
       } else {
-        ElMessage.error(error.message);
+        ElMessage.error("注册失败，请稍后重试");
       }
     } else {
       ElMessage.error("网络错误，请稍后重试");
@@ -131,14 +182,13 @@ async function handleLogin() {
   }
 }
 
-// 跳转到注册页面
-function goRegister() {
-  router.push("/register");
-}
+const goLogin = () => {
+  router.push("/login"); // 跳转到登录页面
+};
 </script>
 
-<style lang="scss" scoped>
-.login-page {
+<style scoped>
+.register-page {
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -150,7 +200,7 @@ function goRegister() {
   overflow: hidden;
 }
 
-.login-page::before {
+.register-page::before {
   content: "";
   position: absolute;
   top: 0;
@@ -166,13 +216,13 @@ function goRegister() {
   pointer-events: none;
 }
 
-.login-card {
+.register-card {
   width: 100%;
   max-width: 420px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 40px;
+  padding: 36px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
@@ -181,12 +231,12 @@ function goRegister() {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.login-card:hover {
+.register-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
-.login-header {
+.register-header {
   text-align: center;
   margin-bottom: 40px;
 }
@@ -203,7 +253,7 @@ function goRegister() {
   background-clip: text;
 }
 
-.login-header h2 {
+.register-header h2 {
   color: var(--text-primary);
   margin: 0;
   font-size: 28px;
@@ -211,23 +261,14 @@ function goRegister() {
   letter-spacing: -0.5px;
 }
 
-.form-actions {
-  text-align: right;
-  margin-bottom: 12px;
-}
-
-.forgot-link {
-  color: var(--primary);
+.register-subtitle {
+  color: #64748b;
   font-size: 14px;
+  margin-top: 8px;
   font-weight: 500;
-  transition: color 0.2s ease;
 }
 
-.forgot-link:hover {
-  color: var(--primary-hover);
-}
-
-.login-btn {
+.register-btn {
   width: 100%;
   background: var(--gradient-brand);
   border: none;
@@ -242,7 +283,7 @@ function goRegister() {
   overflow: hidden;
 }
 
-.login-btn::before {
+.register-btn::before {
   content: "";
   position: absolute;
   top: 0;
@@ -253,22 +294,22 @@ function goRegister() {
   transition: left 0.5s ease;
 }
 
-.login-btn:hover::before {
+.register-btn:hover::before {
   left: 100%;
 }
 
-.login-btn:hover,
-.login-btn:focus {
+.register-btn:hover,
+.register-btn:focus {
   background: linear-gradient(45deg, #1d4ed8, #1e40af);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
 }
 
-.login-btn:active {
+.register-btn:active {
   transform: translateY(0);
 }
 
-.register-section {
+.login-section {
   text-align: center;
   margin-top: 32px;
   color: #64748b;
@@ -276,7 +317,7 @@ function goRegister() {
   font-weight: 500;
 }
 
-.register-link {
+.login-link {
   color: var(--primary);
   font-weight: 600;
   margin-left: 4px;
@@ -284,7 +325,7 @@ function goRegister() {
   position: relative;
 }
 
-.register-link::after {
+.login-link::after {
   content: "";
   position: absolute;
   bottom: -2px;
@@ -295,20 +336,20 @@ function goRegister() {
   transition: width 0.3s ease;
 }
 
-.register-link:hover::after {
+.login-link:hover::after {
   width: 100%;
 }
 
-.register-link:hover {
+.login-link:hover {
   color: var(--primary-hover);
 }
 
 /* 适配Element Plus组件样式 - 修复标签对齐和输入框间距问题 */
-.login-form {
+.register-form {
   width: 100%;
 }
 
-.login-form :deep(.el-form-item) {
+.register-form :deep(.el-form-item) {
   margin-bottom: 28px;
   display: flex;
   align-items: center;
@@ -316,7 +357,7 @@ function goRegister() {
 }
 
 /* 修复标签对齐问题 */
-.login-form :deep(.el-form-item__label) {
+.register-form :deep(.el-form-item__label) {
   width: 80px;
   min-width: 80px;
   padding-right: 10px;
@@ -330,14 +371,14 @@ function goRegister() {
 }
 
 /* 修复输入框内容区对齐 */
-.login-form :deep(.el-form-item__content) {
+.register-form :deep(.el-form-item__content) {
   flex: 1;
   margin-left: 0;
   width: auto;
 }
 
 /* 修复输入框样式 */
-.login-form :deep(.el-input__wrapper) {
+.register-form :deep(.el-input__wrapper) {
   border-radius: 10px;
   padding-left: 12px;
   box-sizing: border-box;
@@ -347,25 +388,25 @@ function goRegister() {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.login-form :deep(.el-input__wrapper:hover) {
+.register-form :deep(.el-input__wrapper:hover) {
   border-color: #cbd5e1;
   background: var(--bg-white);
 }
 
 /* 调整图标位置 */
-.login-form :deep(.el-input__prefix) {
+.register-form :deep(.el-input__prefix) {
   margin-right: 8px;
   margin-left: 0;
   padding-right: 0;
   color: #94a3b8;
 }
 
-.login-form :deep(.el-input__prefix-inner) {
+.register-form :deep(.el-input__prefix-inner) {
   color: #94a3b8;
 }
 
 /* 修复输入框内部输入区域 */
-.login-form :deep(.el-input__inner) {
+.register-form :deep(.el-input__inner) {
   padding-left: 8px;
   padding-right: 8px;
   box-sizing: border-box;
@@ -373,21 +414,31 @@ function goRegister() {
   font-weight: 500;
 }
 
-.login-form :deep(.el-input__inner::placeholder) {
+.register-form :deep(.el-input__inner::placeholder) {
   color: #94a3b8;
   font-weight: 400;
 }
 
 /* 确保密码框的显示密码按钮不影响布局 */
-.login-form :deep(.el-input__suffix) {
+.register-form :deep(.el-input__suffix) {
   margin-left: 0;
   color: #94a3b8;
 }
 
-.login-form :deep(.el-input__wrapper:focus-within) {
+.register-form :deep(.el-input__wrapper:focus-within) {
   border-color: var(--primary);
   background: var(--bg-white);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 用deep修改Element Plus组件的样式，使得和上方的输入框UI更一致 */
+.register-form :deep(.el-select__wrapper) {
+  border-radius: 10px;
+  border: 2px solid var(--border-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.register-form :deep(.el-select__wrapper):hover {
+  border-color: #cbd5e1;
 }
 
 /* 动画效果 */
@@ -402,13 +453,13 @@ function goRegister() {
   }
 }
 
-.login-card {
+.register-card {
   animation: fadeInUp 0.6s ease-out;
 }
 
 /* 响应式设计 */
 @media (max-width: 480px) {
-  .login-card {
+  .register-card {
     padding: 30px 20px;
     margin: 20px;
   }
@@ -417,7 +468,7 @@ function goRegister() {
     font-size: 20px;
   }
 
-  .login-header h2 {
+  .register-header h2 {
     font-size: 24px;
   }
 }

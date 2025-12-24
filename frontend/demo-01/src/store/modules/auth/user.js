@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 
 export const useUserStore = defineStore(
   "user",
@@ -19,11 +19,6 @@ export const useUserStore = defineStore(
      */
     const role = ref("");
     const userId = ref(""); // 添加用户ID字段
-
-    /**
-     * 认证头信息
-     */
-    const authHeader = computed(() => token.value || "");
 
     /**
      * 设置token
@@ -79,7 +74,6 @@ export const useUserStore = defineStore(
       isLoggedIn,
       token,
       userId,
-      authHeader,
       setToken,
       setUserRole,
       getDefaultRoute,
