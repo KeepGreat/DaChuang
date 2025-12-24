@@ -11,7 +11,7 @@ public class QuestionResource {
 
     private String description;
     private String name;
-    private Integer type;
+    private Integer type; //0：测试用例，1：用例答案，2：问题描述资料
     private Integer size;
     private Integer questionId;
 }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/codesandbox")
 public class CodeSandboxController {
 
-    private CodeExecutionTool codeExecutionTool = new CodeExecutionTool();
+    private final CodeExecutionTool codeExecutionTool = new CodeExecutionTool();
 
     @PostMapping("/execute")
     public String execute(@RequestBody CodeSandboxInput codeSandboxInput){

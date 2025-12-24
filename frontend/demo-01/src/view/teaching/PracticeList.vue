@@ -68,8 +68,8 @@
                     </el-icon>
                     截止: {{ formatDeadline(practice.deadline) }}
                   </span>
-                  <el-tag :type="getStatusType(practice.status)" size="small">
-                    {{ practice.status }}
+                  <el-tag :type="practice.deadline ? getStatusType(practice.status) : 'success'" size="small">
+                    {{ practice.deadline ? practice.status : '长期有效' }}
                   </el-tag>
                 </div>
               </div>
@@ -359,11 +359,14 @@ const openPracticeDetail = () => {
 
 // 判断是否过期
 const isOverdue = (deadline) => {
+  if (!deadline) return false; // 如果没有截止时间，视为长期有效，不过期
   return new Date(deadline) < new Date();
 };
 
 // 格式化截止时间
 const formatDeadline = (deadline) => {
+  if (!deadline) return "长期有效";
+  
   const date = new Date(deadline);
   const now = new Date();
   const diff = date - now;

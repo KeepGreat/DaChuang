@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,7 +22,7 @@ public class MaterialServiceImpl implements MaterialService {
 
     @Override
     public int addMaterial(Material material) {
-        if (material == null) return -1;
+        if (material == null || material.getType() == null || material.getCourseId() == null) return -1;
         return materialMapper.insert(material);
     }
 
@@ -37,32 +38,40 @@ public class MaterialServiceImpl implements MaterialService {
         updateWrapper.eq("id", material.getId());
         if (material.getType() != null) updateWrapper.set("type", material.getType());
         if (material.getDescription() != null) updateWrapper.set("description", material.getDescription());
-        if (material.getUpdatedTime() != null) updateWrapper.set("updated_time", material.getUpdatedTime());
+        if (material.getUpdatedTime() != null) updateWrapper.set("updated_at", material.getUpdatedTime());
         if (material.getCourseId() != null) updateWrapper.set("course_id", material.getCourseId());
         return materialMapper.update(null, updateWrapper);
     }
 
     @Override
-    public List<Material> getMaterials(Material material) {
+    public List<Material> getMaterials(Material material,
+                                       LocalDateTime createdAtStart, LocalDateTime createdAtEnd,
+                                       LocalDateTime updatedAtStart, LocalDateTime updatedAtEnd) {
         if (material == null) return materialMapper.selectList(null);
         QueryWrapper<Material> queryWrapper = new QueryWrapper<>();
         if (material.getId() != null) queryWrapper.eq("id", material.getId());
         if (material.getType() != null) queryWrapper.eq("type", material.getType());
-        if (material.getCreatedTime() != null) queryWrapper.le("created_time", material.getCreatedTime());
-        if (material.getUpdatedTime() != null) queryWrapper.le("updated_time", material.getUpdatedTime());
+        if (createdAtStart != null) queryWrapper.ge("created_at", createdAtStart);
+        if (createdAtEnd != null) queryWrapper.le("created_at", createdAtEnd);
+        if (updatedAtStart != null) queryWrapper.ge("updated_at", updatedAtStart);
+        if (updatedAtEnd != null) queryWrapper.le("updated_at", updatedAtEnd);
         if (material.getCourseId() != null) queryWrapper.eq("course_id", material.getCourseId());
         return materialMapper.selectList(queryWrapper);
     }
 
     @Override
-    public Page<Material> getMaterialsPage(int pageNo, int pageSize, Material material) {
+    public Page<Material> getMaterialsPage(int pageNo, int pageSize, Material material,
+                                           LocalDateTime createdAtStart, LocalDateTime createdAtEnd,
+                                           LocalDateTime updatedAtStart, LocalDateTime updatedAtEnd) {
         Page<Material> page = new Page<>(pageNo, pageSize);
         if (material == null) return materialMapper.selectPage(page, null);
         QueryWrapper<Material> queryWrapper = new QueryWrapper<>();
         if (material.getId() != null) queryWrapper.eq("id", material.getId());
         if (material.getType() != null) queryWrapper.eq("type", material.getType());
-        if (material.getCreatedTime() != null) queryWrapper.le("created_time", material.getCreatedTime());
-        if (material.getUpdatedTime() != null) queryWrapper.le("updated_time", material.getUpdatedTime());
+        if (createdAtStart != null) queryWrapper.ge("created_at", createdAtStart);
+        if (createdAtEnd != null) queryWrapper.le("created_at", createdAtEnd);
+        if (updatedAtStart != null) queryWrapper.ge("updated_at", updatedAtStart);
+        if (updatedAtEnd != null) queryWrapper.le("updated_at", updatedAtEnd);
         if (material.getCourseId() != null) queryWrapper.eq("course_id", material.getCourseId());
         return materialMapper.selectPage(page, queryWrapper);
     }
