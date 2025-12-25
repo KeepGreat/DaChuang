@@ -8,7 +8,11 @@
       @mousedown="startDrag"
       @click="handleBallClick"
     >
-      <AIAssistantIcon :is-active="true" :is-online="true" />
+      <div class="ball-inner">
+        <el-icon class="chat-icon"><ChatDotRound /></el-icon>
+      </div>
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring delay"></div>
     </div>
 
     <!-- 侧边抽屉 -->
@@ -27,9 +31,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { ElDrawer } from 'element-plus'
-import AIAssistantIcon from './AIAssistantIcon.vue'
+import { ref, onUnmounted } from 'vue'
+import { ElDrawer, ElIcon } from 'element-plus'
+import { ChatDotRound } from '@element-plus/icons-vue'
 import AIAssistant from '@/assets/aimodules/AIAssistant.vue'
 
 const isDrawerOpen = ref(false)
@@ -85,6 +89,54 @@ onUnmounted(() => {
   z-index: 1000;
   cursor: grab;
   transition: opacity 0.3s, transform 0.3s;
+  width: 56px;
+  height: 56px;
+}
+
+.ball-inner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.chat-icon {
+  font-size: 28px;
+  color: #fff;
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgba(59, 130, 246, 0.5);
+  animation: pulse 2s ease-out infinite;
+  z-index: 1;
+}
+
+.pulse-ring.delay {
+  animation-delay: 1s;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
 }
 
 .floating-ball:active {
@@ -97,8 +149,9 @@ onUnmounted(() => {
   transform: scale(0.8);
 }
 
-.floating-ball:hover {
-  transform: scale(1.05);
+.floating-ball:hover .ball-inner {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
 }
 
 :deep(.ai-drawer) {
