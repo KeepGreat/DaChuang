@@ -1,3 +1,5 @@
+import { useUserStore } from "@/store";
+import { ElMessage } from "element-plus";
 import { createRouter, createWebHashHistory } from "vue-router";
 
 // 主界面路由
@@ -178,12 +180,7 @@ const routes = [
   {
     path: "/",
     component: () => import("@/components/Layout.vue"),
-    children: [
-      ...profilingRoutes,
-      ...teachingRoutes,
-      ...practiceRoutes,
-      ...otherRoutes,
-    ],
+    children: [...profilingRoutes, ...teachingRoutes, ...practiceRoutes, ...otherRoutes],
   },
   ...independentRoutes,
   ...authRoutes,
@@ -193,6 +190,36 @@ const routes = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
+});
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+  const isLoggedIn = userStore.isLoggedIn;
+  // 公开路由，无需登录即可访问
+  const publicRoutes = ["/login", "/register"];
+
+  if (isLoggedIn) {
+    // 已登录用户访问公开路由时，重定向到首页
+    if (publicRoutes.includes(to.path)) {
+      ElMessage.warning("您已登录，跳转到首页");
+      next("/");
+    }
+    // 已登录用户访问其他页面，允许通行
+    else {
+      next();
+    }
+  } else {
+    // 未登录用户访问登录/注册页，允许通行
+    if (publicRoutes.includes(to.path)) {
+      next();
+    }
+    // 未登录用户访问其他页面，重定向到登录页
+    else {
+      ElMessage.warning("您还未登录，请先登录后再访问");
+      next("/login");
+    }
+  }
 });
 
 export default router;
