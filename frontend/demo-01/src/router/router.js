@@ -1,3 +1,5 @@
+import { useUserStore } from "@/store";
+import { ElMessage } from "element-plus";
 import { createRouter, createWebHashHistory } from "vue-router";
 
 // 主界面路由
@@ -30,7 +32,8 @@ const profilingRoutes = [
   {
     path: "CoursePlaceholder",
     name: "CoursePlaceholder",
-    component: () => import("@/components/profiling/image/CoursePlaceholder.vue"),
+    component: () =>
+      import("@/components/profiling/image/CoursePlaceholder.vue"),
   },
 ];
 
@@ -56,16 +59,16 @@ const teachingRoutes = [
         name: "CourseSeriesDetail",
         component: () => import("@/view/teaching/CourseSeriesDetail.vue"),
       },
-      {
-        path: "task",
-        name: "TaskList",
-        component: () => import("@/view/teaching/TaskList.vue"),
-      },
-      {
-        path: "task/:taskId",
-        name: "TaskDetail",
-        component: () => import("@/view/teaching/TaskDetail.vue"),
-      },
+      // {
+      //   path: "task",
+      //   name: "TaskList",
+      //   component: () => import("@/view/teaching/TaskList.vue"),
+      // },
+      // {
+      //   path: "task/:taskId",
+      //   name: "TaskDetail",
+      //   component: () => import("@/view/teaching/TaskDetail.vue"),
+      // },
       {
         path: "practice",
         name: "PracticeList",
@@ -81,26 +84,26 @@ const teachingRoutes = [
         name: "ExamDetail",
         component: () => import("@/view/teaching/ExamDetail.vue"),
       },
-      {
-        path: "resource",
-        name: "ResourceList",
-        component: () => import("@/view/teaching/ResourceList.vue"),
-      },
-      {
-        path: "resource/:resourceId",
-        name: "ResourceDetail",
-        component: () => import("@/view/teaching/ResourceDetail.vue"),
-      },
-      {
-        path: "discussion",
-        name: "DiscussionList",
-        component: () => import("@/view/teaching/DiscussionList.vue"),
-      },
-      {
-        path: "discussion/:discussionId",
-        name: "DiscussionDetail",
-        component: () => import("@/view/teaching/DiscussionDetail.vue"),
-      },
+      // {
+      //   path: "resource",
+      //   name: "ResourceList",
+      //   component: () => import("@/view/teaching/ResourceList.vue"),
+      // },
+      // {
+      //   path: "resource/:resourceId",
+      //   name: "ResourceDetail",
+      //   component: () => import("@/view/teaching/ResourceDetail.vue"),
+      // },
+      // {
+      //   path: "discussion",
+      //   name: "DiscussionList",
+      //   component: () => import("@/view/teaching/DiscussionList.vue"),
+      // },
+      // {
+      //   path: "discussion/:discussionId",
+      //   name: "DiscussionDetail",
+      //   component: () => import("@/view/teaching/DiscussionDetail.vue"),
+      // },
       {
         path: "knowledge",
         name: "KnowledgeGraph",
@@ -108,16 +111,16 @@ const teachingRoutes = [
       },
     ],
   },
-  {
-    path: "teach",
-    name: "Teaching",
-    component: () => import("@/view/teaching/Teaching.vue"),
-  },
-  {
-    path: "teachindex",
-    name: "TeachingIndex",
-    component: () => import("@/view/teaching/TeachingIndex.vue"),
-  },
+  // {
+  //   path: "teach",
+  //   name: "Teaching",
+  //   component: () => import("@/view/teaching/Teaching.vue"),
+  // },
+  // {
+  //   path: "teachindex",
+  //   name: "TeachingIndex",
+  //   component: () => import("@/view/teaching/TeachingIndex.vue"),
+  // },
 ];
 
 // Practice 页面路由
@@ -177,12 +180,7 @@ const routes = [
   {
     path: "/",
     component: () => import("@/components/Layout.vue"),
-    children: [
-      ...profilingRoutes,
-      ...teachingRoutes,
-      ...practiceRoutes,
-      ...otherRoutes,
-    ],
+    children: [...profilingRoutes, ...teachingRoutes, ...practiceRoutes, ...otherRoutes],
   },
   ...independentRoutes,
   ...authRoutes,
@@ -192,6 +190,36 @@ const routes = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
+});
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+  const isLoggedIn = userStore.isLoggedIn;
+  // 公开路由，无需登录即可访问
+  const publicRoutes = ["/login", "/register"];
+
+  if (isLoggedIn) {
+    // 已登录用户访问公开路由时，重定向到首页
+    if (publicRoutes.includes(to.path)) {
+      ElMessage.warning("您已登录，跳转到首页");
+      next("/");
+    }
+    // 已登录用户访问其他页面，允许通行
+    else {
+      next();
+    }
+  } else {
+    // 未登录用户访问登录/注册页，允许通行
+    if (publicRoutes.includes(to.path)) {
+      next();
+    }
+    // 未登录用户访问其他页面，重定向到登录页
+    else {
+      ElMessage.warning("您还未登录，请先登录后再访问");
+      next("/login");
+    }
+  }
 });
 
 export default router;

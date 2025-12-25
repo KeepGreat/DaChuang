@@ -49,19 +49,19 @@ const isHovered = ref(false)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 25%, #f0fdfa 50%, #f0fdf4 100%);
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(224, 242, 254, 0.95) 50%, rgba(239, 246, 255, 0.95) 100%);
   border-radius: 15px;
   box-shadow:
-    0 4px 15px rgba(34, 197, 94, 0.1),
-    0 1px 3px rgba(6, 182, 212, 0.05);
+    0 4px 15px var(--primary-alpha-10),
+    0 1px 3px rgba(59, 130, 246, 0.1);
   overflow: visible;
 }
 
 .ai-assistant-icon:hover {
   transform: scale(1.05);
   box-shadow:
-    0 8px 25px rgba(34, 197, 94, 0.2),
-    0 3px 10px rgba(6, 182, 212, 0.15);
+    0 8px 25px var(--primary-alpha-10),
+    0 3px 10px rgba(59, 130, 246, 0.2);
 }
 
 .ai-avatar {
@@ -69,7 +69,7 @@ const isHovered = ref(false)
   height: 72%;
   object-fit: contain;
   border-radius: 50%;
-  filter: drop-shadow(0 2px 6px rgba(34, 197, 94, 0.15));
+  filter: drop-shadow(0 2px 6px rgba(59, 130, 246, 0.15));
   transition: all 0.3s ease;
   z-index: 2;
   animation: avatar-float 4s ease-in-out infinite;
@@ -91,7 +91,7 @@ const isHovered = ref(false)
 }
 
 .ai-assistant-icon:hover .ai-avatar {
-  filter: drop-shadow(0 4px 12px rgba(34, 197, 94, 0.3));
+  filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.3));
   animation-duration: 2s;
 }
 
@@ -105,10 +105,10 @@ const isHovered = ref(false)
   height: 110px;
   background: radial-gradient(
     circle,
-    rgba(34, 197, 94, 0.2) 0%,
-    rgba(6, 182, 212, 0.12) 35%,
-    rgba(251, 191, 36, 0.06) 60%,
-    rgba(34, 197, 94, 0) 80%
+    rgba(59, 130, 246, 0.2) 0%,
+    rgba(96, 165, 250, 0.12) 35%,
+    rgba(147, 197, 253, 0.06) 60%,
+    rgba(59, 130, 246, 0) 80%
   );
   border-radius: 50%;
   animation: active-glow 3s ease-in-out infinite;
@@ -140,10 +140,10 @@ const isHovered = ref(false)
   bottom: -3px;
   background: linear-gradient(
     90deg,
-    rgba(34, 197, 94, 0.4),
-    rgba(6, 182, 212, 0.4),
-    rgba(251, 191, 36, 0.4),
-    rgba(34, 197, 94, 0.4)
+    rgba(59, 130, 246, 0.4),
+    rgba(96, 165, 250, 0.4),
+    rgba(147, 197, 253, 0.4),
+    rgba(59, 130, 246, 0.4)
   );
   background-size: 300% 100%;
   border-radius: 18px;
@@ -182,8 +182,8 @@ const isHovered = ref(false)
   height: 5px;
   top: 15%;
   left: 15%;
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+  background: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
   animation: orbit-float-1 4s ease-in-out infinite;
 }
 
@@ -192,8 +192,8 @@ const isHovered = ref(false)
   height: 4px;
   top: 20%;
   right: 15%;
-  background: #06b6d4;
-  box-shadow: 0 0 7px rgba(6, 182, 212, 0.5);
+  background: #93c5fd;
+  box-shadow: 0 0 7px rgba(147, 197, 253, 0.5);
   animation: orbit-float-2 3.5s ease-in-out infinite;
 }
 
@@ -202,8 +202,8 @@ const isHovered = ref(false)
   height: 5px;
   bottom: 20%;
   right: 15%;
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+  background: #2563eb;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
   animation: orbit-float-3 4.5s ease-in-out infinite;
 }
 
@@ -212,8 +212,8 @@ const isHovered = ref(false)
   height: 4px;
   bottom: 15%;
   left: 15%;
-  background: #06b6d4;
-  box-shadow: 0 0 7px rgba(6, 182, 212, 0.5);
+  background: #60a5fa;
+  box-shadow: 0 0 7px rgba(96, 165, 250, 0.5);
   animation: orbit-float-4 3s ease-in-out infinite;
 }
 
@@ -308,16 +308,16 @@ const isHovered = ref(false)
   border: 2px solid #fff;
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(34, 197, 94, 0.1);
+    0 0 0 1px rgba(59, 130, 246, 0.1);
   z-index: 3;
   transition: all 0.3s ease;
 }
 
 .status-indicator.online {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   box-shadow:
-    0 2px 6px rgba(34, 197, 94, 0.3),
-    0 0 0 2px rgba(34, 197, 94, 0.2);
+    0 2px 6px rgba(59, 130, 246, 0.3),
+    0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .status-dot {
