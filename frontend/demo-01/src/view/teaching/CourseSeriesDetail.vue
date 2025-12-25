@@ -85,7 +85,7 @@
               </div>
 
               <!-- PDF 查看器 -->
-              <div v-else-if="item.type === 'pdf'" class="pdf-wrapper">
+              <div v-else-if="item.type === 'application/pdf'" class="pdf-wrapper">
                 <iframe v-if="fileUrls[item.id]" :src="fileUrls[item.id]" width="100%" height="600" frameborder="0"></iframe>
                 <div v-else class="loading-placeholder">
                   <el-skeleton animated>

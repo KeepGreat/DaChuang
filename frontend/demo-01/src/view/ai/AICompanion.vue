@@ -139,6 +139,8 @@ const chatStarted = ref(false)
 const sessionId = ref(null)
 const isCreatingSession = ref(false)
 
+const airesponse = ref('')
+
 // 返回
 const goBack = () => {
   router.go(-1)

@@ -356,7 +356,7 @@ export const useTeachingStore = defineStore("teaching", () => {
 
     try {
       // 调用 getCourses API
-      const response = await getCourses(courseId);
+      const response = await getCourses(null, null, courseId);
 
       if (response && response.data) {
         return response;

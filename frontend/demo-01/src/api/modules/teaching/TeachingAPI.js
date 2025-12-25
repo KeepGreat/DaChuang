@@ -7,6 +7,11 @@ export default {
     return request({
       url: "/api/teaching/smartcompanion/session/create",
       method: "post",
+      data: {
+        session_id: null,
+        clear_history: true,
+        max_turns: null
+      }
     });
   },
 
