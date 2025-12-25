@@ -251,7 +251,12 @@ export const useTeachingStore = defineStore("teaching", () => {
       // 调用 getMaterials API 获取资料列表
       const response = await getMaterials(null, null, courseId);
 
-      if (response && response.code >= 200 && response.code < 300 && response.data) {
+      if (
+        response &&
+        response.code >= 200 &&
+        response.code < 300 &&
+        response.data
+      ) {
         const materials = response.data;
 
         // 为每个资料获取对应的文件信息
@@ -259,7 +264,13 @@ export const useTeachingStore = defineStore("teaching", () => {
           materials.map(async (material) => {
             try {
               // 根据 matId 获取文件信息
-              const fileResponse = await getFileContents(null, null, null, null, material.id);
+              const fileResponse = await getFileContents(
+                null,
+                null,
+                null,
+                null,
+                material.id
+              );
               const fileInfo = fileResponse?.data?.[0] || null;
 
               return {
@@ -345,7 +356,7 @@ export const useTeachingStore = defineStore("teaching", () => {
 
     try {
       // 调用 getCourses API
-      const response = await getCourses(courseId);
+      const response = await getCourses(null, null, courseId);
 
       if (response && response.data) {
         return response;
@@ -360,22 +371,22 @@ export const useTeachingStore = defineStore("teaching", () => {
       const mockData = [
         {
           id: 1,
-          title: "Python 基础入门",
+          name: "Python 基础入门",
           description: "从零开始学习 Python 编程语言的基础知识",
         },
         {
           id: 2,
-          title: "Python 进阶教程",
+          name: "Python 进阶教程",
           description: "深入学习 Python 的高级特性和编程技巧",
         },
         {
           id: 3,
-          title: "Python Web 开发",
+          name: "Python Web 开发",
           description: "使用 Python 进行 Web 应用开发的完整指南",
         },
         {
           id: 4,
-          title: "Python 数据分析",
+          name: "Python 数据分析",
           description: "掌握使用 Python 进行数据分析的核心技能",
         },
       ];

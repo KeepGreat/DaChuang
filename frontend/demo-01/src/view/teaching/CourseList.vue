@@ -120,13 +120,13 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .list-header h2 {
   margin: 0;
   font-size: 24px;
-  color: #333;
+  color: var(--primary-dark);
   font-weight: 500;
 }
 
@@ -137,7 +137,7 @@ onMounted(() => {
 }
 
 .course-count {
-  color: #666;
+  color: var(--text-regular);
   font-size: 14px;
 }
 
@@ -168,21 +168,21 @@ onMounted(() => {
   gap: 16px;
   padding: 20px;
   background: #fff;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .course-item:hover {
-  border-color: #ff7ab1;
-  box-shadow: 0 4px 12px rgba(255, 122, 177, 0.1);
+  border-color: var(--primary-light);
+  box-shadow: 0 4px 12px var(--primary-alpha-10);
   transform: translateY(-2px);
 }
 
 .course-item.completed {
-  background: #f6ffed;
-  border-color: #52c41a;
+  background: var(--success-alpha-10);
+  border-color: var(--success);
 }
 
 /* 课程图标 */
@@ -192,15 +192,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fff0f6, #ffd6e7);
+  background: linear-gradient(135deg, var(--bg-primary-light), var(--primary-lightest));
   border-radius: 12px;
-  color: #d63384;
+  color: var(--primary);
   flex-shrink: 0;
 }
 
 .course-item.completed .course-icon {
   background: linear-gradient(135deg, #f6ffed, #d9f7be);
-  color: #52c41a;
+  color: var(--success);
 }
 
 /* 课程信息 */
@@ -215,13 +215,13 @@ onMounted(() => {
   margin: 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--primary-dark);
 }
 
 .course-description {
   margin: 0;
   font-size: 14px;
-  color: #666;
+  color: var(--text-regular);
   line-height: 1.5;
 }
 
@@ -249,7 +249,7 @@ onMounted(() => {
 
 .progress-text {
   font-size: 12px;
-  color: #666;
+  color: var(--text-regular);
   min-width: 40px;
 }
 
@@ -269,12 +269,12 @@ onMounted(() => {
 
 .lock-icon {
   font-size: 20px;
-  color: #999;
+  color: var(--text-secondary);
 }
 
 .arrow-icon {
   font-size: 20px;
-  color: #999;
+  color: var(--text-secondary);
 }
 
 /* 响应式设计 */
