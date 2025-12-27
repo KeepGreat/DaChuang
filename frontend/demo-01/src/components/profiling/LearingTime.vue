@@ -127,7 +127,7 @@ const calendarMock = ref(
 <style scoped>
 /* 页面整体背景 */
 .page-wrapper {
-  background-color: #fff6fb;
+  background-color: #f6fbff;
   min-height: 100vh;
   padding: 40px 0;
   display: flex;

@@ -138,7 +138,7 @@ function prevCourse(rowIndex) {
 /* 左侧分类栏 */
 .category-sidebar {
   width:25%;
-  background:#fff0f5;
+  background:#f0f5ff;
   padding:20px;
   border-radius:12px;
   position: sticky;
@@ -146,15 +146,15 @@ function prevCourse(rowIndex) {
   align-self: flex-start;
 }
 
-.category-sidebar h3 { font-size:18px; font-weight:bold; margin-bottom:12px; color:#d63384; }
+.category-sidebar h3 { font-size:18px; font-weight:bold; margin-bottom:12px; color:#6488f4; }
 .category-sidebar ul { list-style:none; padding:0; margin:0; }
-.category-sidebar ul li { padding:8px 0; cursor:pointer; color:#6b3b52; transition: color 0.3s; }
+.category-sidebar ul li { padding:8px 0; cursor:pointer; color:#4683f3; transition: color 0.3s; }
 .category-sidebar ul li:hover { color:#ff72b9; }
 
 /* 右侧课程区域 */
 .course-grid { width:75%; display:flex; flex-direction:column; gap:30px; }
 
-.course-row h2 { font-size:22px; color:#f464ac; font-weight:bold; margin-bottom:12px; }
+.course-row h2 { font-size:22px; color:#6488f4; font-weight:bold; margin-bottom:12px; }
 
 .course-row-wrapper {
   position: relative;
@@ -185,32 +185,18 @@ function prevCourse(rowIndex) {
 
 .course-thumb:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(214, 51, 132, 0.25);
+  box-shadow: 0 6px 18px rgba(51, 135, 214, 0.25);
 }
 
 /* 箭头样式 */
 .course-arrow {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(214, 51, 132, 0.18);
-  color: #d63384;
-  font-size: 28px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.25s ease;
+   background: rgba(51, 162, 214, 0.18); border:none; color:#3e33d6; font-size:28px; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.25s ease; opacity:0.5; 
 }
 
 .course-arrow.left { margin-right: 6px; }
 .course-arrow.right { margin-left: 6px; }
 
-.course-arrow:hover {
-  background: rgba(214, 51, 132, 0.35);
-  transform: scale(1.15);
-}
+.course-arrow:hover { background: rgba(51, 59, 214, 0.35); transform:scale(1.15); }
 
 /* 响应式 */
 @media (max-width:900px){

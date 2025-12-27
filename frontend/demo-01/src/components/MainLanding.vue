@@ -32,6 +32,6 @@ const courseImages = [c1, c2, c3, c4, c5, c6];
   display: flex;
   flex-direction: column;
   font-family: "Inter", Arial, sans-serif;
-  background: #fff6fb;
+  background: #f8f6ff;
 }
 </style>
