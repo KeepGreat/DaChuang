@@ -4,9 +4,9 @@ import { BusinessError } from "./error.js";
 
 const request = axios.create({
   // 本地后端接口地址
-  // baseURL: "http://localhost:80",
+  baseURL: "http://localhost:80",
   // Mock 接口地址
-  baseURL: "http://localhost:5173",
+  // baseURL: "http://localhost:5173",
   // 后端接口地址
   // baseURL: "http://192.168.42.88:80",
   timeout: 50000,
@@ -81,6 +81,10 @@ request.interceptors.response.use(
     // code在[200, 300)区间内时，视为业务成功响应
     if (res.code >= 200 && res.code < 300) {
       return res;
+    }
+
+    if(response.status >= 200 && response.status < 300){
+      return response;
     }
 
     // 业务错误处理

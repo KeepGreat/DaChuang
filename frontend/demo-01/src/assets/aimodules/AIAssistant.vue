@@ -6,7 +6,11 @@
         <p>智能助教随时为您解答问题</p>
         <p>您可以提问或分享代码</p>
       </div>
-      <div v-for="(message, index) in messages" :key="index" :class="['message', message.role]">
+      <div 
+        v-for="(message, index) in messages" 
+        :key="index" 
+        :class="['message', message.role]"
+      >
         <div class="message-header">
           <span class="role-label">{{ message.role === 'user' ? '您' : '助教' }}</span>
           <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
@@ -41,20 +45,39 @@
     <div class="input-area">
       <!-- 问题输入框 -->
       <div class="question-input-wrapper">
-        <textarea v-model="inputQuestion" class="question-input" placeholder="请输入您的问题..." rows="3"></textarea>
+        <textarea
+          v-model="inputQuestion"
+          class="question-input"
+          placeholder="请输入您的问题..."
+          rows="3"
+        ></textarea>
       </div>
 
       <!-- 代码输入（集成CodeSandbox组件） -->
       <div class="code-input-wrapper" v-show="showCodeInput">
-        <CodeSandbox ref="codeSandboxRef" :initialLanguage="selectedLanguage" @codeChange="handleCodeChange" />
+        <CodeSandbox
+          ref="codeSandboxRef"
+          :initialLanguage="selectedLanguage"
+          @codeChange="handleCodeChange"
+        />
       </div>
 
       <!-- 操作按钮 -->
       <div class="action-buttons">
-        <el-button type="default" class="toggle-code-button" @click="toggleCodeInput">
+        <el-button 
+          type="default" 
+          class="toggle-code-button"
+          @click="toggleCodeInput"
+        >
           {{ showCodeInput ? '隐藏代码输入' : '添加代码' }}
         </el-button>
-        <el-button type="primary" class="send-button" @click="sendMessage" :loading="isLoading" :disabled="!canSend">
+        <el-button 
+          type="primary" 
+          class="send-button"
+          @click="sendMessage"
+          :loading="isLoading"
+          :disabled="!canSend"
+        >
           发送
         </el-button>
       </div>
@@ -67,7 +90,6 @@ import { ref, computed, onMounted, nextTick } from 'vue';
 import { ElButton } from 'element-plus';
 import CodeSandbox from './CodeSandbox.vue';
 import { teach, answer } from './AIAssistantAPI.js';
-
 
 // 添加marked库用于Markdown解析
 import { marked } from 'marked';
@@ -121,9 +143,9 @@ const toggleCodeInput = () => {
 // 发送消息
 const sendMessage = async () => {
   if (!canSend.value || isLoading.value) return;
-
+  
   const question = inputQuestion.value.trim();
-
+  
   // 创建用户消息
   const userMessage = {
     role: 'user',
@@ -132,7 +154,7 @@ const sendMessage = async () => {
     codeLanguage: currentCodeLanguage.value,
     timestamp: new Date()
   };
-
+  
   // 创建AI响应占位符消息
   const aiMessage = {
     role: 'assistant',
@@ -140,27 +162,27 @@ const sendMessage = async () => {
     isStreaming: true,
     timestamp: new Date()
   };
-
+  
   // 添加消息到列表
   messages.value.push(userMessage, aiMessage);
-
+  
   // 清空输入
   inputQuestion.value = '';
   if (showCodeInput.value && codeSandboxRef.value) {
     codeSandboxRef.value.resetCode();
     currentCode.value = '';
   }
-
+  
   // 滚动到底部
   scrollToBottom();
-
+  
   // 调用API
   isLoading.value = true;
-
+  
   try {
     // 根据是否有代码选择不同的API
     const endpoint = currentCode.value ? 'teach' : 'answer';
-
+    
     // 构建请求参数，严格按照后端实体类设计
     const teachingInput = currentCode.value ? {
       question: question,
@@ -173,49 +195,58 @@ const sendMessage = async () => {
       question: question,
       codeSandboxInput: null
     };
-
+    
     // 使用TeachingAPI.js中的函数调用接口
-    const response = endpoint === 'teach' ?
-      await teach(teachingInput) :
+    const response = endpoint === 'teach' ? 
+      await teach(teachingInput) : 
       await answer(teachingInput);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    // 获取响应流
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-
-    // 处理流式响应
-    let accumulatedResponse = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) {
-        // 流式传输完成
-        aiMessage.isStreaming = false;
-        break;
+    
+    // 获取响应数据
+    const responseData = response.data;
+    
+    // 检查是否支持流式处理
+    if (responseData && typeof responseData.getReader === 'function') {
+      // 支持流式处理的情况
+      const reader = responseData.getReader();
+      const decoder = new TextDecoder('utf-8');
+      
+      // 处理流式响应
+      let accumulatedResponse = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) {
+          // 流式传输完成
+          aiMessage.isStreaming = false;
+          break;
+        }
+        
+        try {
+          // 解码新的数据块
+          const chunk = decoder.decode(value, { stream: true });
+          accumulatedResponse += chunk;
+          
+          // 更新AI消息响应内容
+          aiMessage.response = accumulatedResponse;
+          
+          // 滚动到底部
+          scrollToBottom();
+        } catch (decodeError) {
+          console.error('流式数据解码错误:', decodeError);
+          // 继续处理下一个数据块
+          continue;
+        }
       }
-
-      try {
-        // 解码新的数据块
-        const chunk = decoder.decode(value, { stream: true });
-        accumulatedResponse += chunk;
-
-        // 更新AI消息响应内容
-        aiMessage.response = accumulatedResponse;
-
-        // 滚动到底部
-        scrollToBottom();
-      } catch (decodeError) {
-        console.error('流式数据解码错误:', decodeError);
-        // 继续处理下一个数据块
-        continue;
-      }
+    } else {
+      // 不支持流式处理，直接获取完整数据
+      // 假设responseData是完整的响应内容字符串
+      const fullResponse = typeof responseData === 'string' ? responseData : JSON.stringify(responseData);
+      aiMessage.response = fullResponse;
+      aiMessage.isStreaming = false;
+      scrollToBottom();
     }
-
+    
   } catch (error) {
     console.error('发送消息错误:', error);
     aiMessage.isStreaming = false;
@@ -380,8 +411,7 @@ onMounted(() => {
 }
 
 /* Markdown列表样式 */
-.response-content ul,
-.response-content ol {
+.response-content ul, .response-content ol {
   margin: 0.5em 0;
   padding-left: 2em;
 }
@@ -449,13 +479,9 @@ onMounted(() => {
 }
 
 @keyframes typing {
-
-  0%,
-  80%,
-  100% {
+  0%, 80%, 100% {
     transform: scale(0);
   }
-
   40% {
     transform: scale(1);
   }
@@ -482,13 +508,8 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* 输入区域 */
@@ -496,9 +517,6 @@ onMounted(() => {
   padding: 16px;
   background-color: #f0f7ff;
   border-top: 1px solid #d9ecff;
-  max-height: 60vh;
-  overflow-y: auto;
-  flex-shrink: 0;
 }
 
 /* 问题输入框 */
