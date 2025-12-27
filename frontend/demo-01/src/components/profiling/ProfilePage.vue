@@ -82,7 +82,7 @@ const openEdit = () => console.log("打开编辑弹窗");
 <style scoped>
 /* 页面整体背景 */
 .page-wrapper {
-  background-color: #fff6fb;
+  background-color: #f6fbff;
   min-height: 100vh; /* 高度撑满视口 */
   padding: 40px 0;
   display: flex;
@@ -93,7 +93,7 @@ const openEdit = () => console.log("打开编辑弹窗");
 .profile-page {
   max-width: 1200px;
   width: 100%;
-  background-color: #fffefe85; /* 内容区白色 */
+  background-color: #fafdff85; /* 内容区白色 */
   border-radius: 16px;
   padding: 40px 20px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.06);

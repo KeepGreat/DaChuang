@@ -4,7 +4,6 @@ import FloatingAI from "@/components/FloatingAI.vue";
 
 <template>
   <router-view></router-view>
-   <FloatingAI />
 </template>
 
 <style scoped>

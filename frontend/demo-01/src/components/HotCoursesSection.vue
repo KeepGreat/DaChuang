@@ -34,7 +34,7 @@ function go(target) {
 
 <style scoped>
 .modules-preview { padding: 40px 6vw; background: #fffefe85; }
-.modules-preview h2 { color:#f464ac; font-size: 22px; font-weight: bold; margin-bottom: 6px; }
+.modules-preview h2 { color:#6488f4; font-size: 22px; font-weight: bold; margin-bottom: 6px; }
 
 .course-carousel { display:flex; align-items:center; width:100%; padding:0 4vw; position:relative; box-sizing:border-box; }
 
@@ -62,11 +62,11 @@ align-items: center;       /* 垂直居中 */
 
 .course-thumb:hover {
      transform: scale(1.07); 
-     box-shadow:0 6px 18px rgba(214,51,132,0.25); }
+     box-shadow:0 6px 18px rgba(51, 179, 214, 0.25); }
 
-.course-arrow { background: rgba(214, 51, 132, 0.18); border:none; color:#d63384; font-size:28px; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.25s ease; opacity:0.5; }
+.course-arrow { background: rgba(51, 162, 214, 0.18); border:none; color:#3e33d6; font-size:28px; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.25s ease; opacity:0.5; }
 .course-carousel:hover .course-arrow { opacity:1; }
-.course-arrow:hover { background: rgba(214,51,132,0.35); transform:scale(1.15); }
+.course-arrow:hover { background: rgba(51, 59, 214, 0.35); transform:scale(1.15); }
 .course-arrow.left { margin-right:12px; }
 .course-arrow.right { margin-left:12px; }
 </style>
