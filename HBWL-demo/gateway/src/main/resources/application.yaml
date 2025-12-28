@@ -14,7 +14,7 @@ spring:
             allowed-origin-patterns: '*'
             allowed-methods: '*'
             allowed-headers: '*'
-            allowed-origins: '*'
+            allow-credentials: true  # 重要：允许携带凭证
   profiles:
     include: route
   #数据库配置

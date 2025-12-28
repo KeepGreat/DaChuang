@@ -1,5 +1,6 @@
 package com.hbwl.ai;
 
+import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
@@ -21,7 +22,8 @@ public interface AITeacherService {
     Flux<String> teach(@V("question") String question,
                        @V("code") String code,
                        @V("codeLanguage") String codeLanguage,
-                       @V("input") String input);
+                       @V("input") String input,
+                       @MemoryId String userId);
 
     @SystemMessage(fromResource = "prompt/teacher-system-prompt-test.txt")
     @UserMessage("""
@@ -31,11 +33,13 @@ public interface AITeacherService {
             """)
     Flux<String> teach(@V("question") String question,
                        @V("code") String code,
-                       @V("codeLanguage") String codeLanguage);
+                       @V("codeLanguage") String codeLanguage,
+                       @MemoryId String userId);
 
     @SystemMessage(fromResource = "prompt/teacher-system-prompt-test.txt")
     @UserMessage("""
             老师你好，我在学习时遇到了如下问题: {{question}}
             """)
-    Flux<String> answerQuestion(@V("question") String question);
+    Flux<String> answerQuestion(@V("question") String question,
+                                @MemoryId String userId);
 }

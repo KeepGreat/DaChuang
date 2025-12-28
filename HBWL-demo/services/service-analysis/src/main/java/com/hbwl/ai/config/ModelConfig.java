@@ -59,14 +59,4 @@ public class ModelConfig {
                 .tools(aiCodeAnalyzerService, codeSandboxTool)
                 .build();
     }
-
-    @Bean
-    public AITeacherService aiTeacherService(ChatModel chatModel){
-        // 将 AITeacherService 用 AiServices 封装为一个 bean，供 controller 注入使用
-        return AiServices.builder(AITeacherService.class)
-                .chatModel(chatModel)
-                .build();
-    }
-
-    
 }

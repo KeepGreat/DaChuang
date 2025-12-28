@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//TODO: 前端在处理提交并判题编程题时，直接使用add方法增加userAnswer，导致调用judegecode时ai的comment写不进去
+
 @RestController
 @RequestMapping("/api/practice/useranswer")
 public class UserAnswerController {
@@ -68,7 +70,7 @@ public class UserAnswerController {
         userAnswer.setQuestionType(questionType);
         userAnswer.setScore(score);
         List<UserAnswer> list = userAnswerService.getUserAnswers(userAnswer);
-        if (list == null || list.isEmpty()) return Result.error("查询用户答案失败");
+//        if (list == null || list.isEmpty()) return Result.error("查询用户答案失败");
         return Result.success(list, "查询用户答案成功");
     }
 
@@ -86,7 +88,7 @@ public class UserAnswerController {
         userAnswer.setQuestionType(questionType);
         userAnswer.setScore(score);
         Page<UserAnswer> page = userAnswerService.getUserAnswersPage(pageNo, pageSize, userAnswer);
-        if (page == null || page.getSize() == 0) return Result.error("查询用户答案失败");
+//        if (page == null || page.getSize() == 0) return Result.error("查询用户答案失败");
         return Result.success(page, "查询用户答案成功");
     }
 

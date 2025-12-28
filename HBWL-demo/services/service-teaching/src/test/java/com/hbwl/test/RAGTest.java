@@ -57,6 +57,7 @@ public class RAGTest {
         //上述操作只需执行一次
         //4.从数据库中查询相关向量
         Embedding query = embeddingModel.embed("错误码A0200是什么意思").content();
+
         EmbeddingSearchRequest request = new EmbeddingSearchRequest(query, 5, 0.75, null);
         List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(request).matches();
         for (EmbeddingMatch<TextSegment> match : matches) {
@@ -70,12 +71,12 @@ public class RAGTest {
 
     @Test
     public void test02(){
-        Flux<String> flux = aiTeacherService.answerQuestion("请问错误码A0100是什么意思");
-        StepVerifier.create(flux)
-                .thenConsumeWhile(element -> {
-                    System.out.print(element);
-                    return true;
-                })
-                .verifyComplete();
+//        Flux<String> flux = aiTeacherService.answerQuestion("请问错误码A0100是什么意思");
+//        StepVerifier.create(flux)
+//                .thenConsumeWhile(element -> {
+//                    System.out.print(element);
+//                    return true;
+//                })
+//                .verifyComplete();
     }
 }

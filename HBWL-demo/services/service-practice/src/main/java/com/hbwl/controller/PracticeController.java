@@ -69,6 +69,7 @@ public class PracticeController {
                                @RequestParam(required = false) LocalDateTime createdAtEnd,
                                @RequestParam(required = false) LocalDateTime expiredAtStart,
                                @RequestParam(required = false) LocalDateTime expiredAtEnd){
+        System.out.println("接收到的参数：" + createdAtEnd);
         List<Practice> list = practiceService.getPractices(id, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd);
         if (list.isEmpty()) return Result.error("查询练习失败");
         return Result.success(list, "查询练习成功");

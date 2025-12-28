@@ -13,6 +13,6 @@ public interface EvaluationFeignClient {
     @PostMapping("/api/evaluation/evaluation/smartcompanion")
     Result evaluateBaseOnSmartCompanion(@RequestBody Map<String, Object> map);
 
-    @PostMapping("/teaching")
+    @PostMapping("/api/evaluation/evaluation/teaching")
     Result evaluateBaseOnAITeaching(@RequestBody Map<String, Object> map);
 }

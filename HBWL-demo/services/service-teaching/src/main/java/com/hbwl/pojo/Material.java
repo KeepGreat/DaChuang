@@ -13,7 +13,7 @@ public class Material {
 
     private String type;
     private String description;
-    private LocalDateTime createdTime;
-    private LocalDateTime updatedTime;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private Integer courseId;
 }

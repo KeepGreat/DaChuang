@@ -17,6 +17,7 @@ public class SmartCompanionController {
     public Result createSession(@RequestBody CreateSessionRequest createSessionRequest,
                                 @RequestHeader("userId") String userId,
                                 @RequestHeader("role") String role){
+        createSessionRequest.setSessionId(userId);
         SessionResponse response = smartCompanionService.createSession(createSessionRequest);
         return Result.success(response, null);
     }

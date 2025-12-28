@@ -38,7 +38,7 @@ public class MaterialServiceImpl implements MaterialService {
         updateWrapper.eq("id", material.getId());
         if (material.getType() != null) updateWrapper.set("type", material.getType());
         if (material.getDescription() != null) updateWrapper.set("description", material.getDescription());
-        if (material.getUpdatedTime() != null) updateWrapper.set("updated_at", material.getUpdatedTime());
+        if (material.getUpdatedAt() != null) updateWrapper.set("updated_at", material.getUpdatedAt());
         if (material.getCourseId() != null) updateWrapper.set("course_id", material.getCourseId());
         return materialMapper.update(null, updateWrapper);
     }
