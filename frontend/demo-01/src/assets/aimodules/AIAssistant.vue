@@ -57,7 +57,9 @@
       <div class="code-input-wrapper" v-show="showCodeInput">
         <CodeSandbox
           ref="codeSandboxRef"
-          :initialLanguage="selectedLanguage"
+          :initialLanguage="sandboxInitialLanguage"
+          :initialCode="sandboxInitialCode"
+          :initialInput="sandboxInitialInput"
           @codeChange="handleCodeChange"
         />
       </div>
@@ -123,6 +125,12 @@ const isLoading = ref(false);
 const codeSandboxRef = ref(null);
 const currentCode = ref('');
 const currentCodeLanguage = ref('cpp');
+const currentProgramInput = ref(''); // 添加程序输入状态
+
+// 添加用于控制CodeSandbox组件props的响应式变量
+const sandboxInitialLanguage = ref('cpp');
+const sandboxInitialCode = ref('');
+const sandboxInitialInput = ref('');
 
 // 计算属性
 const canSend = computed(() => {
@@ -133,131 +141,175 @@ const canSend = computed(() => {
 const handleCodeChange = (codeData) => {
   currentCode.value = codeData.code;
   currentCodeLanguage.value = codeData.language;
+  // 保存程序输入内容
+  if (codeData.input !== undefined) {
+    currentProgramInput.value = codeData.input;
+  }
 };
 
-// 切换代码输入框显示状态
+// 添加代码输入切换函数
 const toggleCodeInput = () => {
   showCodeInput.value = !showCodeInput.value;
+  // 当代码输入框显示时，确保props值正确传递
+  if (showCodeInput.value) {
+    nextTick(() => {
+      // 确保显示时的值正确
+      sandboxInitialLanguage.value = currentCodeLanguage.value;
+      sandboxInitialCode.value = currentCode.value;
+      sandboxInitialInput.value = currentProgramInput.value;
+    });
+  }
 };
 
 // 发送消息
-const sendMessage = async () => {
-  if (!canSend.value || isLoading.value) return;
-  
-  const question = inputQuestion.value.trim();
-  
-  // 创建用户消息
-  const userMessage = {
-    role: 'user',
-    question: question,
-    code: currentCode.value,
-    codeLanguage: currentCodeLanguage.value,
-    timestamp: new Date()
-  };
-  
-  // 创建AI响应占位符消息
-  const aiMessage = {
-    role: 'assistant',
-    response: '',
-    isStreaming: true,
-    timestamp: new Date()
-  };
-  
-  // 添加消息到列表
-  messages.value.push(userMessage, aiMessage);
-  
-  // 清空输入
-  inputQuestion.value = '';
-  if (showCodeInput.value && codeSandboxRef.value) {
-    codeSandboxRef.value.resetCode();
-    currentCode.value = '';
-  }
-  
-  // 滚动到底部
-  scrollToBottom();
-  
-  // 调用API
-  isLoading.value = true;
-  
-  try {
-    // 根据是否有代码选择不同的API
-    const endpoint = currentCode.value ? 'teach' : 'answer';
+  const sendMessage = async () => {
+    if (!canSend.value || isLoading.value) return;
     
-    // 构建请求参数，严格按照后端实体类设计
-    const teachingInput = currentCode.value ? {
+    const question = inputQuestion.value.trim();
+    
+    // 创建用户消息
+    const userMessage = {
+      role: 'user',
       question: question,
-      codeSandboxInput: {
-        codeLanguage: currentCodeLanguage.value,
-        code: currentCode.value,
-        input: '' // 输入内容暂时为空
-      }
-    } : {
-      question: question,
-      codeSandboxInput: null
+      code: currentCode.value,
+      codeLanguage: currentCodeLanguage.value,
+      codeInput: currentProgramInput.value, // 添加程序输入到用户消息中
+      timestamp: new Date()
     };
     
-    // 使用TeachingAPI.js中的函数调用接口
-    const response = endpoint === 'teach' ? 
-      await teach(teachingInput) : 
-      await answer(teachingInput);
+    // 创建AI响应占位符消息
+    const aiMessage = {
+      role: 'assistant',
+      response: '',
+      isStreaming: true,
+      timestamp: new Date()
+    };
     
-    // 获取响应数据
-    const responseData = response.data;
+    // 添加消息到列表
+    messages.value.push(userMessage, aiMessage);
     
-    // 检查是否支持流式处理
-    if (responseData && typeof responseData.getReader === 'function') {
-      // 支持流式处理的情况
-      const reader = responseData.getReader();
-      const decoder = new TextDecoder('utf-8');
+    // 清空输入
+    inputQuestion.value = '';
+    
+    // 滚动到底部
+    scrollToBottom();
+    
+    // 调用API
+    isLoading.value = true;
+    
+    try {
+      // 根据是否有代码选择不同的API
+      // 重要：在清空代码前进行判断
+      const endpoint = currentCode.value && currentCode.value.trim() ? 'teach' : 'answer';
       
-      // 处理流式响应
-      let accumulatedResponse = '';
+      // 构建请求参数，严格按照后端实体类设计
+      // 使用userMessage中的code和codeLanguage，避免重复定义临时变量
+      const teachingInput = userMessage.code ? {
+        question: question,
+        codeSandboxInput: {
+          codeLanguage: userMessage.codeLanguage,
+          code: userMessage.code,
+          input: userMessage.codeInput || '' // 使用用户输入的程序输入内容，默认为空
+        }
+      } : {
+        question: question,
+        codeSandboxInput: null
+      };
       
-      while (true) {
-        const { done, value } = await reader.read();
-        
-        if (done) {
-          // 流式传输完成
-          aiMessage.isStreaming = false;
-          break;
-        }
-        
-        try {
-          // 解码新的数据块
-          const chunk = decoder.decode(value, { stream: true });
-          accumulatedResponse += chunk;
-          
-          // 更新AI消息响应内容
-          aiMessage.response = accumulatedResponse;
-          
-          // 滚动到底部
-          scrollToBottom();
-        } catch (decodeError) {
-          console.error('流式数据解码错误:', decodeError);
-          // 继续处理下一个数据块
-          continue;
-        }
+      // 现在可以安全地清空代码状态，因为已经保存了需要的值
+      // 移除条件判断，确保代码总是被清空
+      // 重置本地代码状态
+      currentCode.value = '';
+      currentProgramInput.value = ''; // 重置程序输入
+      // 重置语言为默认值
+      currentCodeLanguage.value = 'cpp';
+      
+      // 使用CodeSandbox组件暴露的reset方法清空内容
+      // 这是最直接有效的方法，可以确保组件内部状态正确重置
+      if (codeSandboxRef.value) {
+        // 使用nextTick确保DOM更新完成后再调用reset方法
+        nextTick(() => {
+          codeSandboxRef.value.reset('cpp', '', '');
+        });
       }
-    } else {
-      // 不支持流式处理，直接获取完整数据
-      // 假设responseData是完整的响应内容字符串
-      const fullResponse = typeof responseData === 'string' ? responseData : JSON.stringify(responseData);
-      aiMessage.response = fullResponse;
+      
+      // 不再需要通过props更新和highlightCode方法调用
+      // 使用组件自己的reset方法即可处理所有逻辑
+      // 通过更新props控制CodeSandbox组件重置（保留作为备选方案）
+      sandboxInitialLanguage.value = 'cpp';
+      sandboxInitialCode.value = '';
+      sandboxInitialInput.value = '';
+      
+      // 移除多余的nextTick函数块
+      // 因为我们已经在调用reset方法时使用了nextTick
+      // 使用nextTick确保DOM更新完成
+      // nextTick(() => {
+      //   // 不需要调用highlightCode方法
+      //   // CodeSandbox组件内部的watch会自动处理高亮更新
+      // });
+      
+      // 使用TeachingAPI.js中的函数调用接口
+      const response = endpoint === 'teach' ? 
+        await teach(teachingInput) : 
+        await answer(teachingInput);
+      
+      // 获取响应数据
+      const responseData = response.data;
+      
+      // 检查是否支持流式处理
+      if (responseData && typeof responseData.getReader === 'function') {
+        // 支持流式处理的情况
+        const reader = responseData.getReader();
+        const decoder = new TextDecoder('utf-8');
+        
+        // 处理流式响应
+        let accumulatedResponse = '';
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) {
+            // 流式传输完成
+            aiMessage.isStreaming = false;
+            break;
+          }
+          
+          try {
+            // 解码新的数据块
+            const chunk = decoder.decode(value, { stream: true });
+            accumulatedResponse += chunk;
+            
+            // 更新AI消息响应内容
+            aiMessage.response = accumulatedResponse;
+            
+            // 滚动到底部
+            scrollToBottom();
+          } catch (decodeError) {
+            console.error('流式数据解码错误:', decodeError);
+            // 继续处理下一个数据块
+            continue;
+          }
+        }
+      } else {
+        // 不支持流式处理，直接获取完整数据
+        // 假设responseData是完整的响应内容字符串
+        const fullResponse = typeof responseData === 'string' ? responseData : JSON.stringify(responseData);
+        aiMessage.response = fullResponse;
+        aiMessage.isStreaming = false;
+        scrollToBottom();
+      }
+      
+    } catch (error) {
+      console.error('发送消息错误:', error);
       aiMessage.isStreaming = false;
+      // 显示错误信息
+      aiMessage.response = `抱歉，处理您的请求时出错：${error.message || '未知错误'}`;
+    } finally {
+      isLoading.value = false;
+      // 最终滚动到底部
       scrollToBottom();
     }
-    
-  } catch (error) {
-    console.error('发送消息错误:', error);
-    aiMessage.isStreaming = false;
-    // 显示错误信息
-    aiMessage.response = `抱歉，处理您的请求时出错：${error.message || '未知错误'}`;
-  } finally {
-    isLoading.value = false;
-    // 最终滚动到底部
-    scrollToBottom();
-  }
-};
+  };
 
 // 滚动到底部
 const scrollToBottom = () => {

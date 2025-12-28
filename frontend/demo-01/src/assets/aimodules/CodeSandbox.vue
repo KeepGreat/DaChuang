@@ -248,6 +248,19 @@ onMounted(() => {
     });
   }
 });
+
+// 暴露reset方法给父组件使用
+defineExpose({
+  // 重置代码编辑器内容
+  reset(language = 'cpp', code = '', input = '') {
+    selectedLanguage.value = language;
+    codeContent.value = code || getDefaultCode(language);
+    programInput.value = input || '';
+    nextTick(() => {
+      highlightCode();
+    });
+  }
+});
 </script>
 
 <style scoped>
@@ -283,6 +296,7 @@ onMounted(() => {
   height: 300px;
   border: 1px solid #e8e8e8;
   border-radius: 4px;
+  font-size: 0.875rem; /* 使用相对单位 */
 }
 
 /* 代码显示区域 */
@@ -295,7 +309,7 @@ onMounted(() => {
   margin: 0;
   padding: 12px;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
+  font-size: inherit; /* 继承父容器字体大小 */
   line-height: 1.5;
   font-weight: normal;
   letter-spacing: 0;
@@ -313,7 +327,7 @@ onMounted(() => {
 /* 确保code元素也使用相同的字体设置 */
 .code-editor code {
   font-family: inherit;
-  font-size: inherit;
+  font-size: inherit; /* 继承父容器字体大小 */
   line-height: inherit;
   font-weight: inherit;
   letter-spacing: inherit;
@@ -336,7 +350,7 @@ onMounted(() => {
   margin: 0;
   padding: 12px;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
+  font-size: inherit; /* 继承父容器字体大小 */
   line-height: 1.5;
   font-weight: normal;
   letter-spacing: 0;
@@ -372,7 +386,7 @@ onMounted(() => {
   height: 100px;
   padding: 12px;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
+  font-size: inherit; /* 继承父容器字体大小 */
   line-height: 1.5;
   border: 1px solid #e8e8e8;
   border-radius: 4px;
@@ -384,10 +398,71 @@ onMounted(() => {
   border-color: #409eff;
 }
 
-/* 响应式设计 */
+/* 响应式设计 - 针对侧边栏场景优化 */
+@media (max-width: 1200px) {
+  .code-sandbox {
+    padding: 15px;
+  }
+  
+  .code-editor-wrapper {
+    height: 250px;
+    font-size: 0.8125rem; /* 进一步缩小字体 */
+  }
+  
+  .header-title {
+    font-size: 14px;
+  }
+  
+  .language-select {
+    width: 100px;
+  }
+}
+
 @media (max-width: 768px) {
   .code-editor-wrapper {
     height: 200px;
+    font-size: 0.75rem; /* 最小字体大小 */
   }
+  
+  .text-input {
+    height: 80px;
+  }
+}
+
+/* 针对侧边栏集成的特殊样式调整 */
+/* 确保highlight.js生成的代码完全遵循指定字体大小，不使用额外的样式 */
+:deep(.hljs) {
+  font-size: 100% !important; /* 强制使用100%的父容器字体大小 */
+  line-height: inherit !important;
+  font-family: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  word-spacing: inherit !important;
+  padding: 0 !important; /* 移除highlight.js默认的内边距 */
+  margin: 0 !important; /* 移除highlight.js默认的外边距 */
+  background: transparent !important; /* 使用透明背景 */
+}
+
+/* 防止字体大小溢出容器 */
+.code-editor-wrapper {
+  overflow: hidden;
+}
+
+.code-editor, .code-input {
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 确保所有高亮元素都遵循相同的字体设置 */
+:deep(.hljs *),
+:deep(.hljs span),
+:deep(.hljs strong),
+:deep(.hljs em),
+:deep(.hljs code),
+:deep(.hljs pre) {
+  font-size: 100% !important;
+  line-height: inherit !important;
+  font-family: inherit !important;
+  font-weight: inherit !important;
 }
 </style>
