@@ -8,7 +8,6 @@ import com.hbwl.analysis.pojo.AnalysisInput;
 import com.hbwl.analysis.pojo.AnalysisOutput;
 import com.hbwl.codesandbox.pojo.CodeSandboxInput;
 import com.hbwl.codesandbox.pojo.CodeSandboxOutput;
-import com.hbwl.common.Result;
 import com.hbwl.feign.AnalysisFeignClient;
 import com.hbwl.feign.CodeSandboxFeignClient;
 import com.hbwl.feign.EvaluationFeignClient;
@@ -23,6 +22,7 @@ import com.hbwl.pojo.UserAnswer;
 import com.hbwl.pojo.dto.UserAnswerOutputDTO;
 import com.hbwl.service.UserAnswerService;
 import com.hbwl.utils.QuestionResourceUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -39,6 +39,7 @@ import java.util.Map;
 
 @Service
 @Transactional
+@Slf4j
 public class UserAnswerServiceImpl implements UserAnswerService {
 
     @Autowired
@@ -71,6 +72,12 @@ public class UserAnswerServiceImpl implements UserAnswerService {
                 userAnswer.getContent() == null || userAnswer.getContent().trim().isEmpty() ||
                 userAnswer.getUserId() == null || userAnswer.getUserId().trim().isEmpty() ||
                 userAnswer.getQuestionId() == null) return -1;
+        //如果userId+questionId在数据库中已存在则直接update
+        QueryWrapper<UserAnswer> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userAnswer.getUserId());
+        queryWrapper.eq("question_id", userAnswer.getQuestionId());
+        List<UserAnswer> list = userAnswerMapper.selectList(queryWrapper);
+        if (!list.isEmpty()) updateUserAnswerById(userAnswer);
         return userAnswerMapper.insert(userAnswer);
     }
 
@@ -187,9 +194,11 @@ public class UserAnswerServiceImpl implements UserAnswerService {
             AnalysisOutput analysisOutput = analysisFeignClient.analyze(analysisInput);
             userAnswer.setComment(analysisOutput.getAnalysis());
             //将分析结果同步到评估模块
+            log.info("将代码判题的结果同步给评估模块");
             Map<String, String> score = new HashMap<>();
             score.put("userId", userAnswer.getUserId());
-            score.put("score", JSONUtil.toJsonStr(analysisOutput.getScore()));
+            score.put("json", JSONUtil.toJsonStr(analysisOutput.getScore()));
+            log.info("同步的信息：{}", score);
             evaluationFeignClient.evaluateBaseOnPractice(score);
             //代码运行错误
             if (!codeSandboxOutput.getStatus().equals("Accepted")){

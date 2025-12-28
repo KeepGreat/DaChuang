@@ -100,16 +100,10 @@ public class PracticeServiceImpl implements PracticeService {
         if (id == null && createdAtStart == null && createdAtEnd == null && expiredAtStart == null && expiredAtEnd == null) return practiceMapper.selectList(null);
         QueryWrapper<Practice> queryWrapper = new QueryWrapper<>();
         if (id != null) queryWrapper.eq("id", id);
-        if (createdAtStart != null && createdAtEnd != null) queryWrapper.between("created_at", createdAtStart, createdAtEnd);
-        else {
-            if (createdAtStart != null) queryWrapper.ge("created_at", createdAtStart);
-            if (createdAtEnd != null) queryWrapper.le("created_at", createdAtEnd);
-        }
-        if (expiredAtStart != null && expiredAtEnd != null) queryWrapper.between("expired_at", expiredAtStart, expiredAtEnd);
-        else {
-            if (expiredAtStart != null) queryWrapper.ge("expired_at", expiredAtStart);
-            if (expiredAtEnd != null) queryWrapper.le("expired_at", expiredAtEnd);
-        }
+        if (createdAtStart != null) queryWrapper.ge("created_at", createdAtStart);
+        if (createdAtEnd != null) queryWrapper.le("created_at", createdAtEnd);
+        if (expiredAtStart != null) queryWrapper.ge("expired_at", expiredAtStart);
+        if (expiredAtEnd != null) queryWrapper.le("expired_at", expiredAtEnd);
         return practiceMapper.selectList(queryWrapper);
     }
 
@@ -120,16 +114,10 @@ public class PracticeServiceImpl implements PracticeService {
         if (id == null && createdAtStart == null && createdAtEnd == null && expiredAtStart == null && expiredAtEnd == null) return practiceMapper.selectPage(page, null);
         QueryWrapper<Practice> queryWrapper = new QueryWrapper<>();
         if (id != null) queryWrapper.eq("id", id);
-        if (createdAtStart != null && createdAtEnd != null) queryWrapper.between("created_at", createdAtStart, createdAtEnd);
-        else {
-            if (createdAtStart != null) queryWrapper.ge("created_at", createdAtStart);
-            if (createdAtEnd != null) queryWrapper.le("created_at", createdAtEnd);
-        }
-        if (expiredAtStart != null && expiredAtEnd != null) queryWrapper.between("expired_at", expiredAtStart, expiredAtEnd);
-        else {
-            if (expiredAtStart != null) queryWrapper.ge("expired_at", expiredAtStart);
-            if (expiredAtEnd != null) queryWrapper.le("expired_at", expiredAtEnd);
-        }
+        if (createdAtStart != null) queryWrapper.ge("created_at", createdAtStart);
+        if (createdAtEnd != null) queryWrapper.le("created_at", createdAtEnd);
+        if (expiredAtStart != null) queryWrapper.ge("expired_at", expiredAtStart);
+        if (expiredAtEnd != null) queryWrapper.le("expired_at", expiredAtEnd);
         return practiceMapper.selectPage(page, queryWrapper);
     }
 

@@ -9,7 +9,7 @@ const request = axios.create({
   // baseURL: "http://localhost:5173",
   // 后端接口地址
   // baseURL: "http://192.168.42.88:80",
-  timeout: 50000,
+  timeout: 60000,
 });
 
 // 请求拦截器

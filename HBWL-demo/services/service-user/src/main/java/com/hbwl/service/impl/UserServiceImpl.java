@@ -3,6 +3,8 @@ package com.hbwl.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hbwl.common.Result;
+import com.hbwl.feign.UserScoreFeignClient;
 import com.hbwl.mapper.UserMapper;
 import com.hbwl.pojo.User;
 import com.hbwl.service.UserService;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -22,13 +25,19 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private UserScoreFeignClient userScoreFeignClient;
+
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public int addUser(User user) {
         if (user == null || user.getUsername() == null || user.getPassword() == null) return -1;
-        user.setId(UUID.randomUUID().toString());
+        String userId = UUID.randomUUID().toString();
+        user.setId(userId);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        Result result = userScoreFeignClient.addUserScore(Map.of("userId", userId));
+        if (result.getCode() != 200) return 0;
         System.out.println("插入数据: " + user );
         return userMapper.insert(user);
     }

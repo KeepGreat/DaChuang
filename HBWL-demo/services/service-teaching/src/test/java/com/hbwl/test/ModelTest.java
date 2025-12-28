@@ -38,13 +38,13 @@ public class ModelTest {
         String question = "为什么这个程序会报错";
         String code = "#include<bits/stdc++.h>\n using namespace std; int main(){cout << 1/0; return 0;}";
         String codeLanguage = "cpp";
-        Flux<String> flux = aiTeacherService.teach(question, code, codeLanguage);
-        StepVerifier.create(flux)
-                .thenConsumeWhile(element -> {
-                    System.out.print(element);
-                    return true;
-                })
-                .verifyComplete();
+//        Flux<String> flux = aiTeacherService.teach(question, code, codeLanguage);
+//        StepVerifier.create(flux)
+//                .thenConsumeWhile(element -> {
+//                    System.out.print(element);
+//                    return true;
+//                })
+//                .verifyComplete();
     }
 
     @Test

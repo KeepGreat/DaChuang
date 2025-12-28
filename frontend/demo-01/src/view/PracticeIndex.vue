@@ -303,7 +303,7 @@ const fetchPractices = async () => {
     }
 
     // 步骤3: 获取所有可用的练习数据
-    const currentTime = new Date().toISOString();
+    const currentTime = new Date().toISOString().split('.')[0];
     const response = await getPractices({
       createdAtEnd: currentTime // 获取创建日期在当前时间之前的练习
     });
