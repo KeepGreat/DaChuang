@@ -122,9 +122,9 @@
                   <span class="question-type">{{ getQuestionTypeLabel(q) }}</span>
                   <span class="question-number">第 {{ index + 1 }} 题</span>
                 </div>
-                <div class="question-status" v-if="q.status">
-                  <el-tag :type="getStatusType(q.status)">{{
-                    getStatusText(q.status)
+                <div class="question-status" v-if="getCalculatedQuestionStatus(q)">
+                  <el-tag :type="getStatusType(getCalculatedQuestionStatus(q))">{{
+                    getStatusText(getCalculatedQuestionStatus(q))
                   }}</el-tag>
                 </div>
               </div>
@@ -205,16 +205,34 @@
 
       <!-- 操作按钮区域 -->
       <div class="question-actions">
-        <el-button v-if="singleQuestionMode || isProgrammingQuestion" @click="previousQuestion">上一题</el-button>
+        <el-button
+          v-if="singleQuestionMode || isProgrammingQuestion"
+          @click="previousQuestion"
+          >上一题</el-button
+        >
 
         <div class="right-buttons">
-          <el-button type="info" @click="toggleCorrectness">
-            {{ showCorrectness ? "隐藏答案" : "查看答案" }}
-          </el-button>
+          <el-tooltip
+            v-if="!isProgrammingQuestion"
+            :content="getTooltipContent()"
+            placement="top"
+            :disabled="allQuestionsSubmitted || showCorrectness"
+          >
+            <el-button
+              type="info"
+              @click="toggleCorrectness"
+              :disabled="!allQuestionsSubmitted && !showCorrectness"
+            >
+              {{ showCorrectness ? "隐藏答案" : "查看答案" }}
+            </el-button>
+          </el-tooltip>
           <el-button type="primary" @click="submitAnswer" :disabled="showCorrectness">
             提交答案
           </el-button>
-          <el-button v-if="singleQuestionMode || isProgrammingQuestion" type="success" @click="nextQuestion"
+          <el-button
+            v-if="singleQuestionMode || isProgrammingQuestion"
+            type="success"
+            @click="nextQuestion"
             >下一题</el-button
           >
         </div>
@@ -351,9 +369,9 @@ const isShortAnswerQuestion = (q) => {
   return q.type === 2; // 2:简答题
 };
 
-// 辅助函数：判断是否应显示选项正确性
+// 辅助函数：判断是否应显示选项正确性（只在显示答案时才显示颜色）
 const shouldShowOptionCorrectness = (q) => {
-  return props.showCorrectness || q.status === "correct" || q.status === "incorrect";
+  return props.showCorrectness;
 };
 
 // 选项状态判断函数
@@ -369,24 +387,48 @@ const getOptionClasses = (value, q, questionId = q.id) => {
 
 // 判断选项是否被选中
 const isOptionSelected = (value, questionId) => {
-  return getUserAnswer(questionId).includes(value);
+  const userAnswer = getUserAnswer(questionId);
+  return Array.isArray(userAnswer) ? userAnswer.includes(value) : userAnswer === value;
 };
 
 // 判断选项是否正确
 const isOptionCorrect = (value, q) => {
-  const answer = Array.isArray(q.answer) ? q.answer : [q.answer];
-  return answer.includes(value);
+  // 只使用标准答案
+  const standardAnswers = answerStore.getAnswersByQuestionId(q.id);
+  if (standardAnswers && standardAnswers.length > 0) {
+    const correctAnswer = standardAnswers[0];
+    const answerArray = Array.isArray(correctAnswer.content)
+      ? correctAnswer.content
+      : correctAnswer.content.split(",").map((item) => item.trim());
+
+    // 进行大小写不敏感的比较
+    const normalizedValue = value.toString().toLowerCase().trim();
+    const normalizedCorrectAnswers = answerArray.map((answer) =>
+      answer.toString().toLowerCase().trim()
+    );
+
+    const isCorrect = normalizedCorrectAnswers.includes(normalizedValue);
+
+    return isCorrect;
+  }
+  // 如果没有标准答案，返回false
+  console.error("No standard answer found for question ID:", q.id);
+  return false;
 };
 
 // 判断选项是否错误（选中但不正确）
 const isOptionIncorrect = (value, q, questionId) => {
+  // 只有用户选择的选项才可能是错误的
   return isOptionSelected(value, questionId) && !isOptionCorrect(value, q);
 };
 
 // 判断选项是否被遗漏（正确但未选中，仅多选题）
 const isOptionMissed = (value, q, questionId) => {
+  // 只有多选题才有遗漏概念，且必须是正确答案但用户没有选择的
   return (
-    !isSingleType(q) && !isOptionSelected(value, questionId) && isOptionCorrect(value, q)
+    !isSingleType(q) && // 不是单选题/判断题
+    !isOptionSelected(value, questionId) && // 用户没有选择
+    isOptionCorrect(value, q) // 但是这是正确答案
   );
 };
 
@@ -436,6 +478,11 @@ const handleOptionSelection = (value, questionId = props.question?.id) => {
 
   // 更新答案
   updateUserAnswer(questionId, currentAnswer);
+
+  // 重置题目状态为null，表示有未提交的更改
+  if (targetQuestion.status === "answered") {
+    targetQuestion.status = null;
+  }
 };
 
 // 统一的答案提交处理
@@ -539,6 +586,80 @@ const getQuestionStandardAnswer = (questionId) => {
   return answers && answers.length > 0 ? answers[0] : null;
 };
 
+// 根据最新判题结果动态计算题目状态
+const getCalculatedQuestionStatus = (q) => {
+  // 只有在显示答案时，才显示判题结果（correct/incorrect）
+  if (props.showCorrectness && (q.status === "correct" || q.status === "incorrect")) {
+    return q.status;
+  }
+
+  // 如果用户已回答，显示已作答
+  if (userAnswerStore.isQuestionAnswered(q.id)) {
+    return "answered";
+  }
+
+  // 其他情况不显示状态
+  return null;
+};
+
+// 检查单个题目是否已提交
+const isQuestionSubmitted = (question) => {
+  if (!question) return true; // 没有题目时认为已提交
+
+  // 编程题：必须已提交评测（status不为null）才算完成
+  if (question.type === 3) {
+    return question.status !== null;
+  }
+
+  // 其他题型（判断题、选择题、简答题）：有答案内容就算完成
+
+  // 检查用户是否有答案
+  const userAnswer = getUserAnswer(question.id);
+  const hasUserAnswer =
+    userAnswer &&
+    (Array.isArray(userAnswer)
+      ? userAnswer.length > 0
+      : userAnswer.toString().trim() !== "");
+
+  // 如果用户没有答案，则认为未提交（需要用户至少选择或填写一个答案）
+  if (!hasUserAnswer) {
+    return false;
+  }
+
+  // 如果用户有答案但状态为null，则认为未提交
+  if (question.status === null) {
+    return false;
+  }
+
+  // 只有当用户有答案且状态为已提交状态时，才认为已提交
+  return (
+    question.status === "answered" ||
+    question.status === "correct" ||
+    question.status === "incorrect"
+  );
+};
+// 计算所有题目是否都已提交
+const allQuestionsSubmitted = computed(() => {
+  if (props.singleQuestionMode) {
+    // 单题模式：检查当前题目是否已提交
+    return isQuestionSubmitted(props.question);
+  } else {
+    // 多题模式：检查所有题目是否都已提交
+    return props.sameTypeQuestions.every((q) => isQuestionSubmitted(q));
+  }
+});
+
+// 获取未提交题目的数量
+const unsubmittedCount = computed(() => {
+  if (props.singleQuestionMode) {
+    // 单题模式：检查当前题目
+    return isQuestionSubmitted(props.question) ? 0 : 1;
+  } else {
+    // 多题模式：统计未提交的题目数量
+    return props.sameTypeQuestions.filter((q) => !isQuestionSubmitted(q)).length;
+  }
+});
+
 // 事件处理
 // 处理编程题答案提交
 const handleProgrammingAnswerSubmitted = (result) => {
@@ -556,6 +677,27 @@ const toggleCorrectness = () => {
   emit("set-show-correctness");
 };
 
+// 获取提示文本内容
+const getTooltipContent = () => {
+  if (props.showCorrectness) {
+    return ""; // 已经显示答案时不需要提示
+  }
+
+  if (props.singleQuestionMode) {
+    // 单题模式
+    if (unsubmittedCount.value > 0) {
+      return "请先提交当前题目的答案";
+    }
+  } else {
+    // 多题模式
+    if (unsubmittedCount.value > 0) {
+      return `还有${unsubmittedCount.value}道题目未提交答案，请先提交所有题目答案`;
+    }
+  }
+
+  return "";
+};
+
 // 导航控制
 const previousQuestion = () => {
   emit("previous");
@@ -570,7 +712,7 @@ const nextQuestion = () => {
 .question-display {
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--bg-white);
   border-radius: 8px;
   padding: 24px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -584,7 +726,7 @@ const nextQuestion = () => {
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--border-primary-lighter);
 }
 
 .question-info {
@@ -594,8 +736,8 @@ const nextQuestion = () => {
 }
 
 .question-type {
-  background: #ecf5ff;
-  color: #409eff;
+  background: var(--primary-alpha-10);
+  color: var(--primary);
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 12px;
@@ -604,7 +746,7 @@ const nextQuestion = () => {
 
 .question-number {
   font-size: 14px;
-  color: #606266;
+  color: var(--text-regular);
 }
 
 .question-content {
@@ -616,13 +758,13 @@ const nextQuestion = () => {
 .question-title {
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-primary);
   margin-bottom: 12px;
 }
 
 .question-body {
   font-size: 16px;
-  color: #606266;
+  color: var(--text-regular);
   line-height: 1.6;
   margin-top: 24px;
 }
@@ -639,36 +781,36 @@ const nextQuestion = () => {
   display: flex;
   align-items: flex-start;
   padding: 16px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--border-light);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #fff;
+  background: var(--bg-white);
 }
 
 .option-item:hover {
-  border-color: #409eff;
+  border-color: var(--primary);
   box-shadow: 0 2px 8px rgba(64, 158, 255, 0.15);
 }
 
 .option-item.selected {
-  border-color: #409eff;
-  background: #ecf5ff;
+  border-color: var(--primary);
+  background: var(--primary-alpha-10);
 }
 
 .option-item.correct {
-  border-color: #67c23a;
-  background: #f0f9eb;
+  border-color: var(--success);
+  background: var(--success-alpha-10);
 }
 
 .option-item.incorrect {
-  border-color: #f56c6c;
-  background: #fef0f0;
+  border-color: var(--danger);
+  background: var(--danger-alpha-10);
 }
 
 .option-item.missed {
-  border-color: #e6a23c;
-  background: #fdf6ec;
+  border-color: var(--warning);
+  background: var(--warning-alpha-10);
   opacity: 0.8;
 }
 
@@ -678,33 +820,33 @@ const nextQuestion = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
+  background: var(--bg-primary-lighter);
   border-radius: 50%;
   font-weight: 600;
-  color: #606266;
+  color: var(--text-regular);
   margin-right: 12px;
   flex-shrink: 0;
 }
 
 .option-item.selected .option-label {
-  background: #409eff;
-  color: #fff;
+  background: var(--primary);
+  color: var(--bg-white);
 }
 
 .option-item.correct .option-label {
-  background: #67c23a;
-  color: #fff;
+  background: var(--success);
+  color: var(--bg-white);
 }
 
 .option-item.incorrect .option-label {
-  background: #f56c6c;
-  color: #fff;
+  background: var(--danger);
+  color: var(--bg-white);
 }
 
 .option-content {
   flex: 1;
   font-size: 15px;
-  color: #606266;
+  color: var(--text-regular);
   line-height: 1.5;
 }
 
@@ -723,21 +865,21 @@ const nextQuestion = () => {
 .correct-answer {
   margin-top: 20px;
   padding: 16px;
-  background: #f0f9eb;
-  border: 1px solid #e1f3d8;
+  background: var(--success-alpha-10);
+  border: 1px solid var(--success-alpha-20);
   border-radius: 6px;
 }
 
 .correct-answer h4 {
   margin: 0 0 12px 0;
-  color: #67c23a;
+  color: var(--success);
   font-size: 16px;
   font-weight: 600;
 }
 
 .answer-content {
   font-size: 15px;
-  color: #606266;
+  color: var(--text-regular);
   line-height: 1.6;
 }
 
@@ -745,19 +887,19 @@ const nextQuestion = () => {
 .answer-analysis {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e1f3d8;
+  border-top: 1px solid var(--success-alpha-20);
 }
 
 .answer-analysis h4 {
   margin: 0 0 12px 0;
-  color: #409eff;
+  color: var(--primary);
   font-size: 16px;
   font-weight: 600;
 }
 
 .analysis-content {
   font-size: 15px;
-  color: #606266;
+  color: var(--text-regular);
   line-height: 1.6;
 }
 
@@ -782,7 +924,7 @@ const nextQuestion = () => {
   align-items: center;
   margin-top: auto;
   padding-top: 24px;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid var(--border-primary-lighter);
   flex-shrink: 0;
 }
 
@@ -819,17 +961,17 @@ const nextQuestion = () => {
 }
 
 .single-question-wrapper::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--bg-primary-lighter);
   border-radius: 3px;
 }
 
 .single-question-wrapper::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--border-base);
   border-radius: 3px;
 }
 
 .single-question-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--border-light);
 }
 
 /* 单题模式滚动条样式 */
@@ -857,17 +999,17 @@ const nextQuestion = () => {
 }
 
 .all-questions-wrapper::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--bg-primary-lighter);
   border-radius: 3px;
 }
 
 .all-questions-wrapper::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--border-base);
   border-radius: 3px;
 }
 
 .all-questions-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--border-light);
 }
 
 .single-question-container {

@@ -19,5 +19,5 @@ function go(target) {
 
 <style scoped>
 .footer { margin-top:auto; padding:28px 6vw; display:flex; justify-content:space-between; align-items:center; color:#8b6a76; }
-.footer a { color:#d63384; cursor:pointer; }
+.footer a { color:#336cd6; cursor:pointer; }
 </style>

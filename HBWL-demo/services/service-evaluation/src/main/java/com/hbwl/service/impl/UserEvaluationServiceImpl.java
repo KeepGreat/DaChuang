@@ -7,6 +7,7 @@ import com.hbwl.pojo.UserScore;
 import com.hbwl.service.UserEvaluationService;
 import com.hbwl.utils.TestScoreUtil;
 import com.hbwl.utils.UserEvaluationUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @Service
 @Transactional
+@Slf4j
 public class UserEvaluationServiceImpl implements UserEvaluationService {
 
     @Autowired
@@ -28,6 +30,7 @@ public class UserEvaluationServiceImpl implements UserEvaluationService {
 
     @Override
     public UserEvaluation evaluateBaseOnPractice(String userId, String json) {
+        log.info("收到了评估练习部分的请求，开始进行多维度评估，收到的参数：\n{}\n{}", userId, json);
         QueryWrapper<UserScore> wrapper = new QueryWrapper<>();
         wrapper.eq("user_id", userId);
         UserScore userScore = userScoreMapper.selectOne(wrapper);
@@ -72,8 +75,10 @@ public class UserEvaluationServiceImpl implements UserEvaluationService {
     @Override
     public UserEvaluation evaluateBaseOnSmartCompanion(Map<String, Object> map) {
         String userId = (String) map.get("userId");
-        Float expressionScore = (Float) map.get("ExpressionScore");
-        Float conversionEfficiencyScore = (Float) map.get("ConversionEfficiencyScore");
+        Number expressionScoreNumber = (Number) map.get("expressionScore");
+        Float expressionScore = expressionScoreNumber.floatValue();
+        Number conversionEfficiencyScoreNumber = (Number) map.get("conversionEfficiencyScore");
+        Float conversionEfficiencyScore = conversionEfficiencyScoreNumber.floatValue();
 
         //从数据库中拿到对应的评分数据
         QueryWrapper<UserScore> wrapper = new QueryWrapper<>();

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@CrossOrigin
 public class JwtAuthController {
 
     @Autowired
@@ -60,7 +62,8 @@ public class JwtAuthController {
 
     //刷新token
     @PostMapping("/refreshtoken")
-    public Mono<ResponseEntity<Result>> refreshToken(@RequestBody String oldToken){
+    public Mono<ResponseEntity<Result>> refreshToken(@RequestBody Map<String, String> map){
+        String oldToken = map.get("oldToken");
         String usernameFromToken = jwtTokenUtil.getUsernameFromToken(oldToken);
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", usernameFromToken);
@@ -77,11 +80,16 @@ public class JwtAuthController {
 
     //获取用户权限role
     @PostMapping("/identify")
-    public Mono<ResponseEntity<Result>> identify(@RequestBody String token){
+    public Mono<ResponseEntity<Result>> identify(@RequestBody Map<String, String> map){
+        String token = map.get("token");
         if (token == null || token.isEmpty()){
             return buildFailureResponse("参数不能为空");
         }
+//        System.out.println("------------------------------");
+//        System.out.println("传入的token:" + token);
         String usernameFromToken = jwtTokenUtil.getUsernameFromToken(token);
+//        System.out.println("usernameFromToken = " + usernameFromToken);
+//        System.out.println("------------------------------");
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", usernameFromToken);
         User user = userMapper.selectOne(queryWrapper);
@@ -94,7 +102,8 @@ public class JwtAuthController {
 
     //获取用户id
     @PostMapping("/identity")
-    public Mono<ResponseEntity<Result>> identity(@RequestBody String token){
+    public Mono<ResponseEntity<Result>> identity(@RequestBody Map<String, String> map){
+        String token = map.get("token");
         if (token == null || token.isEmpty()){
             return buildFailureResponse("参数不能为空");
         }

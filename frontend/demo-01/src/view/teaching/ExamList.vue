@@ -39,7 +39,7 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-content">
-              <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2)">
+              <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
                 <el-icon size="24"><Document /></el-icon>
               </div>
               <div class="stat-info">
@@ -52,7 +52,7 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-content">
-              <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c)">
+              <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary-light), var(--primary))">
                 <el-icon size="24"><Clock /></el-icon>
               </div>
               <div class="stat-info">
@@ -277,7 +277,7 @@ onMounted(() => {
 
 .list-header h2 {
   margin: 0;
-  color: #2c3e50;
+  color: var(--primary-dark);
   font-size: 24px;
 }
 
@@ -292,7 +292,7 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 20px;
   padding: 15px;
-  background: #f5f7fa;
+  background: var(--bg-light);
   border-radius: 8px;
 }
 
@@ -337,13 +337,13 @@ onMounted(() => {
 .stat-info h3 {
   margin: 0 0 5px 0;
   font-size: 24px;
-  color: #303133;
+  color: var(--primary-dark);
 }
 
 .stat-info p {
   margin: 0;
   font-size: 14px;
-  color: #909399;
+  color: var(--text-regular);
 }
 
 .exam-content {
@@ -366,15 +366,16 @@ onMounted(() => {
 .exam-card {
   padding: 20px;
   background: #fff;
-  border: 1px solid #e4e7ed;
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .exam-card:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px var(--primary-alpha-10);
   transform: translateY(-2px);
+  border-color: var(--primary-lighter);
 }
 
 .card-header {
@@ -391,12 +392,12 @@ onMounted(() => {
 .exam-title {
   margin: 0 0 10px 0;
   font-size: 18px;
-  color: #303133;
+  color: var(--primary-dark);
   font-weight: 600;
 }
 
 .exam-desc {
-  color: #606266;
+  color: var(--text-regular);
   font-size: 14px;
   line-height: 1.6;
   margin: 0 0 15px 0;
@@ -415,12 +416,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #909399;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
 .card-footer {
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--border-light);
   padding-top: 15px;
   display: flex;
   justify-content: space-between;
@@ -435,12 +436,12 @@ onMounted(() => {
 
 .time-label {
   font-size: 12px;
-  color: #909399;
+  color: var(--text-secondary);
 }
 
 .time-value {
   font-size: 13px;
-  color: #606266;
+  color: var(--text-regular);
 }
 
 .pagination-wrapper {

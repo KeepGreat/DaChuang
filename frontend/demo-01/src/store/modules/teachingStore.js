@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { getCourses } from "@/api/modules/teaching/CourseAPI";
 import { getMaterials } from "@/api/modules/teaching/MaterialAPI";
+import { getFileContents } from "@/api/modules/teaching/FileContentAPI";
 // import { testpdf } from "@/assets/test_pdf.pdf";
 
 // 模拟延迟函数
@@ -247,20 +248,63 @@ export const useTeachingStore = defineStore("teaching", () => {
     error.value = null;
 
     try {
-      // 调用 getMaterials API
-      const response = await getMaterials(
-        seriesId, // 资料ID
-        null, // 类型
-        null, // 创建时间
-        null, // 更新时间
-        courseId // 课程ID
-      );
+      // 调用 getMaterials API 获取资料列表
+      const response = await getMaterials(null, null, courseId);
 
-      if (response && response.code >= 200 && response.code < 300) {
+      if (
+        response &&
+        response.code >= 200 &&
+        response.code < 300 &&
+        response.data
+      ) {
+        const materials = response.data;
+
+        // 为每个资料获取对应的文件信息
+        const contentList = await Promise.all(
+          materials.map(async (material) => {
+            try {
+              // 根据 matId 获取文件信息
+              const fileResponse = await getFileContents(
+                null,
+                null,
+                null,
+                null,
+                material.id
+              );
+              const fileInfo = fileResponse?.data?.[0] || null;
+
+              return {
+                id: material.id,
+                title: material.description || `资料 ${material.id}`,
+                type: material.type, // video 或 pdf
+                description: material.description,
+                fileId: fileInfo?.id || null,
+                fileName: fileInfo?.name || null,
+                fileType: fileInfo?.type || null,
+                fileSize: fileInfo?.size || null,
+              };
+            } catch (err) {
+              console.error(`获取资料 ${material.id} 的文件信息失败:`, err);
+              return {
+                id: material.id,
+                title: material.description || `资料 ${material.id}`,
+                type: material.type,
+                description: material.description,
+                fileId: null,
+                fileName: null,
+              };
+            }
+          })
+        );
+
         // 缓存内容
-        courseContent.value[seriesId] = response.data || [];
+        courseContent.value[seriesId] = contentList;
 
-        return response;
+        return {
+          code: 200,
+          message: "获取成功",
+          data: contentList,
+        };
       }
 
       throw new Error("API返回数据格式错误");
@@ -271,33 +315,18 @@ export const useTeachingStore = defineStore("teaching", () => {
       // 返回模拟数据
       const mockData = [
         {
-          id: seriesId,
+          id: 1,
           title: "Python基础语法入门",
           type: "video",
-          url: "https://www.w3schools.com/html/mov_bbb.mp4",
-          duration: "15:30",
+          fileId: null,
           description: "学习Python的基本语法和数据类型",
-          createdTime: new Date().toISOString(),
-          updatedTime: new Date().toISOString(),
         },
         {
-          id: seriesId + 1,
+          id: 2,
           title: "Python变量与数据类型",
           type: "pdf",
-          url: "/src/assets/test_pdf.pdf",
+          fileId: null,
           description: "深入理解Python的变量和基本数据类型",
-          createdTime: new Date().toISOString(),
-          updatedTime: new Date().toISOString(),
-        },
-        {
-          id: seriesId + 2,
-          title: "Python流程控制语句",
-          type: "video",
-          url: "https://www.w3schools.com/html/mov_bbb.mp4",
-          duration: "20:15",
-          description: "掌握if-else、for循环、while循环等流程控制",
-          createdTime: new Date().toISOString(),
-          updatedTime: new Date().toISOString(),
         },
       ];
 
@@ -327,7 +356,7 @@ export const useTeachingStore = defineStore("teaching", () => {
 
     try {
       // 调用 getCourses API
-      const response = await getCourses(courseId);
+      const response = await getCourses(null, null, courseId);
 
       if (response && response.data) {
         return response;
@@ -342,22 +371,22 @@ export const useTeachingStore = defineStore("teaching", () => {
       const mockData = [
         {
           id: 1,
-          title: "Python 基础入门",
+          name: "Python 基础入门",
           description: "从零开始学习 Python 编程语言的基础知识",
         },
         {
           id: 2,
-          title: "Python 进阶教程",
+          name: "Python 进阶教程",
           description: "深入学习 Python 的高级特性和编程技巧",
         },
         {
           id: 3,
-          title: "Python Web 开发",
+          name: "Python Web 开发",
           description: "使用 Python 进行 Web 应用开发的完整指南",
         },
         {
           id: 4,
-          title: "Python 数据分析",
+          name: "Python 数据分析",
           description: "掌握使用 Python 进行数据分析的核心技能",
         },
       ];

@@ -26,7 +26,7 @@ const router = useRouter();
 function go(target) {
   if (target === "profile") router.push("/profile");
   else if (target === "courses") router.push("/coursesection");
-  else if (target === "practice") router.push("/pracindex");
+  else if (target === "practice") router.push("/practiceIndex");
   else if (target === "community") router.push("/community");
 }
 
@@ -41,7 +41,7 @@ function goHome() { router.push("/"); }
   align-items: center;
   padding: 0 36px;
   background: rgba(255, 255, 255, 0.9);
-  border-bottom: 1px solid #f5dbe7;
+  border-bottom: 1px solid #dddbf5;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -58,18 +58,18 @@ function goHome() { router.push("/"); }
   width: 42px;
   height: 42px;
   border-radius: 10px;
-  background: linear-gradient(135deg,#ffd6e8,#ffb6d9);
+  background: linear-gradient(135deg,#e4f1ff,#9393ff);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: #9b1f54;
+  color: #4940ff;
   box-shadow: 0 6px 18px rgba(214,51,132,0.08);
 }
 
 .brand-name {
   font-weight: 700;
-  color: #d63384;
+  color: #4b93f1;
   font-size: 18px;
 }
 
@@ -86,13 +86,13 @@ function goHome() { router.push("/"); }
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  color: #a43b69;
+  color: #3b6ca4;
   transition: all .18s ease;
 }
 
 .nav-link:hover {
   background: rgba(214,51,132,0.08);
-  color: #d63384;
+  color: rgb(51, 149, 214);
   transform: translateY(-2px);
 }
 
@@ -102,15 +102,15 @@ function goHome() { router.push("/"); }
   gap: 8px;
   padding: 6px 10px;
   border-radius: 10px;
-  background: linear-gradient(180deg,#fff,#fff0f4);
-  border: 1px solid #ffd6e7;
+  background: linear-gradient(180deg,#fff,#f0f1ff);
+  border: 1px solid #cbd4ff;
   cursor: pointer;
   transition: all .18s ease;
 }
 
 .nav-ghost:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 18px rgba(214,51,132,0.08);
+  box-shadow: 0 6px 18px rgba(51, 75, 214, 0.08);
 }
 
 @media(max-width:900px){

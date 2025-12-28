@@ -7,7 +7,7 @@
           <div class="header-left">
             <h3>练习任务</h3>
             <div class="stats">
-              <span>共 {{ practices.length }} 个练习</span>
+              <span>共 {{ allPractices.length }} 个练习</span>
             </div>
           </div>
           <div class="header-right">
@@ -16,7 +16,7 @@
               v-model:page-size="pageSize"
               :page-sizes="[6, 12, 18]"
               layout="prev, pager, next"
-              :total="practices.length"
+              :total="allPractices.length"
               @size-change="handleSizeChange"
               @current-change="handleCurrentChange"
               small
@@ -41,7 +41,7 @@
         </div>
 
         <!-- 空状态 -->
-        <div v-else-if="practices.length === 0" class="empty-state">
+        <div v-else-if="allPractices.length === 0" class="empty-state">
           <el-icon class="empty-icon"><Edit /></el-icon>
           <p>暂无练习任务</p>
         </div>
@@ -59,12 +59,12 @@
               <el-icon><Cpu /></el-icon>
             </div>
             <div class="practice-info">
-              <h4>{{ practice.name }}</h4>
-              <p>包含 {{ practice.questionNum }} 个问题的练习</p>
+              <h4>{{ practice.title }}</h4>
+              <p>{{ practice.description }}</p>
               <div class="practice-meta">
-                <span class="deadline" v-if="practice.expiredAt">
+                <span class="deadline" v-if="practice.deadline">
                   <el-icon><Clock /></el-icon>
-                  截止: {{ formatDeadline(practice.expiredAt) }}
+                  截止: {{ formatDeadline(practice.deadline) }}
                 </span>
                 <span class="deadline" v-else>
                   <el-icon><Clock /></el-icon>
@@ -95,7 +95,7 @@
         <el-card class="preview-card">
           <template #header>
             <div class="preview-header">
-              <h4>{{ paginatedPractices[selectedPractice].name }}</h4>
+              <h4>{{ paginatedPractices[selectedPractice].title }}</h4>
               <el-button type="primary" @click="handleClick('practice')">
                 开始练习
               </el-button>
@@ -109,14 +109,21 @@
                 本练习包含 {{ paginatedPractices[selectedPractice].questionNum }} 个算法题目，
                 旨在帮助您掌握基础算法思想和编程技巧。
               </p>
-              <div v-if="paginatedPractices[selectedPractice].expiredAt" class="deadline-info">
+              <div v-if="paginatedPractices[selectedPractice].deadline" class="deadline-info">
                 <el-icon><Clock /></el-icon>
-                截止时间: {{ new Date(paginatedPractices[selectedPractice].expiredAt).toLocaleString() }}
+                截止时间: {{ new Date(paginatedPractices[selectedPractice].deadline).toLocaleString() }}
                 <el-tag 
-                  :type="new Date(paginatedPractices[selectedPractice].expiredAt) < new Date() ? 'danger' : 'info'"
+                  :type="new Date(paginatedPractices[selectedPractice].deadline) < new Date() ? 'danger' : 'info'"
                   size="small"
                 >
-                  {{ formatDeadline(paginatedPractices[selectedPractice].expiredAt) }}
+                  {{ formatDeadline(paginatedPractices[selectedPractice].deadline) }}
+                </el-tag>
+              </div>
+              <div v-else class="deadline-info">
+                <el-icon><Clock /></el-icon>
+                截止时间: 长期有效
+                <el-tag type="success" size="small">
+                  长期有效
                 </el-tag>
               </div>
             </div>
@@ -147,31 +154,6 @@
         </el-card>
       </div>
 
-      <!-- 实践实验室 -->
-      <div class="lab-preview">
-        <el-card class="lab-card" @click="handleClick('experiment')">
-          <template #header>
-            <div class="lab-header">
-              <h4>代码实验室</h4>
-              <el-button type="success" text>
-                进入实验
-              </el-button>
-            </div>
-          </template>
-          <div class="lab-content">
-            <div class="lab-icon-container">
-              <el-icon class="lab-icon"><Compass /></el-icon>
-            </div>
-            <p class="lab-description">在代码实验室中，您可以自由练习编程，尝试各种算法实现，提升编程技能。</p>
-            <div class="lab-features">
-              <el-tag size="small" type="success">实时运行</el-tag>
-              <el-tag size="small" type="success">在线调试</el-tag>
-              <el-tag size="small" type="success">代码分享</el-tag>
-            </div>
-          </div>
-        </el-card>
-      </div>
-
       <!-- 空状态 -->
       <div v-if="selectedPractice === null" class="empty-preview">
         <el-icon size="60">
@@ -184,11 +166,12 @@
 </template>
 
 <script setup>
-import { Compass, Cpu, Clock, Warning, Edit } from "@element-plus/icons-vue";
+import { Cpu, Clock, Warning, Edit } from "@element-plus/icons-vue";
 import { ElCard, ElIcon, ElPagination, ElButton, ElTag, ElMessage } from "element-plus";
 import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getPractices } from "@/api/modules/practice/practice";
+import { getPracticeIndexes } from "@/api/modules/practice/practiceIndex";
 import { getQuestionByIndex } from "@/api/modules/practice/question";
 import { useQuestionsStore, usePracticeStore } from "@/store";
 
@@ -196,18 +179,20 @@ const router = useRouter();
 const questionsStore = useQuestionsStore();
 const practiceStore = usePracticeStore();
 
-// 选中状态
-const selectedPractice = ref(null);
+// 选中状态 - 使用 store 的 selectedPractice
+const selectedPractice = computed(() => practiceStore.selectedPractice);
 const loadingQuestions = ref(false);
 
 // 滚动条显示控制
 const isScrolling = ref(false);
 let scrollTimeout = null;
 
-// 练习任务数据 - 从API获取
-const practices = ref([]);
+// 练习任务数据 - 从 store 获取
 const loading = ref(false);
 const error = ref(null);
+
+// 从 store 获取所有练习
+const allPractices = computed(() => practiceStore.practices);
 
 // 分页相关
 const currentPage = ref(1);
@@ -215,7 +200,7 @@ const pageSize = ref(6);
 
 const paginatedPractices = computed(() => {
   const startIndex = (currentPage.value - 1) * pageSize.value;
-  return practices.value.slice(startIndex, startIndex + pageSize.value);
+  return allPractices.value.slice(startIndex, startIndex + pageSize.value);
 });
 
 // 当前选中练习的题目数量
@@ -241,7 +226,8 @@ const selectPractice = async (index) => {
     return;
   }
   
-  selectedPractice.value = index;
+  // 使用 store 的 action 设置选中状态
+  practiceStore.setSelectedPractice(index);
   const practice = paginatedPractices.value[index];
   
   if (!practice) {
@@ -259,7 +245,6 @@ const selectPractice = async (index) => {
     if (response.code === 200 && response.data) {
       // 将获取到的问题存入questionStore，store会自动处理结构转换
       questionsStore.setQuestions(response.data);
-      ElMessage.success('练习数据加载成功');
     } else {
       ElMessage.warning('获取题目失败: ' + response.message);
     }
@@ -291,20 +276,46 @@ const handleScroll = () => {
 const fetchPractices = async () => {
   loading.value = true;
   error.value = null;
-  
+
   try {
-    // 获取当前时间
-    const currentTime = new Date().toISOString();
+    // 步骤1: 获取所有练习索引信息，建立practiceId到courseSectionId的映射
+    const practiceIndexesResponse = await getPracticeIndexes({});
     
-    // 调用API获取练习数据
+    if (practiceIndexesResponse.code !== 200 || !practiceIndexesResponse.data) {
+      throw new Error('获取练习索引信息失败');
+    }
+
+    // 创建practiceId到课程信息的映射
+    const practiceIndexMap = new Map();
+    practiceIndexesResponse.data.forEach(index => {
+      if (index.practiceId) {
+        practiceIndexMap.set(index.practiceId, {
+          courseSectionId: index.courseSectionId,
+          courseId: index.courseId || 0
+        });
+      }
+    });
+
+    // 步骤2: 如果没有练习索引，直接返回空列表
+    if (practiceIndexMap.size === 0) {
+      practiceStore.resetPractices([]);
+      return;
+    }
+
+    // 步骤3: 获取所有可用的练习数据
+    const currentTime = new Date().toISOString().split('.')[0];
     const response = await getPractices({
       createdAtEnd: currentTime // 获取创建日期在当前时间之前的练习
     });
     
     if (response.code === 200 && response.data) {
-      // 过滤并排序数据：按截止时间降序排序（截止时间越晚顺序越前）
-      practices.value = response.data
+      // 步骤4: 过滤和转换练习数据，只保留有索引信息的练习
+      const fetchedPractices = response.data
         .filter(practice => {
+          // 只保留有索引信息的练习
+          if (!practiceIndexMap.has(practice.id)) {
+            return false;
+          }
           // 确保创建时间在当前时间之前
           if (!practice.createdAt) return true;
           return new Date(practice.createdAt) <= new Date(currentTime);
@@ -316,16 +327,30 @@ const fetchPractices = async () => {
           if (!b.expiredAt) return 1;
           return new Date(b.expiredAt) - new Date(a.expiredAt);
         })
-        .map(practice => ({
-          id: practice.id,
-          name: practice.name,
-          createdAt: practice.createdAt,
-          expiredAt: practice.expiredAt,
-          questionNum: practice.questionNum || 0
-        }));
-      
-      // 如果获取到了练习，默认选择第一个
-      if (practices.value.length > 0) {
+        .map((practice) => {
+          const practiceInfo = practiceIndexMap.get(practice.id);
+          return {
+            id: practice.id.toString(),
+            courseSectionId: practiceInfo.courseSectionId,
+            courseId: practiceInfo.courseId,
+            title: practice.name,
+            description: `包含 ${practice.questionNum} 个问题的练习`,
+            requirement: "",
+            deadline: practice.expiredAt ? new Date(practice.expiredAt).toISOString() : null,
+            status: "未开始",
+            score: null,
+            totalScore: 100,
+            difficulty: 1,
+            questionNum: practice.questionNum || 0,
+            createTime: practice.createdAt || new Date().toISOString()
+          };
+        });
+
+      // 步骤5: 更新practiceStore中的练习列表
+      practiceStore.resetPractices(fetchedPractices);
+
+      // 步骤6: 如果获取到了练习，默认选择第一个
+      if (allPractices.value.length > 0) {
         selectPractice(0);
       }
     } else {
@@ -347,7 +372,7 @@ onMounted(() => {
 
 // 格式化截止时间
 const formatDeadline = (deadline) => {
-  if (!deadline) return '无截止时间';
+  if (!deadline) return '长期有效';
   
   const date = new Date(deadline);
   const now = new Date();
@@ -370,39 +395,26 @@ const handleClick = (item) => {
       if (selectedPractice.value !== null && paginatedPractices.value[selectedPractice.value]) {
         const selectedPracticeData = paginatedPractices.value[selectedPractice.value];
         
-        // 将练习数据存储到 practiceStore 中，使用 resetPractices 方法
-        practiceStore.resetPractices([{
-          id: selectedPracticeData.id,
-          title: selectedPracticeData.name,
-          deadline: selectedPracticeData.expiredAt,
-          questionNum: selectedPracticeData.questionNum,
-          // 添加必要的字段以符合 practiceStore 的数据结构
-          courseId: '1', // 默认课程ID
-          description: `练习：${selectedPracticeData.name}`,
-          requirement: `<p>请完成本练习的所有题目。</p>`,
-          status: '未开始',
-          score: null,
-          totalScore: 100,
-          difficulty: 1,
-          createTime: new Date().toISOString()
-        }]);
+        // 确保有有效的courseSectionId
+        if (!selectedPracticeData.courseSectionId) {
+          ElMessage.error('练习数据不完整，无法进入练习');
+          return;
+        }
         
-        // 导航到练习页面，传递练习ID
+        // 导航到练习页面，传递课程章节ID和练习ID
         router.push({
           name: "Practice",
-          query: {
-            practiceId: selectedPracticeData.id,
-            practiceName: selectedPracticeData.name
-          }
+          params: {
+            courseSectionId: selectedPracticeData.courseSectionId, // 使用练习索引中的课程章节ID
+            practiceId: selectedPracticeData.id
+          },
         });
       } else {
-        // 如果没有选中练习，使用默认跳转
-        router.push("/prac");
+        // 如果没有选中练习，显示提示信息
+        ElMessage.warning('请先选择一个练习');
       }
       break;
-    case "experiment":
-      router.push("/exp");
-      break;
+
   }
 };
 </script>
@@ -525,7 +537,7 @@ const handleClick = (item) => {
 :deep(.el-pagination .btn-next),
 :deep(.el-pagination .el-pager li) {
   background: rgba(255, 255, 255, 0.6);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-light);
   margin: 0 2px;
   border-radius: 6px;
   transition: all 0.3s ease;
@@ -540,8 +552,8 @@ const handleClick = (item) => {
 }
 
 :deep(.el-pagination .el-pager li.active) {
-  background: linear-gradient(135deg, #409eff, #66b1ff);
-  border-color: #409eff;
+  background: var(--gradient-brand);
+  border-color: var(--primary);
   color: white;
 }
 
@@ -600,7 +612,7 @@ const handleClick = (item) => {
 
 .practice-info p {
   margin: 0 0 10px 0;
-  color: #909399;
+  color: var(--text-placeholder);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -657,7 +669,7 @@ const handleClick = (item) => {
 
 .preview-header h4 {
   margin: 0;
-  color: #409eff;
+  color: var(--primary);
   font-size: 18px;
   font-weight: 700;
 }
@@ -698,67 +710,13 @@ const handleClick = (item) => {
   gap: 8px;
   margin-top: 10px;
   padding: 8px 12px;
-  background: rgba(64, 158, 255, 0.1);
+  background: var(--bg-primary-alpha);
   border-radius: 6px;
   font-size: 13px;
-  color: #606266;
+  color: var(--text-regular);
 }
 
-/* 实验室预览 */
-.lab-preview {
-  margin-top: 20px;
-}
 
-.lab-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.lab-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(103, 194, 58, 0.15);
-}
-
-.lab-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.lab-header h4 {
-  margin: 0;
-  color: #67c23a;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.lab-content {
-  text-align: center;
-}
-
-.lab-icon-container {
-  margin-bottom: 15px;
-}
-
-.lab-icon {
-  font-size: 48px;
-  color: #67c23a;
-}
-
-.lab-description {
-  color: #606266;
-  line-height: 1.6;
-  margin: 0 0 15px 0;
-}
-
-.lab-features {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
 
 /* 空状态 */
 .empty-preview {
@@ -767,7 +725,7 @@ const handleClick = (item) => {
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: #909399;
+  color: var(--text-placeholder);
 }
 
 .empty-preview .el-icon {
@@ -784,7 +742,7 @@ const handleClick = (item) => {
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: #909399;
+  color: var(--text-placeholder);
   text-align: center;
 }
 
@@ -801,7 +759,7 @@ const handleClick = (item) => {
 .error-state .error-icon {
   font-size: 32px;
   margin-bottom: 12px;
-  color: #f56c6c;
+  color: var(--danger);
 }
 
 .empty-state .empty-icon {

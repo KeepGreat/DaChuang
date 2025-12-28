@@ -37,6 +37,7 @@ public class SmartCompanionServiceImpl implements SmartCompanionService {
             UserScoreResponse userScores = chatResponse.getUserScores();
             scores.put("expressionScore", userScores.getExpressionScore());
             scores.put("conversionEfficiencyScore", userScores.getConversionEfficiencyScore());
+            scores.put("userId", userId);
             evaluationFeignClient.evaluateBaseOnSmartCompanion(scores);
         }
         return chatResponse;

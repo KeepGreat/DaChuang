@@ -1,0 +1,65 @@
+// 定义全局CSS变量
+:root {
+  // 主色调
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #3b82f6;
+  --primary-lighter: #60a5fa;
+  --primary-lightest: #dbeafe;
+  --primary-dark: #1e40af;
+  --primary-darker: #1e3a8a;
+  --primary-darkest: #172554;
+  --primary-alpha-10: rgba(37, 99, 235, 0.1);
+  --primary-alpha-20: rgba(37, 99, 235, 0.2);
+  --primary-alpha-50: rgba(37, 99, 235, 0.5);
+  --primary-alpha-80: rgba(37, 99, 235, 0.8);
+  
+  // 渐变色
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-brand: linear-gradient(45deg, #2563eb, #1d4ed8);
+  --gradient-primary-soft: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  --gradient-primary-light: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
+  --gradient-primary-dark: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  
+  // 背景色
+  --bg-white: #ffffff;
+  --bg-light: #f0f9ff;
+  --bg-primary-light: #eff6ff;
+  --bg-primary-lighter: #dbeafe;
+  --bg-primary-grey: #f5f7fa;
+  --bg-primary-alpha: rgba(37, 99, 235, 0.05);
+  
+  // 文本色
+  --text-primary: #1e293b;
+  --text-primary-light: #3b82f6;
+  --text-primary-lighter: #60a5fa;
+  --text-regular: #606266;
+  --text-placeholder: #909399;
+  
+  // 边框色
+  --border-light: #e2e8f0;
+  --border-base: #dcdfe6;
+  --border-primary: #2563eb;
+  --border-primary-light: #3b82f6;
+  --border-primary-lighter: #93c5fd;
+  
+  // 状态色
+  --state-hover: #3b82f6;
+  --state-active: #1d4ed8;
+  --state-disabled: #93c5fd;
+  --state-focus: rgba(37, 99, 235, 0.1);
+  
+  // 成功色
+  --success: #10b981;
+  --success-alpha-10: rgba(16, 185, 129, 0.1);
+  --success-alpha-20: rgba(16, 185, 129, 0.2);
+  
+  // 危险色
+  --danger: #ef4444;
+  --danger-alpha-10: rgba(239, 68, 68, 0.1);
+  --danger-alpha-30: rgba(239, 68, 68, 0.3);
+  
+  // 警告色
+  --warning: #f59e0b;
+  --warning-alpha-10: rgba(245, 158, 11, 0.1);
+}

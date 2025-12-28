@@ -6,7 +6,7 @@
 
 <script setup>
 import * as echarts from "echarts";
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 
 const chartRef = ref(null);
 
@@ -74,7 +74,9 @@ onMounted(() => {
 
   onBeforeUnmount(() => {
     window.removeEventListener("resize", handleResize);
-    try { chart && chart.dispose(); } catch (e) {}
+    try {
+      chart && chart.dispose();
+    } catch (e) {}
     chart = null;
   });
 });

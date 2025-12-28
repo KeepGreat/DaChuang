@@ -31,6 +31,9 @@ public class SmartTeacherServiceImpl implements SmartTeacherService {
             teachingInput.getCodeSandboxInput() == null || teachingInput.getCodeSandboxInput().getCodeLanguage() == null || teachingInput.getCodeSandboxInput().getCode() == null) return null;
         CodeSandboxInput codeSandboxInput = teachingInput.getCodeSandboxInput();
 
+        System.out.println("-------------------------");
+        System.out.println("获取到的参数" + teachingInput);
+        System.out.println("-------------------------");
         //频率判断
         long callCount = userCallService.getUserCallCount(userId, null);
         if (role.equals("student") && callCount > MAX_CALL_PER_HOUR){
@@ -40,16 +43,25 @@ public class SmartTeacherServiceImpl implements SmartTeacherService {
         callCount = userCallService.recordUserCall(userId);
         log.info("用户ID: {} ; 小时内调用次数: {}", userId, callCount);
         Flux<String> result;
-        if (codeSandboxInput.getInput() == null || codeSandboxInput.getInput().isBlank())
+        if (codeSandboxInput.getInput() == null || codeSandboxInput.getInput().isBlank()){
+            System.out.println("========================不带输入的分析===============================");
             result = aiTeacherService.teach(teachingInput.getQuestion(), codeSandboxInput.getCode(),
-                    codeSandboxInput.getCodeLanguage(), codeSandboxInput.getInput());
-        else result = aiTeacherService.teach(teachingInput.getQuestion(), codeSandboxInput.getCode(),
-                codeSandboxInput.getCodeLanguage());
+                    codeSandboxInput.getCodeLanguage(), userId);
+        }
+        else{
+            System.out.println("========================带输入的分析===============================");
+            result = aiTeacherService.teach(teachingInput.getQuestion(), codeSandboxInput.getCode(),
+                    codeSandboxInput.getCodeLanguage(), codeSandboxInput.getInput(), userId);
+        }
         return result;
     }
 
     @Override
     public Flux<String> answerQuestion(TeachingInput teachingInput, String userId, String role) {
+        System.out.println("-------------------------");
+        System.out.println("获取到的参数" + teachingInput);
+        System.out.println("-------------------------");
+
         //频率判断
         long callCount = userCallService.getUserCallCount(userId, null);
         if (role.equals("student") && callCount > MAX_CALL_PER_HOUR){
@@ -58,6 +70,6 @@ public class SmartTeacherServiceImpl implements SmartTeacherService {
         //记录用户调用
         callCount = userCallService.recordUserCall(userId);
         log.info("用户ID: {} ; 小时内调用次数: {}", userId, callCount);
-        return aiTeacherService.answerQuestion(teachingInput.getQuestion());
+        return aiTeacherService.answerQuestion(teachingInput.getQuestion(), userId);
     }
 }

@@ -1,9 +1,9 @@
 import request from "@/utils/request";
 
-export let downloadFile = (fileName) => {
+export let downloadFile = (id) => {
     return request.get('api/teaching/file/download', {
         params: {
-            fileName: fileName
+            id: id
         },
         responseType: 'blob'
     })

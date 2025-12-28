@@ -4,6 +4,7 @@ import com.hbwl.jwt.properties.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class JwtTokenUtil {
 
     @Autowired
@@ -41,6 +43,7 @@ public class JwtTokenUtil {
             Claims claims = getClaimsFromToken(token);
             userId = (String) claims.get("userId");
         } catch (Exception e) {
+            log.error("从token中加载用户ID时出错:{}", e.getMessage());
             userId = null;
         }
         return userId;
@@ -52,6 +55,7 @@ public class JwtTokenUtil {
             Claims claims = getClaimsFromToken(token);
             username = (String) claims.get("username");
         } catch (Exception e){
+            log.error("从token中加载用户名时出错:{}", e.getMessage());
             username = null;
         }
         return username;
@@ -63,6 +67,7 @@ public class JwtTokenUtil {
             Claims claims = getClaimsFromToken(token);
             userRole = (String) claims.get("role");
         } catch (Exception e){
+            log.error("从token中加载用户权限时出错:{}", e.getMessage());
             userRole = null;
         }
         return userRole;
@@ -106,6 +111,7 @@ public class JwtTokenUtil {
             claims = Jwts.parser().setSigningKey(jwtProperties.getSecretKey()).parseClaimsJws(token).getBody();
         } catch (Exception e){
             //System.out.println("解析token出错！");//过期同样会报错
+            log.error("从token中获取claim时出错:{}", e.getMessage());
             claims = null;
             throw new Exception(e);
         }

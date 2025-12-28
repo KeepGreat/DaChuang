@@ -36,7 +36,7 @@ defineProps({
   width: 100%; /* 占满父容器宽度 */
   min-height: 240px; /* 最小高度限制 */
   height: clamp(240px, 30vh, 320px); /* 自适应高度，限制最小最大值 */
-  background: linear-gradient(135deg, #e09fff 0%, #ffffff 100%); /* 背景渐变 */
+  background: linear-gradient(135deg, #94a4ff 0%, #ffffff 100%); /* 背景渐变 */
   border-radius: 16px; /* 卡片圆角 */
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06); /* 卡片阴影 */
   display: flex; /* 使用 Flex 布局 */

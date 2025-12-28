@@ -4,12 +4,12 @@ import { BusinessError } from "./error.js";
 
 const request = axios.create({
   // 本地后端接口地址
-  // baseURL: "http://localhost:80",
+  baseURL: "http://localhost:80",
   // Mock 接口地址
-  baseURL: "http://localhost:5173",
+  // baseURL: "http://localhost:5173",
   // 后端接口地址
   // baseURL: "http://192.168.42.88:80",
-  timeout: 50000,
+  timeout: 60000,
 });
 
 // 请求拦截器
@@ -21,25 +21,14 @@ request.interceptors.request.use(
       return config;
     }
 
-    // 创建userStore实例
+    // 检查token是否存在
     const userStore = useUserStore();
-
-    // TODO 暂时注释登录和token检查，后续功能完善后再处理，这里需要检查token是否存在
-    /* 
-    if (!userStore.token) {
-			console.warn("用户未登录");
-      return Promise.reject(new Error("用户未登录"));
-    }
-		*/
-
-    // 在Headers携带token，key是JwtToken，value是实际的token
-    // TODO 暂时这样处理，避免传undefined
-    if (userStore.authHeader) {
-      config.headers.JwtToken = userStore.authHeader;
+    if (userStore.token) {
+      config.headers.JwtToken = userStore.token;
     } else {
-      console.warn("authHeader 为空，未携带 JwtToken 请求头");
+      console.warn("用户未登录");
+      return Promise.reject(new Error("用户未登录，请先登录"));
     }
-
     return config;
   },
   (error) => {
@@ -47,7 +36,6 @@ request.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
@@ -93,6 +81,10 @@ request.interceptors.response.use(
     // code在[200, 300)区间内时，视为业务成功响应
     if (res.code >= 200 && res.code < 300) {
       return res;
+    }
+
+    if(response.status >= 200 && response.status < 300){
+      return response;
     }
 
     // 业务错误处理

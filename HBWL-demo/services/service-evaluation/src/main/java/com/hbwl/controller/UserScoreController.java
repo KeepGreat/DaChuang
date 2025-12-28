@@ -6,6 +6,10 @@ import com.hbwl.service.UserScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
+//TODO: 这个controller只供内部调用，后续改一下传参
+
 @RestController
 @RequestMapping("/api/evaluation/score")
 public class UserScoreController {
@@ -21,7 +25,8 @@ public class UserScoreController {
     }
 
     @PostMapping
-    public Result addUserScore(@RequestHeader("userId") String userId) {
+    public Result addUserScore(@RequestBody Map<String, String> map) {
+        String userId = map.get("userId");
         int add = userScoreService.addUserScore(userId);
         if(add == -1)  return Result.error("添加数据不能为空");
         if(add == 0)  return Result.error("添加数据失败");

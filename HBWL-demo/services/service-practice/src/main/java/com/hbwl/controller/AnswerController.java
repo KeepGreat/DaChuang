@@ -69,9 +69,4 @@ public class AnswerController {
         answer.setQuestionId(questionId);
         return Result.success(answerService.getAnswersPage(pageNo, pageSize, answer), null);
     }
-
-//    @PostMapping("/judge")
-//    public Result judgeAnswer(@RequestBody String userAnswer){
-//
-//    }
 }

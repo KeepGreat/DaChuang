@@ -38,7 +38,7 @@ import image2 from '@/assets/mainimage2.png';
 const router = useRouter();
 function go(target) {
   if (target === "courses") router.push("/coursesection");
-  else if (target === "practice") router.push("/pracindex");
+  else if (target === "practice") router.push("/practiceIndex");
 }
 
 const images = [image1, image2];
@@ -66,11 +66,11 @@ onUnmounted(() => clearInterval(interval));
 
 <style scoped>
 .hero { padding:56px 6vw; text-align:center; position: relative; }
-.hero-inner h1 { font-size:40px; color:#d63384; margin-bottom:12px; font-weight:800; }
-.hero-inner .lead { font-size:18px; color:#6b3b52; margin-bottom:20px; }
+.hero-inner h1 { font-size:40px; color:#458dfa; margin-bottom:12px; font-weight:800; }
+.hero-inner .lead { font-size:18px; color:#3b4c6b; margin-bottom:20px; }
 .cta-row { display:flex; gap:14px; justify-content:center; margin-bottom:26px; }
-.btn-primary { background: linear-gradient(90deg,#ff7ab1,#d63384); color:white; padding:12px 20px; border-radius:12px; border:0; cursor:pointer; font-weight:700; }
-.btn-outline { background:transparent; border:1px solid #ffd6e7; padding:10px 18px; border-radius:12px; color:#d63384; cursor:pointer; font-weight:700; }
+.btn-primary { background: linear-gradient(90deg,#cbe8ff,#7ac3ff); color:white; padding:12px 20px; border-radius:12px; border:0; cursor:pointer; font-weight:700; }
+.btn-outline { background:transparent; border:1px solid #d5d8ff; padding:10px 18px; border-radius:12px; color:#4f52ea; cursor:pointer; font-weight:700; }
 
 .carousel-wrapper { position:relative; width:100%; max-width:1000px; margin:36px auto; overflow:hidden; border-radius:14px; }
 .carousel-track { display:flex; transition: transform 0.5s ease; }

@@ -5,6 +5,8 @@ import com.hbwl.ai.listener.CustomChatModelListener;
 import com.hbwl.ai.tool.CodeSandboxTool;
 import com.hbwl.ai.properties.TeachingProperties;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.memory.chat.ChatMemoryProvider;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -99,11 +101,19 @@ public class ModelConfig {
     @Bean
     public AITeacherService aiTeacherService(StreamingChatModel streamingChatModel,
                                              CodeSandboxTool codeSandboxTool,
-                                             EmbeddingStoreContentRetriever embeddingStoreContentRetriever){
+                                             EmbeddingStoreContentRetriever embeddingStoreContentRetriever,
+                                             AITeacherChatMemoryStore aiTeacherChatMemoryStore){
+        ChatMemoryProvider chatMemoryProvider = memory -> MessageWindowChatMemory.builder()
+                .id(memory)
+                .maxMessages(10)
+                .chatMemoryStore(aiTeacherChatMemoryStore)
+                .build();
+
         return AiServices.builder(AITeacherService.class)
                 .streamingChatModel(streamingChatModel)
                 .tools(codeSandboxTool)
                 .contentRetriever(embeddingStoreContentRetriever)
+                .chatMemoryProvider(chatMemoryProvider)
                 .build();
     }
 }

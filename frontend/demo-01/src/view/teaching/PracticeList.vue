@@ -68,8 +68,8 @@
                     </el-icon>
                     截止: {{ formatDeadline(practice.deadline) }}
                   </span>
-                  <el-tag :type="getStatusType(practice.status)" size="small">
-                    {{ practice.status }}
+                  <el-tag :type="practice.deadline ? getStatusType(practice.status) : 'success'" size="small">
+                    {{ practice.deadline ? practice.status : '长期有效' }}
                   </el-tag>
                 </div>
               </div>
@@ -354,16 +354,19 @@ const openPracticeDetail = () => {
   }
   const practiceId = selectedPractice.id;
   const courseId = route.params.id;
-  router.push(`/teaching/course/${courseId}/practice/${practiceId}`);
+  router.push(`/practice/${courseId}/${practiceId}`);
 };
 
 // 判断是否过期
 const isOverdue = (deadline) => {
+  if (!deadline) return false; // 如果没有截止时间，视为长期有效，不过期
   return new Date(deadline) < new Date();
 };
 
 // 格式化截止时间
 const formatDeadline = (deadline) => {
+  if (!deadline) return "长期有效";
+  
   const date = new Date(deadline);
   const now = new Date();
   const diff = date - now;
@@ -410,7 +413,7 @@ const getSubmissionType = (status) => {
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: #666;
+  color: var(--text-regular);
   text-align: center;
 }
 
@@ -439,7 +442,7 @@ const getSubmissionType = (status) => {
 
 .stat-detail {
   font-size: 11px;
-  color: #9b7a88;
+  color: var(--text-secondary);
   opacity: 0.8;
 }
 
@@ -465,18 +468,18 @@ const getSubmissionType = (status) => {
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #f5dbe7;
+  border-bottom: 1px solid var(--border-primary-lighter);
 }
 
 .panel-header h3 {
   margin: 0;
-  color: #d63384;
+  color: var(--primary);
   font-size: 18px;
   font-weight: 700;
 }
 
 .stats {
-  color: #9b7a88;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
