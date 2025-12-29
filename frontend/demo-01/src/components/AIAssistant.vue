@@ -91,7 +91,7 @@
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { ElButton } from 'element-plus';
 import CodeSandbox from './CodeSandbox.vue';
-import { teach, answer } from './AIAssistantAPI.js';
+import { teach, answer } from '@/api/modules/teaching/AIAssistantAPI.js';
 
 // 添加marked库用于Markdown解析
 import { marked } from 'marked';
