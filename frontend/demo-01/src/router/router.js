@@ -128,7 +128,7 @@ const practiceRoutes = [
   {
     path: "practiceIndex",
     name: "PracticeIndex",
-    component: () => import("@/view/PracticeIndex.vue"),
+    component: () => import("@/view/practice/PracticeIndex.vue"),
   },
 ];
 

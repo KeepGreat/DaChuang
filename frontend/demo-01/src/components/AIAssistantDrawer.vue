@@ -34,7 +34,7 @@
 import { ref, onUnmounted } from 'vue'
 import { ElDrawer, ElIcon } from 'element-plus'
 import { ChatDotRound } from '@element-plus/icons-vue'
-import AIAssistant from '@/assets/aimodules/AIAssistant.vue'
+import AIAssistant from '@/components/AIAssistant.vue'
 
 const isDrawerOpen = ref(false)
 const ballPosition = ref({ x: 30, y: 200 })
