@@ -55,4 +55,9 @@ public class UserController {
         user.setRole(userRole);
         return Result.success(userService.getUsers(user), "查询用户成功");
     }
+
+    @GetMapping("/id")
+    public Result getUserById(@RequestHeader("userId") String userId){
+        return Result.success(userService.getUserById(userId), "查询用户成功");
+    }
 }

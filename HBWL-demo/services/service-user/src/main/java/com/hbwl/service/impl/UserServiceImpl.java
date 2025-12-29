@@ -63,7 +63,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(String id) {
-        return userMapper.selectById(id);
+        //这个方法用于获取用户信息，需要去掉密码内容
+        User user = userMapper.selectById(id);
+        user.setPassword(null);
+        return user;
     }
 
     @Override

@@ -24,8 +24,8 @@ CREATE TABLE `material` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `type` VARCHAR(20) NOT NULL COMMENT '资料类型',
   `description` VARCHAR(100) COMMENT '资料描述',
-  `created_time` DATETIME NOT NULL COMMENT '创建时间',
-  `updated_time` DATETIME NOT NULL COMMENT '更新时间',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '更新时间',
   `course_id` INT NOT NULL COMMENT '课程id'
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -46,3 +46,43 @@ CREATE TABLE `file_content` (
   `size` INT NOT NULL COMMENT '文件大小',
   `mat_id` INT NOT NULL COMMENT '资料id'
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+#用户调用记录表，用于记录用户调用agent的信息
+DROP TABLE IF EXISTS `user_call_record`;
+CREATE TABLE `user_call_record` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` VARCHAR(100) NOT NULL,
+  `hour_timestamp` BIGINT NOT NULL COMMENT '小时时间戳',
+  `call_count` INT NOT NULL COMMENT '调用次数',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP 
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+#智能体对话记录表，用于记录agent对话记录
+DROP TABLE IF EXISTS `agent_chat_memory`;
+CREATE TABLE `agent_chat_memory` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `memory_id` VARCHAR(100) NOT NULL COMMENT '同userId',
+  `content` JSON NOT NULL
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+SELECT * FROM `agent_chat_memory`;
+
+###以下为测试数据###
+INSERT INTO `course_section`(`name`, `description`)
+VALUES('测试课程1', '这是测试课程');
+SELECT * FROM `course_section`;
+
+INSERT INTO `course`(`name`, `description`, `section_id`)
+VALUES('测试课1', '这是一节测试课', '1');
+INSERT INTO `course`(`name`, `description`, `section_id`)
+VALUES('测试课2', '这是一节测试课', '1');
+SELECT * FROM `course`;
+
+INSERT INTO `material`(`type`, `description`, `course_id`)
+VALUES('pdf', '测试文档', '1');
+SELECT * FROM `material`;
+
+INSERT INTO `file_content`(`type`, `name`, `size`, `mat_id`)
+VALUES('application/pdf', '192b0316-6716-46a3-a2b6-b65d89f6e15c.pdf', '1496687', '1');
+SELECT * FROM `file_content`;

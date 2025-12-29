@@ -11,3 +11,6 @@ CREATE TABLE `user` (
   `password` VARCHAR(100) NOT NULL,
   `role` VARCHAR(10) NOT NULL #'ADMIN', 'STUDENT', 'TEACHER'
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+SELECT * FROM `user`;
+DELETE FROM `user` WHERE `role` = 'student';
