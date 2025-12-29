@@ -10,6 +10,15 @@
         @edit="openEdit"
       />
 
+      <br>
+
+      <!-- 学习能力雷达图 -->
+      <RadarStats
+        :data=userEvaluationStat
+        class="card chart-full"
+      />
+
+
       <div class="section-title">学习总结</div>
 
       <!-- 三个统计卡片 -->
@@ -30,19 +39,6 @@
       <div class="card chart-full">
         <PracticeProgress />
       </div>
-
-      <!-- 学习能力雷达图 -->
-      <RadarStats
-        :data="{
-          codeAccuracy: 80,
-          aiDependence: 60,
-          knowledgeConversion: 75,
-          expressionAbility: 70,
-          knowledgeDepth: 85,
-          codeQuality: 90,
-        }"
-        class="card chart-full"
-      />
 
       <!-- 新增四个图表 -->
       <div class="section-title">学习维度统计</div>
@@ -76,7 +72,7 @@
 
 <script setup>
 import avatarDefault from "@/assets/avatar-default.png";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import UserHeader from "./UserHeader.vue";
 
 import LearningTrend from "@/components/profiling/learingtime/LearningTrend.vue";
@@ -89,14 +85,26 @@ import RadarStats from "@/components/profiling/learingtime/RadarStats.vue";
 import StudyPunchCard from "@/components/profiling/learingtime/StudyPunchCard.vue";
 import StudyTypeDistribution from "@/components/profiling/learingtime/StudyTypeDistribution.vue";
 
+import { getUserInfo } from "@/api/modules/profiling/UserInfo";
+import { getUserEvaluation } from "@/api/modules/profiling/UserEvaluation";
+
 const user = ref({
-  name: "Qingtian1111",
+  name: "User",
   certs: 0,
   avatar: avatarDefault,
   progress: 2,
   finished: 0,
   hours: 0,
 });
+
+const userEvaluationStat = ref({
+  codeAccuracy: 0,
+  aiDependence: 0,
+  knowledgeConversion: 0,
+  expressionAbility: 0,
+  knowledgeDepth: 0,
+  codeQuality: 0,
+})
 
 const openEdit = () => console.log("打开编辑弹窗");
 
@@ -120,6 +128,28 @@ const calendarMock = ref(
     return [`2025-01-${String(i + 1).padStart(2, "0")}`, Math.random() > 0.3 ? 1 : 0];
   })
 );
+
+//获取用户信息
+const fetchUserInfo = async() => {
+  const response = await getUserInfo();
+  user.value.name = response.data.username;
+}
+
+//获取用户评分
+const fetchUserEvaluation = async() => {
+  const response = await getUserEvaluation();
+  userEvaluationStat.value.aiDependence = response.data.aiDependenceScore;
+  userEvaluationStat.value.codeAccuracy = response.data.accuracyRateScore;
+  userEvaluationStat.value.codeQuality = response.data.qualityScore;
+  userEvaluationStat.value.expressionAbility = response.data.expressionScore;
+  userEvaluationStat.value.knowledgeConversion = response.data.conversionEfficiencyScore;
+  userEvaluationStat.value.knowledgeDepth = response.data.masteryDepthScore;
+}
+
+onMounted(async() => {
+  await fetchUserInfo();
+  await fetchUserEvaluation();
+})
 </script>
 
 <style scoped>

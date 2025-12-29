@@ -19,7 +19,7 @@ export * from "./modules/practice/userAnswer";
 
 // profiling
 export * from "./modules/profiling/api";
-export * from "./modules/profiling/calcScore";
+export * from "./modules/profiling/UserEvaluation";
 
 // experiment & practice
 export * from "./modules/ExperimentAPI";

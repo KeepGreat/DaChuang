@@ -10,8 +10,8 @@
     <nav class="nav">
       <button class="nav-link" @click="go('courses')">课程</button>
       <button class="nav-link" @click="go('practice')">练习</button>
-      <button class="nav-link" @click="go('community')">社区</button>
-      <button class="nav-ghost" @click="go('profile')">
+      <!-- <button class="nav-link" @click="go('community')">社区</button> -->
+      <button class="nav-ghost" @click="go('learningTime')">
         <span class="avatar">👤</span>
         <span class="nav-text">个人中心</span>
       </button>
@@ -24,7 +24,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 function go(target) {
-  if (target === "profile") router.push("/profile");
+  if (target === "learningTime") router.push("/learningTime");
   else if (target === "courses") router.push("/coursesection");
   else if (target === "practice") router.push("/practiceIndex");
   else if (target === "community") router.push("/community");
