@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import avatarDefault from "@/assets/avatar-default.png";
+import avatarDefault from "@/assets/profile/avatar-default.png";
 
 // 定义组件 props
 defineProps({

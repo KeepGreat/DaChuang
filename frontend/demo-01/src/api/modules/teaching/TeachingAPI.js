@@ -1,4 +1,4 @@
-import request from "@/utils/request";
+import request from "@/api/request";
 // src/api/modules/teaching/TeachingAPI.js
 
 export default {

@@ -18,6 +18,8 @@
         <module>service-practice</module>
         <module>service-user</module>
         <module>service-evaluation</module>
+<!--        出于技术问题，暂时不支持独立智能体模块-->
+<!--        <module>service-agents</module>-->
     </modules>
 
     <properties>

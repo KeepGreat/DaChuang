@@ -37,7 +37,7 @@ public class AnalysisController {
         return result;
     }
 
-    //只调ai
+    //只调ai,目前使用此
     @PostMapping("/analyze")
     public AnalysisOutput analyze(@RequestBody AnalysisInput analysisInput){
         if (analysisInput == null || analysisInput.getCodeLanguage() == null || analysisInput.getCode() == null || analysisInput.getCodeSandboxOutput() == null || analysisInput.getQuestion() == null) return  null;

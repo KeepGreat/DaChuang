@@ -7,7 +7,7 @@ const mainRoutes = [
   {
     path: "/",
     name: "MainLanding",
-    component: () => import("@/components/MainLanding.vue"),
+    component: () => import("@/view/homepage/MainLanding.vue"),
   },
 ];
 
@@ -21,7 +21,7 @@ const profilingRoutes = [
   {
     path: "LearningTime",
     name: "LearningTime",
-    component: () => import("@/components/profiling/LearingTime.vue"),
+    component: () => import("@/components/profiling/LearningTime.vue"),
   },
   {
     path: "course/:id",
@@ -134,16 +134,21 @@ const practiceRoutes = [
 
 // 其他页面路由
 const otherRoutes = [
+  // {
+  //   path: "exp",
+  //   name: "Experiment",
+  //   component: () => import("@/view/test/Experiment.vue"),
+  // },
+  // {
+  //   path: "filetest",
+  //   name: "FileTest",
+  //   component: () => import("@/view/test/FileTest.vue"),
+  // },
   {
-    path: "exp",
-    name: "Experiment",
-    component: () => import("@/view/Experiment.vue"),
-  },
-  {
-    path: "filetest",
-    name: "FileTest",
-    component: () => import("@/view/FileTest.vue"),
-  },
+    path: "test/material",
+    name: "MaterialTest",
+    component: () => import("@/view/test/MaterialTest.vue")
+  }
 ];
 
 // 独立路由 - 不使用主布局

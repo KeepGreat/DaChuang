@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/api/request'
 
 export let addCourseSection = (CourseSection) => {
     return request.post("api/teaching/coursesection", CourseSection)

@@ -126,9 +126,9 @@ import { ElMessage } from 'element-plus'
 // 导入 Pinia store
 import { useTeachingStore } from '@/store'
 // 导入 AI 助手图标组件
-import AIAssistantIcon from '@/components/AIAssistantIcon.vue'
+import AIAssistantIcon from '@/components/teaching/AIAssistantIcon.vue'
 // 导入 AI 助教抽屉组件
-import AIAssistantDrawer from '@/components/AIAssistantDrawer.vue'
+import AIAssistantDrawer from '@/components/teaching/AIAssistantDrawer.vue'
 // 导入文件下载 API
 import { downloadFile } from '@/api/modules/teaching/FileContentAPI'
 

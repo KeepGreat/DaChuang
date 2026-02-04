@@ -14,6 +14,7 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.comparison.IsEqualTo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ import java.util.UUID;
 @Component
 public class FileContentUtil {
 
+    @Qualifier("file")
     @Autowired
     private Path fileStorageLocation;
 

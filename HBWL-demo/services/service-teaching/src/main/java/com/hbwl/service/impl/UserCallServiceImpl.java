@@ -128,7 +128,7 @@ public class UserCallServiceImpl implements UserCallService {
         if (hourTimestamp == null ) hourTimestamp = getCurrentHourTimestamp();
         String pattern = USER_CALL_COUNT_KEY_PREFIX;
         if (userId != null) pattern += userId + ":" + hourTimestamp;
-        pattern += "*:" + hourTimestamp;
+        else pattern += "*:" + hourTimestamp;
 
         Set<String> keys = stringRedisTemplate.keys(pattern);
         if (keys != null && !keys.isEmpty()) {

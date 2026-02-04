@@ -19,6 +19,7 @@
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
     "recharts": "^3.3.0",
+    "video.js": "^8.23.4",
     "vue": "^3.5.10",
     "vue-router": "^4.5.1",
     "vue3-pdf-app": "^1.0.3"

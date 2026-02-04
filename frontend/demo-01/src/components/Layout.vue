@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import TopNav from './TopNav.vue';
+import TopNav from './homepage/TopNav.vue';
 // sidebar removed to allow content full width
 </script>
 

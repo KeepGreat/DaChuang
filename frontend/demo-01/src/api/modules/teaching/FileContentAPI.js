@@ -1,4 +1,4 @@
-import request from "@/utils/request";
+import request from "@/api/request";
 
 export let downloadFile = (id) => {
     return request.get('api/teaching/file/download', {

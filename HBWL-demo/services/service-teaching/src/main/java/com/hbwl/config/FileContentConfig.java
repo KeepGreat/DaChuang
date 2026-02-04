@@ -15,7 +15,7 @@ public class FileContentConfig {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    @Bean
+    @Bean(name = "file")
     public Path fileStorageLocation() {
         Path path = Paths.get(uploadDir).toAbsolutePath().normalize();
         try {

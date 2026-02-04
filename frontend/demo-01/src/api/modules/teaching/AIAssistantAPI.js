@@ -1,4 +1,4 @@
-import request from "@/utils/request"
+import request from "@/api/request"
 
 export let teach = (teachingInput) => {
     return request.post('http://localhost:80/api/teaching/ai/teach',

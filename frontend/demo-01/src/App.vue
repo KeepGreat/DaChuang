@@ -1,5 +1,4 @@
 <script setup>
-import FloatingAI from "@/components/FloatingAI.vue";
 </script>
 
 <template>

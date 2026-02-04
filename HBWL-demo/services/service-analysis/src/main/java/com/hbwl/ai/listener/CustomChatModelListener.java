@@ -4,9 +4,7 @@ import dev.langchain4j.model.chat.listener.ChatModelErrorContext;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.listener.ChatModelRequestContext;
 import dev.langchain4j.model.chat.listener.ChatModelResponseContext;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
 public class CustomChatModelListener implements ChatModelListener {
 
     @Override

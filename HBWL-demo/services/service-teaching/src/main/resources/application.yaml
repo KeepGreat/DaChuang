@@ -29,7 +29,9 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
   servlet:
     multipart:
-      max-file-size: 20MB
+      max-file-size: 512MB
+      max-request-size: 2GB
+      enabled: true
   #Redis配置
   data:
     redis:
@@ -54,6 +56,13 @@ mybatis-plus:
 file:
   upload-dir: ./uploads/files/
   max-size: 20 * 1024 * 1024 #20MB
+
+#视频传输
+video:
+  upload:
+    chunk-dir: ./uploads/chunks
+    final-dir: ./uploads/videos
+    max-chunk-size: 536870912 #512MB
 
 #Agent调用频率控制
 agent:
