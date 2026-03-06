@@ -6,7 +6,16 @@ DROP TABLE IF EXISTS `course_section`;
 CREATE TABLE `course_section`(
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `name` VARCHAR(20) NOT NULL COMMENT '课程系列名称',
-  `description` VARCHAR(100) COMMENT '课程系列描述'
+  `description` VARCHAR(100) COMMENT '课程系列描述',
+  `course_section_type_id` TINYINT DEFAULT '0' NOT NULL COMMENT '课程系列类型对应id,具体类型在type表中指定,0为未指定',
+  `teacher_id` VARCHAR(100) NOT NULL COMMENT '创建教师id'
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+#课程系列类型表
+DROP TABLE IF EXISTS `course_section_type`;
+CREATE TABLE `course_section_type`(
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `name` VARCHAR(20) NOT NULL COMMENT '课程系列类型名称'
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 #课程表
@@ -92,9 +101,17 @@ CREATE TABLE `agent_chat_memory` (
 SELECT * FROM `agent_chat_memory`;
 
 ###以下为测试数据###
-INSERT INTO `course_section`(`name`, `description`)
-VALUES('测试课程1', '这是测试课程');
+INSERT INTO `course_section`(`name`, `description`, `course_section_type_id`, `teacher_id`)
+VALUES('测试课程1', '这是测试课程', '1', '5f8708bf-1750-4508-8cc8-2fac9efdd9e7');
 SELECT * FROM `course_section`;
+
+INSERT INTO `course_section_type`(`name`)
+VALUES('编程语言');
+INSERT INTO `course_section_type`(`name`)
+VALUES('练习实践');
+INSERT INTO `course_section_type`(`name`)
+VALUES('开发技术');
+SELECT * FROM `course_section_type`;
 
 INSERT INTO `course`(`name`, `description`, `section_id`)
 VALUES('测试课1', '这是一节测试课', '1');

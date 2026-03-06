@@ -20,9 +20,17 @@ DROP TABLE IF EXISTS `practice`;
 CREATE TABLE `practice` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `name` VARCHAR(20) NOT NULL COMMENT '练习名称',
+  `practice_type_id` TINYINT DEFAULT '0' NOT NULL COMMENT '练习类型对应id，具体类型在type表中指定,0为未指定',
   `question_num` SMALLINT NOT NULL COMMENT '问题数量',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '发布时间',
   `expired_at` DATETIME COMMENT '截止时间' #为空表示长期有效
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+#练习类型表
+DROP TABLE IF EXISTS `practice_type`;
+CREATE TABLE `practice_type`(
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `name` VARCHAR(20) NOT NULL COMMENT '类型名称'
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 #练习问题索引表，根据练习id查询相关问题的id数组
@@ -41,6 +49,7 @@ CREATE TABLE `question` (
   `type` TINYINT(1) NOT NULL COMMENT '问题类型', #0：判断，1：选择，2：简答，3：编程
   `content` TEXT NOT NULL COMMENT '问题文本', #<65535字
   `score` TINYINT NOT NULL COMMENT '问题分值',
+  `difficulty` TINYINT(1) NOT NULL COMMENT '问题难度', #0：简单，1：中等，2：困难
   `has_resource` BOOLEAN NOT NULL COMMENT '是否有资源' #优化查询
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -78,22 +87,32 @@ CREATE TABLE `user_answer`(
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ###以下是测试用例###
-INSERT INTO `practice`(`name`, `question_num`)
-VALUES('测试练习', '4');
+INSERT INTO `practice`(`name`, `practice_type_id`, `question_num`)
+VALUES('测试练习', '1', '4');
 SELECT * FROM `practice`;
+
+INSERT INTO `practice_type`(`name`)
+VALUES('编程');
+INSERT INTO `practice_type`(`name`)
+VALUES('算法');
+INSERT INTO `practice_type`(`name`)
+VALUES('系统');
+INSERT INTO `practice_type`(`name`)
+VALUES('AI');
+SELECT * FROM `practice_type`;
 
 INSERT INTO `practice_index`(`practice_id`, `course_section_id`)
 VALUES('1', '1');
 SELECT * FROM `practice_index`;
 
-INSERT INTO `question`(`name`, `type`, `content`, `score`, `has_resource`)
-VALUES('测试判断题', '0', '这是测试判断题，正确答案是False', '100', FALSE);
-INSERT INTO `question`(`name`, `type`, `content`, `score`, `has_resource`)
-VALUES('测试选择题', '1', '这是测试选择题，正确答案是C', '100', FALSE);
-INSERT INTO `question`(`name`, `type`, `content`, `score`, `has_resource`)
-VALUES('测试简答题', '2', '这是测试简答题', '100', FALSE);
-INSERT INTO `question`(`name`, `type`, `content`, `score`, `has_resource`)
-VALUES('斐波那契数列', '3', '计算斐波那契数列的第n项,斐波那契数列的定义为F(1)=1, F(2)=1, F(n)=F(n-1)+F(n-2),(n≥3)', '100', TRUE);
+INSERT INTO `question`(`name`, `type`, `content`, `score`, `difficulty`, `has_resource`)
+VALUES('测试判断题', '0', '这是测试判断题，正确答案是False', '100', '0', FALSE);
+INSERT INTO `question`(`name`, `type`, `content`, `score`, `difficulty`, `has_resource`)
+VALUES('测试选择题', '1', '这是测试选择题，正确答案是C', '100', '0', FALSE);
+INSERT INTO `question`(`name`, `type`, `content`, `score`, `difficulty`, `has_resource`)
+VALUES('测试简答题', '2', '这是测试简答题', '100', '0', FALSE);
+INSERT INTO `question`(`name`, `type`, `content`, `score`, `difficulty`, `has_resource`)
+VALUES('斐波那契数列', '3', '计算斐波那契数列的第n项,斐波那契数列的定义为F(1)=1, F(2)=1, F(n)=F(n-1)+F(n-2),(n≥3)', '100', '1', TRUE);
 SELECT * FROM `question`;
 
 INSERT INTO `question_index`(`practice_id`, `question_id`)
@@ -107,17 +126,17 @@ VALUES('1', '4');
 SELECT * FROM `question_index`;
 
 INSERT INTO `question_resource`(`description`, `name`, `type`, `size`, `question_id`)
-VALUES('斐波那契数列测试用例', '1.in', '0', '4', '1');
+VALUES('斐波那契数列测试用例', '1.in', '0', '4', '4');
 INSERT INTO `question_resource`(`description`, `name`, `type`, `size`, `question_id`)
-VALUES('斐波那契数列用例答案', '1.out', '1', '2', '1');
+VALUES('斐波那契数列用例答案', '1.out', '1', '2', '4');
 SELECT * FROM `question_resource`;
 
 INSERT INTO `answer`(`content`, `analysis`, `question_id`)
-VALUES('False', '这是测试解析', 2);
+VALUES('False', '这是测试解析', 1);
 INSERT INTO `answer`(`content`, `analysis`, `question_id`)
-VALUES('C', '这是测试解析', 3);
+VALUES('C', '这是测试解析', 2);
 INSERT INTO `answer`(`content`, `analysis`, `question_id`)
-VALUES('这是测试答案', '这是测试解析', 4);
+VALUES('这是测试答案', '这是测试解析', 3);
 SELECT * FROM `answer`;
 
 SELECT * FROM `user_answer`;
