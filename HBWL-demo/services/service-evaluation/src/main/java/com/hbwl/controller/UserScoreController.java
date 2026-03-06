@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-//TODO: 这个controller只供内部调用，后续改一下传参
+//这个controller只供内部调用
 
 @RestController
 @RequestMapping("/api/evaluation/score")
@@ -18,7 +18,7 @@ public class UserScoreController {
     private UserScoreService userScoreService;
 
     @GetMapping
-    public Result getUserScore(@RequestHeader("userId") String userId) {
+    public Result getUserScore(@RequestParam String userId) {
         UserScore userScore = userScoreService.getUserScore(userId);
         if(userScore == null) return Result.error("查找数据为空");
         return Result.success(userScore, null);
@@ -42,7 +42,7 @@ public class UserScoreController {
     }
 
     @DeleteMapping
-    public Result deleteUserScore(@RequestHeader("userId") String userId) {
+    public Result deleteUserScore(@RequestParam String userId) {
         int delete = userScoreService.deleteUserScoreByUserId(userId);
         if(delete == -1)  return Result.error("删除数据不能为空");
         if(delete == 0)  return Result.error("删除失败");

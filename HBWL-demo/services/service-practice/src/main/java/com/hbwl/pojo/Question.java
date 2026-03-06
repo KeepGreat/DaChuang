@@ -13,5 +13,6 @@ public class Question {
     private Integer type; //0：判断，1：选择，2：简答，3：编程
     private String content; //<65535字
     private Integer score;
+    private Integer difficulty;
     private Boolean hasResource;
 }

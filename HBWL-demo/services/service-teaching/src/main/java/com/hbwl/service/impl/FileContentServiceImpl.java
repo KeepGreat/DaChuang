@@ -28,7 +28,7 @@ public class FileContentServiceImpl implements FileContentService {
 
     @Override
     public int addFileContent(FileContent fileContent, MultipartFile file) {
-        if (fileContent == null || file == null) return -1;
+        if (fileContent == null || file == null || fileContent.getMatId() == null) return -1;
         String fileName = fileContentUtil.storeFile(file);
         fileContent.setName(fileName);
         fileContentUtil.embedVector(fileContent, file);

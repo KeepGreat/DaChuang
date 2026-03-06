@@ -8,7 +8,8 @@ import java.util.List;
 
 public interface MaterialService {
 
-    int addMaterial(Material material);
+    //返回新增的materialId
+    Material addMaterial(Material material);
 
     int deleteMaterialById(Integer id);
 

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hbwl.common.Result;
 import com.hbwl.pojo.Practice;
 import com.hbwl.pojo.PracticeIndex;
+import com.hbwl.pojo.PracticeType;
 import com.hbwl.pojo.dto.PracticeDTO;
 import com.hbwl.service.PracticeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,12 +66,17 @@ public class PracticeController {
 
     @GetMapping
     public Result getPractices(@RequestParam(required = false) Integer id,
+                               @RequestParam(required = false) String name,
+                               @RequestParam(required = false) Integer practiceTypeId,
                                @RequestParam(required = false) LocalDateTime createdAtStart,
                                @RequestParam(required = false) LocalDateTime createdAtEnd,
                                @RequestParam(required = false) LocalDateTime expiredAtStart,
                                @RequestParam(required = false) LocalDateTime expiredAtEnd){
-        System.out.println("接收到的参数：" + createdAtEnd);
-        List<Practice> list = practiceService.getPractices(id, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd);
+        Practice practice = new Practice();
+        practice.setId(id);
+        practice.setName(name);
+        practice.setPracticeTypeId(practiceTypeId);
+        List<Practice> list = practiceService.getPractices(practice, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd);
         if (list.isEmpty()) return Result.error("查询练习失败");
         return Result.success(list, "查询练习成功");
     }
@@ -78,11 +84,17 @@ public class PracticeController {
     @GetMapping("/{page}/{size}")
     public Result getPracticesPage(@PathVariable("page") int pageNo, @PathVariable("size") int pageSize,
                                    @RequestParam(required = false) Integer id,
+                                   @RequestParam(required = false) String name,
+                                   @RequestParam(required = false) Integer practiceTypeId,
                                    @RequestParam(required = false) LocalDateTime createdAtStart,
                                    @RequestParam(required = false) LocalDateTime createdAtEnd,
                                    @RequestParam(required = false) LocalDateTime expiredAtStart,
                                    @RequestParam(required = false) LocalDateTime expiredAtEnd){
-        Page<Practice> practicesPage = practiceService.getPracticesPage(pageNo, pageSize, id, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd);
+        Practice practice = new Practice();
+        practice.setId(id);
+        practice.setName(name);
+        practice.setPracticeTypeId(practiceTypeId);
+        Page<Practice> practicesPage = practiceService.getPracticesPage(pageNo, pageSize, practice, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd);
         if (practicesPage.getSize() == 0) return Result.error("查询练习失败");
         return Result.success(practicesPage, "查询练习成功");
     }
@@ -108,5 +120,47 @@ public class PracticeController {
         Page<Practice> page = practiceService.getPracticesPageByIndex(pageNo, pageSize, practiceIndex);
         if (page.getSize() == 0) return Result.error("查询练习失败");
         return Result.success(page, "查询练习成功");
+    }
+
+    //管理PracticeType
+    @PostMapping("/type")
+    public Result addPracticeType(@RequestBody PracticeType practiceType,
+                                  @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
+        int row = practiceService.addPracticeType(practiceType);
+        if (row == -1) return Result.error("参数不能为空");
+        if (row == 0) return Result.error("插入练习类型失败");
+        return Result.success("插入练习类型成功");
+    }
+
+    @DeleteMapping("/type/{id}")
+    public Result deletePracticeType(@PathVariable Integer id,
+                                     @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
+        int row = practiceService.deletePracticeTypeById(id);
+        if (row == -1) return Result.error("参数不能为空");
+        if (row == 0) return Result.error("删除练习类型失败");
+        return Result.success("删除练习类型成功");
+    }
+
+    @PutMapping("/type")
+    public Result updatePracticeType(@RequestBody PracticeType practiceType,
+                                     @RequestHeader("role") String role){
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
+        int row = practiceService.updatePracticeTypeById(practiceType);
+        if (row == -1) return Result.error("参数不能为空");
+        if (row == 0) return Result.error("更新练习类型失败");
+        return Result.success("更新练习类型成功");
+    }
+
+    @GetMapping("/type")
+    public Result getPracticeTypes(@RequestParam(required = false) Integer id,
+                                   @RequestParam(required = false) String name){
+        PracticeType practiceType = new PracticeType();
+        practiceType.setId(id);
+        practiceType.setName(name);
+        List<PracticeType> list = practiceService.getPracticeTypes(practiceType);
+        if (list.isEmpty()) return Result.error("查询练习类型失败");
+        return Result.success(list, "查询练习类型成功");
     }
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface QuestionService {
 
-    int addQuestion(Question question, QuestionIndex questionIndex);
+    Question addQuestion(Question question, QuestionIndex questionIndex);
 
     int deleteQuestionById(Integer id);
 

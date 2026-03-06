@@ -15,8 +15,21 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    //学生注册
     @PostMapping("/register")
     public Result register(@RequestBody User user) {
+        user.setRole("student");
+        int row = userService.addUser(user);
+        if (row == -1) return Result.error("参数不能为空");
+        if (row == 0) return Result.error("注册用户失败");
+        return Result.success("注册用户成功");
+    }
+
+    //教师和管理员注册
+    @PostMapping("/register/admin")
+    public Result registerForAdmin(@RequestBody User user,
+                                   @RequestHeader("role") String role){
+        if (!role.equals("admin")) return Result.error("权限不足");
         int row = userService.addUser(user);
         if (row == -1) return Result.error("参数不能为空");
         if (row == 0) return Result.error("注册用户失败");

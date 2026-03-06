@@ -26,19 +26,19 @@ public class QuestionServiceImpl implements QuestionService {
     private QuestionIndexMapper questionIndexMapper;
 
     @Override
-    public int addQuestion(Question question, QuestionIndex questionIndex) {
-        if (question == null || questionIndex == null) return -1;
+    public Question addQuestion(Question question, QuestionIndex questionIndex) {
+        if (question == null || questionIndex == null) return null;
         //addQuestion
-        if (question.getType() != null || question.getContent() != null || question.getHasResource() != null) return -1;
+        if (question.getType() == null || question.getContent() == null || question.getScore() == null || question.getDifficulty() == null || question.getHasResource() == null) return null;
         int row = 0;
         row = questionMapper.insert(question);
-        if (row == 0) return 0;
+        if (row == 0) return null;
         //addQuestionIndex
-        if (questionIndex.getPracticeId() == null) return -1;
+        if (questionIndex.getPracticeId() == null) return null;
         questionIndex.setQuestionId(question.getId());
         row = questionIndexMapper.insert(questionIndex);
         if (row == 0) throw new RuntimeException("插入QuestionIndex失败，进行回滚");
-        return row;
+        return question;
     }
 
     @Override
@@ -83,6 +83,7 @@ public class QuestionServiceImpl implements QuestionService {
         if (question.getType() != null) updateWrapper.set("type", question.getType());
         if (question.getContent() != null) updateWrapper.set("content", question.getContent());
         if (question.getScore() != null) updateWrapper.set("score", question.getScore());
+        if (question.getDifficulty() != null) updateWrapper.set("difficulty", question.getDifficulty());
         if (question.getHasResource() != null) updateWrapper.set("has_resource", question.getHasResource());
         return questionMapper.update(null, updateWrapper);
     }
@@ -95,6 +96,7 @@ public class QuestionServiceImpl implements QuestionService {
         if (question.getName() != null) queryWrapper.like("name", question.getName());
         if (question.getType() != null) queryWrapper.eq("type", question.getType());
         if (question.getScore() != null) queryWrapper.eq("score", question.getScore());
+        if (question.getDifficulty() != null) queryWrapper.eq("difficulty", question.getDifficulty());
         if (question.getHasResource() != null) queryWrapper.eq("has_resource", question.getHasResource());
         return questionMapper.selectList(queryWrapper);
     }
@@ -108,6 +110,7 @@ public class QuestionServiceImpl implements QuestionService {
         if (question.getName() != null) queryWrapper.like("name", question.getName());
         if (question.getType() != null) queryWrapper.eq("type", question.getType());
         if (question.getScore() != null) queryWrapper.eq("score", question.getScore());
+        if (question.getDifficulty() != null) queryWrapper.eq("difficulty", question.getDifficulty());
         if (question.getHasResource() != null) queryWrapper.eq("has_resource", question.getHasResource());
         return questionMapper.selectPage(page, queryWrapper);
     }

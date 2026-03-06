@@ -36,8 +36,11 @@ public class UserServiceImpl implements UserService {
         String userId = UUID.randomUUID().toString();
         user.setId(userId);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        Result result = userScoreFeignClient.addUserScore(Map.of("userId", userId));
-        if (result.getCode() != 200) return 0;
+        //如果用户是学生则纳入评价体系
+        if (user.getRole().equals("student")){
+            Result result = userScoreFeignClient.addUserScore(Map.of("userId", userId));
+            if (result.getCode() != 200) return 0;
+        }
         System.out.println("插入数据: " + user );
         return userMapper.insert(user);
     }
@@ -45,6 +48,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public int deleteUserById(String id) {
         if (id == null) return -1;
+        userScoreFeignClient.deleteUserScore(id);
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", id);
         return userMapper.delete(queryWrapper);

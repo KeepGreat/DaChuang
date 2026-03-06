@@ -21,9 +21,11 @@ public class MaterialServiceImpl implements MaterialService {
     private MaterialMapper materialMapper;
 
     @Override
-    public int addMaterial(Material material) {
-        if (material == null || material.getType() == null || material.getCourseId() == null) return -1;
-        return materialMapper.insert(material);
+    public Material addMaterial(Material material) {
+        if (material == null || material.getType() == null || material.getCourseId() == null) return null;
+        int row = materialMapper.insert(material);
+        if (row > 0) return material;
+        else return null;
     }
 
     @Override

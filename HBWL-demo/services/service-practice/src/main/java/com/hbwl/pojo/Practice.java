@@ -13,6 +13,7 @@ public class Practice {
 
     private String name;
     private Integer questionNum;
+    private Integer practiceTypeId;
     private LocalDateTime createdAt; //格式为yyyy-mm-ddThh:mm:ss
     private LocalDateTime expiredAt; //格式为yyyy-mm-ddThh:mm:ss
 }

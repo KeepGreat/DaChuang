@@ -21,10 +21,9 @@ public class MaterialController {
     public Result addMaterial(@RequestBody Material material,
                               @RequestHeader("role") String role){
         if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
-        int row = materialService.addMaterial(material);
-        if (row == -1) return Result.error("参数不能为空");
-        if (row == 0) return Result.error("增加教材失败");
-        return Result.success("增加教材成功");
+        Material addMaterial = materialService.addMaterial(material);
+        if (addMaterial == null) return Result.error("增加教材失败");
+        return Result.success(addMaterial, null);
     }
 
     @DeleteMapping("{id}")

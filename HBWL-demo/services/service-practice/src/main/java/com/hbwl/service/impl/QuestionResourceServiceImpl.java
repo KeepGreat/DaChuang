@@ -36,7 +36,7 @@ public class QuestionResourceServiceImpl implements QuestionResourceService {
 
     @Override
     public int addQuestionResource(QuestionResource questionResource, MultipartFile file) {
-        if (questionResource == null || file == null) return -1;
+        if (questionResource == null || file == null || questionResource.getQuestionId() == null) return -1;
         String ResourceName = questionResourceUtil.storeFile(file);
         questionResource.setName(ResourceName);
         return questionResourceMapper.insert(questionResource);

@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hbwl.mapper.PracticeIndexMapper;
 import com.hbwl.mapper.PracticeMapper;
+import com.hbwl.mapper.PracticeTypeMapper;
 import com.hbwl.pojo.Practice;
 import com.hbwl.pojo.PracticeIndex;
+import com.hbwl.pojo.PracticeType;
 import com.hbwl.service.PracticeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Autowired
     private PracticeIndexMapper practiceIndexMapper;
+
+    @Autowired
+    private PracticeTypeMapper practiceTypeMapper;
 
     @Override
     public int addPractice(Practice practice, PracticeIndex practiceIndex) {
@@ -89,6 +94,7 @@ public class PracticeServiceImpl implements PracticeService {
         updateWrapper.eq("id", practice.getId());
         if (practice.getName() != null) updateWrapper.set("name", practice.getName());
         if (practice.getQuestionNum() != null) updateWrapper.set("question_num", practice.getQuestionNum());
+        if (practice.getPracticeTypeId() != null) updateWrapper.set("practice_type_id", practice.getPracticeTypeId());
         if (practice.getCreatedAt() != null) updateWrapper.set("created_at", practice.getCreatedAt());
         if (practice.getExpiredAt() != null) updateWrapper.set("expired_at", practice.getExpiredAt());
         return practiceMapper.update(null, updateWrapper);
@@ -96,10 +102,13 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     @Override
-    public List<Practice> getPractices(Integer id, LocalDateTime createdAtStart, LocalDateTime createdAtEnd, LocalDateTime expiredAtStart, LocalDateTime expiredAtEnd) {
-        if (id == null && createdAtStart == null && createdAtEnd == null && expiredAtStart == null && expiredAtEnd == null) return practiceMapper.selectList(null);
+    public List<Practice> getPractices(Practice practice, LocalDateTime createdAtStart, LocalDateTime createdAtEnd, LocalDateTime expiredAtStart, LocalDateTime expiredAtEnd) {
+        if (practice == null
+            && createdAtStart == null && createdAtEnd == null && expiredAtStart == null && expiredAtEnd == null) return practiceMapper.selectList(null);
         QueryWrapper<Practice> queryWrapper = new QueryWrapper<>();
-        if (id != null) queryWrapper.eq("id", id);
+        if (practice.getId() != null) queryWrapper.eq("id", practice.getId());
+        if (practice.getName() != null) queryWrapper.like("name", practice.getName());
+        if (practice.getPracticeTypeId() != null) queryWrapper.eq("practice_type_id", practice.getPracticeTypeId());
         if (createdAtStart != null) queryWrapper.ge("created_at", createdAtStart);
         if (createdAtEnd != null) queryWrapper.le("created_at", createdAtEnd);
         if (expiredAtStart != null) queryWrapper.ge("expired_at", expiredAtStart);
@@ -109,11 +118,13 @@ public class PracticeServiceImpl implements PracticeService {
 
     @Override
     public Page<Practice> getPracticesPage(int pageNo, int pageSize,
-                                           Integer id, LocalDateTime createdAtStart, LocalDateTime createdAtEnd, LocalDateTime expiredAtStart, LocalDateTime expiredAtEnd) {
+                                           Practice practice, LocalDateTime createdAtStart, LocalDateTime createdAtEnd, LocalDateTime expiredAtStart, LocalDateTime expiredAtEnd) {
         Page<Practice> page = new Page<>(pageNo, pageSize);
-        if (id == null && createdAtStart == null && createdAtEnd == null && expiredAtStart == null && expiredAtEnd == null) return practiceMapper.selectPage(page, null);
+        if (practice == null && createdAtStart == null && createdAtEnd == null && expiredAtStart == null && expiredAtEnd == null) return practiceMapper.selectPage(page, null);
         QueryWrapper<Practice> queryWrapper = new QueryWrapper<>();
-        if (id != null) queryWrapper.eq("id", id);
+        if (practice.getId() != null) queryWrapper.eq("id", practice.getId());
+        if (practice.getName() != null) queryWrapper.like("name", practice.getName());
+        if (practice.getPracticeTypeId() != null) queryWrapper.eq("practice_type_id", practice.getPracticeTypeId());
         if (createdAtStart != null) queryWrapper.ge("created_at", createdAtStart);
         if (createdAtEnd != null) queryWrapper.le("created_at", createdAtEnd);
         if (expiredAtStart != null) queryWrapper.ge("expired_at", expiredAtStart);
@@ -149,5 +160,39 @@ public class PracticeServiceImpl implements PracticeService {
             practices.add(practiceMapper.selectById(index.getPracticeId()));
         }
         return page.setRecords(practices);
+    }
+
+    //管理PracticeType
+    @Override
+    public int addPracticeType(PracticeType practiceType) {
+        if (practiceType == null || practiceType.getName() == null) return -1;
+        return practiceTypeMapper.insert(practiceType);
+    }
+
+    @Override
+    public int deletePracticeTypeById(Integer id) {
+        if (id == null) return -1;
+        UpdateWrapper<Practice> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("practice_type_id", id);
+        updateWrapper.set("practice_type_id", 0);
+        return practiceTypeMapper.deleteById(id);
+    }
+
+    @Override
+    public int updatePracticeTypeById(PracticeType practiceType) {
+        if (practiceType == null || practiceType.getId() == null) return -1;
+        UpdateWrapper<PracticeType> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", practiceType.getId());
+        if (practiceType.getName() != null) updateWrapper.set("name", practiceType.getName());
+        return practiceTypeMapper.update(null, updateWrapper);
+    }
+
+    @Override
+    public List<PracticeType> getPracticeTypes(PracticeType practiceType) {
+        if (practiceType == null) return practiceTypeMapper.selectList(null);
+        QueryWrapper<PracticeType> queryWrapper = new QueryWrapper<>();
+        if (practiceType.getId() != null) queryWrapper.eq("id", practiceType.getId());
+        if (practiceType.getName() != null) queryWrapper.like("name", practiceType.getName());
+        return practiceTypeMapper.selectList(queryWrapper);
     }
 }

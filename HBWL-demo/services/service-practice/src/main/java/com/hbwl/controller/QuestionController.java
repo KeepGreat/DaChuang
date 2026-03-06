@@ -22,15 +22,14 @@ public class QuestionController {
     public Result addQuestion(@RequestBody QuestionDTO questionDTO,
                               @RequestHeader("role") String role){
         if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
-        int row = questionService.addQuestion(questionDTO.getQuestion(), questionDTO.getQuestionIndex());
-        if (row == -1) return Result.error("参数不能为空");
-        if (row == 0) return Result.error("插入问题失败");
-        return Result.success("插入问题成功");
+        Question addQuestion = questionService.addQuestion(questionDTO.getQuestion(), questionDTO.getQuestionIndex());
+        if (addQuestion == null) return Result.error("插入问题失败");
+        return Result.success(addQuestion, null);
     }
 
     @DeleteMapping("{id}")
     public Result deleteQuestionById(@PathVariable("id") Integer id,
-                                 @RequestHeader("role") String role){
+                                     @RequestHeader("role") String role){
         if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = questionService.deleteQuestionById(id);
         if (row == -1) return Result.error("参数不能为空");
@@ -65,11 +64,14 @@ public class QuestionController {
                                @RequestParam(required = false) String name,
                                @RequestParam(required = false) Integer type,
                                @RequestParam(required = false) Integer score,
+                               @RequestParam(required = false) Integer difficulty,
                                @RequestParam(required = false) Boolean hasResource){
         Question question = new Question();
         question.setId(id);
         question.setName(name);
         question.setType(type);
+        question.setScore(score);
+        question.setDifficulty(difficulty);
         question.setHasResource(hasResource);
         List<Question> list = questionService.getQuestions(question);
         if (list.isEmpty()) return Result.error("查询问题失败");
@@ -82,11 +84,14 @@ public class QuestionController {
                                    @RequestParam(required = false) String name,
                                    @RequestParam(required = false) Integer type,
                                    @RequestParam(required = false) Integer score,
+                                   @RequestParam(required = false) Integer difficulty,
                                    @RequestParam(required = false) Boolean hasResource){
         Question question = new Question();
         question.setId(id);
         question.setName(name);
         question.setType(type);
+        question.setScore(score);
+        question.setDifficulty(difficulty);
         question.setHasResource(hasResource);
         Page<Question> page = questionService.getQuestionsPage(pageNo, pageSize, question);
         if (page.getSize() == 0) return Result.error("查询问题失败");
