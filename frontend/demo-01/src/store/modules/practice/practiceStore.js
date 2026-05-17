@@ -4,53 +4,11 @@ import { ref, computed } from 'vue'
 export const usePracticeStore = defineStore('practice', () => {
   // State
   const practices = ref([
-    // Python编程基础课程的练习
-    {
-      id: '1',
-      courseSectionId: '0',
-      courseId: '0',
-      title: '练习1：Python基础语法',
-      description: '练习Python变量、数据类型和基本运算符',
-      requirement: `<p>请完成以下任务：</p>
-        <ul>
-          <li>定义不同类型的变量（整数、浮点数、字符串、布尔值）</li>
-          <li>使用算术运算符进行计算</li>
-          <li>使用比较运算符和逻辑运算符</li>
-          <li>练习字符串的基本操作</li>
-          <li>代码需要包含适当的注释</li>
-        </ul>`,
-      deadline: '2024-12-15 23:59:59',
-      status: '未提交',
-      score: null,
-      totalScore: 100,
-      difficulty: 1
-    }
   ])
 
   const currentPractice = ref(null)
   const selectedPractice = ref(null)
   const submissionHistory = ref({
-    '2': [
-      {
-        submitTime: '2024-12-14 15:30:00',
-        status: '已提交',
-        score: 85
-      }
-    ],
-    '5': [
-      {
-        submitTime: '2024-12-16 20:15:00',
-        status: '部分正确',
-        score: 60
-      }
-    ],
-    '6': [
-      {
-        submitTime: '2024-12-20 10:30:00',
-        status: '已提交',
-        score: 90
-      }
-    ]
   })
   const loading = ref(false)
 

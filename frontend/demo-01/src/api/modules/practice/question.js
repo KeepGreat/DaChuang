@@ -12,6 +12,8 @@ import request from "@/api/request";
  * @property {string} name - 问题名称
  * @property {number} type - 问题类型（0:判断,1:选择,2:简答,3:编程）
  * @property {string} content - 问题内容
+ * @property {number} score - 问题分值
+ * @property {number} difficulty - 问题难度(0：简单，1：中等，2：困难)
  * @property {boolean} hasResource - 是否有资源
  */
 
@@ -38,6 +40,8 @@ import request from "@/api/request";
  * @property {string} [name] - 问题名称
  * @property {number} [type] - 问题类型
  * @property {string} [content] - 问题内容
+ * @property {number} [score] - 问题分值
+ * @property {number} [difficulty] - 问题难度(0：简单，1：中等，2：困难)
  * @property {boolean} [hasResource] - 是否有资源
  */
 
@@ -56,6 +60,7 @@ export function createQuestionAndIndex(data) {
 
 /**
  * 根据问题ID删除问题及关联的QuestionIndex
+ * 注意该方法已自动删除与问题相关的索引，无需再调用questionIndex中的方法
  * @param {number} questionId - 问题ID
  * @returns {Promise<ApiEmptyResponse>}
  */
@@ -98,6 +103,8 @@ export function updateQuestion(data) {
  * @param {number} [params.id] - 问题ID
  * @param {string} [params.name] - 问题名称
  * @param {number} [params.type] - 问题类型
+ * @param {number} [score] - 问题分值
+ * @param {number} [difficulty] - 问题难度(0：简单，1：中等，2：困难)
  * @param {boolean} [params.hasResource] - 是否有资源
  * @returns {Promise<ApiResponse<Question[]>>} 问题列表
  */
@@ -118,6 +125,8 @@ export function getQuestions(params = {}) {
  * @param {number} [queryParams.id] - 问题ID
  * @param {string} [queryParams.name] - 问题名称
  * @param {number} [queryParams.type] - 问题类型
+ * @param {number} [queryParams.score] - 问题分值
+ * @param {number} [queryParams.difficulty] - 问题难度(0：简单，1：中等，2：困难)
  * @param {boolean} [queryParams.hasResource] - 是否有资源
  * @returns {Promise<ApiResponse<Page<Question>>>} 分页问题列表
  */

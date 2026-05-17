@@ -11,14 +11,14 @@
           </div>
           <div class="ai-info">
             <div class="ai-avatar-header">
-              <img src="@/assets/AI.png" alt="AI" />
+              <img src="@/assets/teaching/AI.png" alt="AI" />
               <div class="online-indicator"></div>
             </div>
             <div class="ai-details">
               <h1>{{ courseTitle || '智能学伴' }}</h1>
               <p class="status-text">
                 <span class="online-dot"></span>
-                在线 - 随时为您提供帮助
+                你的小伙伴有问题要问你，快帮帮他吧!
               </p>
             </div>
           </div>
@@ -35,7 +35,7 @@
           <div class="welcome-section" v-if="!chatStarted">
             <div class="welcome-card">
               <div class="ai-avatar-welcome">
-                <img src="@/assets/AI.png" alt="AI" />
+                <img src="@/assets/teaching/AI.png" alt="AI" />
                 <div class="pulse-ring"></div>
               </div>
               <h2 class="welcome-title">你好！我是你的智能学伴</h2>
@@ -58,10 +58,10 @@
               <!-- AI消息 -->
               <div v-else class="message-bubble ai-bubble">
                 <div class="ai-avatar-small">
-                  <img src="@/assets/AI.png" alt="AI" />
+                  <img src="@/assets/teaching/AI.png" alt="AI" />
                 </div>
                 <div class="bubble-content-wrapper">
-                  <div class="bubble-content" v-html="message.content"></div>
+                  <div class="bubble-content markdown-content" v-html="parseAiMarkdown(message.content)"></div>
                   <div class="message-meta">
                     <span class="message-time">{{ formatMessageTime(message.time) }}</span>
                     <div class="message-tools">
@@ -81,7 +81,7 @@
             <!-- AI正在输入 -->
             <div class="typing-bubble" v-if="isTyping">
               <div class="ai-avatar-small">
-                <img src="@/assets/AI.png" alt="AI" />
+                <img src="@/assets/teaching/AI.png" alt="AI" />
               </div>
               <div class="typing-indicator">
                 <span></span>
@@ -118,6 +118,7 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { marked } from 'marked'
 import {
   ArrowLeft,
   CopyDocument,
@@ -128,9 +129,35 @@ import TeachingAPI from '@/api/modules/teaching/TeachingAPI'
 const route = useRoute()
 const router = useRouter()
 
+const parseMaterialIds = (queryValue) => {
+  if (!queryValue) return []
+
+  const normalizeIds = (ids) => ids
+    .map((id) => Number(id))
+    .filter((id) => Number.isFinite(id))
+
+  if (Array.isArray(queryValue)) {
+    return normalizeIds(queryValue)
+  }
+
+  if (typeof queryValue === 'string') {
+    try {
+      const parsed = JSON.parse(queryValue)
+      if (Array.isArray(parsed)) {
+        return normalizeIds(parsed)
+      }
+    } catch (error) {
+      return normalizeIds(queryValue.split(','))
+    }
+  }
+
+  return []
+}
+
 // 数据
 const courseId = ref(route.query.courseId)
 const courseTitle = ref(route.query.courseTitle)
+const materialIds = ref(parseMaterialIds(route.query.materialIds))
 const inputMessage = ref('')
 const messages = ref([])
 const isTyping = ref(false)
@@ -141,6 +168,33 @@ const isCreatingSession = ref(false)
 
 const airesponse = ref('')
 
+marked.setOptions({
+  gfm: true,
+  breaks: true
+})
+
+const sanitizeHtml = (html) => {
+  if (!html) return ''
+
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, '')
+    .replace(/\son\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/\s(href|src)=("|')\s*javascript:[\s\S]*?\2/gi, '')
+}
+
+const parseAiMarkdown = (content) => {
+  if (!content || typeof content !== 'string') return ''
+
+  try {
+    const html = marked.parse(content)
+    return sanitizeHtml(typeof html === 'string' ? html : String(html))
+  } catch (error) {
+    console.error('Markdown 解析失败:', error)
+    return content
+  }
+}
+
 // 返回
 const goBack = () => {
   router.go(-1)
@@ -150,7 +204,9 @@ const goBack = () => {
 const createSession = async () => {
   try {
     isCreatingSession.value = true
-    const res = await TeachingAPI.createSession()
+    const res = await TeachingAPI.createSession({
+      material_id: materialIds.value
+    })
     if (res.data && res.data.session_id) {
       sessionId.value = res.data.session_id
       airesponse.value = res.data.welcome_message || '智能学伴已就绪，您可以开始对话了！(本次对话最多六轮)'
@@ -638,6 +694,43 @@ onUnmounted(() => {
   border-bottom-left-radius: 4px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   border: 1px solid var(--border-primary-lighter);
+}
+
+.ai-bubble .bubble-content :deep(p) {
+  margin: 0;
+}
+
+.ai-bubble .bubble-content :deep(p + p) {
+  margin-top: 10px;
+}
+
+.ai-bubble .bubble-content :deep(ul),
+.ai-bubble .bubble-content :deep(ol) {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.ai-bubble .bubble-content :deep(pre) {
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--bg-primary-light);
+  overflow-x: auto;
+}
+
+.ai-bubble .bubble-content :deep(code) {
+  font-family: Consolas, Monaco, monospace;
+}
+
+.ai-bubble .bubble-content :deep(:not(pre) > code) {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--bg-primary-light);
+}
+
+.ai-bubble .bubble-content :deep(a) {
+  color: var(--primary);
+  text-decoration: underline;
 }
 
 .message-time {

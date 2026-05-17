@@ -6,7 +6,7 @@
       <!-- 问题题目卡片 -->
       <div class="section-card">
         <h3 class="section-title">问题题目</h3>
-        <div class="problem-title">{{ question.title }}</div>
+        <div class="problem-title">{{ question.name }}</div>
       </div>
 
       <!-- 问题要求卡片 -->
@@ -16,7 +16,7 @@
       </div>
 
       <!-- 问题说明卡片 -->
-      <div class="section-card">
+      <!-- <div class="section-card">
         <h3 class="section-title">问题说明</h3>
         <div class="note-content">
           <div v-if="question.input" class="note-item">
@@ -29,10 +29,10 @@
             <span class="note-label">注意:</span> {{ question.note }}
           </div>
         </div>
-      </div>
+      </div> -->
 
-      <!-- 问题资源 -->
-      <QuestionResources v-if="question.hasResource" :question-id="question.id" />
+      <!-- 问题资源
+      <QuestionResources v-if="question.hasResource" :question-id="question.id" /> -->
     </div>
 
     <!-- 右侧：代码编写区域 -->
@@ -42,18 +42,6 @@
         <div class="code-header">
           <span class="code-title">编写代码</span>
           <div class="code-actions">
-            <!-- 编程语言选择器 -->
-            <el-select
-              v-model="selectedLanguage"
-              placeholder="选择语言"
-              size="default"
-              style="width: 100px"
-            >
-              <el-option label="Python" value="python"></el-option>
-              <el-option label="Java" value="java"></el-option>
-              <el-option label="C++" value="cpp"></el-option>
-              <el-option label="JavaScript" value="javascript"></el-option>
-            </el-select>
             <!-- 查看上一次评测按钮 -->
             <el-button
               v-if="hasPreviousEvaluation"
@@ -67,12 +55,13 @@
 
         <!-- 代码输入区域 -->
         <div class="code-content">
-          <textarea
-            v-model="codeInput"
-            class="code-input"
-            placeholder="在此输入代码..."
-            :disabled="showCorrectness"
-          ></textarea>
+          <CodeSandbox
+            ref="codeSandboxRef"
+            :initial-language="selectedLanguage"
+            :initial-code="codeInput"
+            :initial-input="sandboxInput"
+            @code-change="handleCodeSandboxChange"
+          />
         </div>
 
         <!-- 代码运行结果展示 -->
@@ -125,6 +114,7 @@ import { useUserAnswerStore, useUserStore } from "@/store";
 import { ElMessage } from "element-plus";
 import { marked } from "marked";
 import { onMounted, ref, watch } from "vue";
+import CodeSandbox from "../teaching/CodeSandbox.vue";
 import QuestionResources from "./QuestionResources.vue";
 
 // ==========================================================================
@@ -184,7 +174,9 @@ defineExpose({
 // 核心状态
 const selectedLanguage = ref("cpp"); // 选中的编程语言
 const codeInput = ref(""); // 用户输入的代码
+const sandboxInput = ref(""); // 程序输入
 const codeResult = ref(""); // 代码运行结果
+const codeSandboxRef = ref(null);
 
 // 评估对话框状态
 const evaluationDialogVisible = ref(false); // 评估对话框可见性
@@ -212,6 +204,15 @@ watch(
       const userAnswer = userAnswerStore.getUserAnswerByQuestionId(newQuestion.id);
       // 确保 codeInput 始终是字符串类型
       codeInput.value = typeof userAnswer === "string" ? userAnswer : "";
+      sandboxInput.value = newQuestion.codeInput || newQuestion.input || "";
+
+      if (codeSandboxRef.value?.reset) {
+        codeSandboxRef.value.reset(
+          selectedLanguage.value,
+          codeInput.value,
+          sandboxInput.value
+        );
+      }
     }
     codeResult.value = ""; // 清空之前的运行结果
   },
@@ -226,6 +227,12 @@ watch(
   },
   { deep: true }
 );
+
+function handleCodeSandboxChange(payload) {
+  selectedLanguage.value = payload?.language || selectedLanguage.value;
+  codeInput.value = payload?.code || "";
+  sandboxInput.value = payload?.input || "";
+}
 
 // ==========================================================================
 // 核心功能函数
@@ -307,7 +314,7 @@ async function submitCode() {
     codeSandboxInput: {
       codeLanguage: selectedLanguage.value,
       code: codeInput.value,
-      input: props.question.codeInput,
+      input: sandboxInput.value || props.question.codeInput || props.question.input || "",
     },
     userAnswer: {
       content: codeInput.value,

@@ -168,106 +168,6 @@
             </div>
           </div>
         </div>
-
-        <!-- 文件预览区域 - 独立显示，不嵌套在资源组内 -->
-        <div
-          v-if="previewFileUrl && currentPreviewResource"
-          class="file-preview-container"
-        >
-          <div class="preview-header">
-            <span class="preview-title">{{ currentPreviewResource.name }}</span>
-            <el-button size="small" circle @click="closePreview">
-              <el-icon><Close /></el-icon>
-            </el-button>
-          </div>
-
-          <!-- 图片预览 -->
-          <img
-            v-if="previewFileType.startsWith('image/')"
-            :src="previewFileUrl"
-            :alt="currentPreviewResource.name"
-            class="preview-image"
-          />
-
-          <!-- PDF预览 -->
-          <div
-            v-else-if="previewFileType.startsWith('application/pdf')"
-            class="pdf-preview-container"
-          >
-            <div v-if="pdfPreviewError" class="pdf-preview-error">
-              <p>PDF文件加载失败，可能是由于浏览器安全限制或文件格式不支持。</p>
-              <el-button
-                type="primary"
-                size="small"
-                @click="downloadResource(currentPreviewResource)"
-              >
-                下载PDF文件
-              </el-button>
-            </div>
-            <iframe
-              v-else
-              :src="previewFileUrl"
-              class="preview-iframe"
-              @error="handlePdfPreviewError"
-              @load="handlePdfPreviewLoad"
-            ></iframe>
-          </div>
-
-          <!-- TXT预览 -->
-          <div
-            v-else-if="previewFileType === 'text/plain'"
-            class="text-preview-container"
-          >
-            <pre class="preview-text">{{ textContent }}</pre>
-          </div>
-
-          <!-- JSON预览 -->
-          <div
-            v-else-if="previewFileType === 'application/json'"
-            class="json-preview-container"
-          >
-            <pre class="preview-json">{{ jsonContent }}</pre>
-          </div>
-
-          <!-- PPT预览提示 -->
-          <div
-            v-else-if="
-              previewFileType.includes('powerpoint') ||
-              previewFileType.includes('pptx') ||
-              previewFileType.includes('ppt')
-            "
-            class="ppt-preview-container"
-          >
-            <div class="ppt-preview-info">
-              <i class="el-icon-warning-outline"></i>
-              <p>PPT文件无法直接在页面中预览</p>
-              <p>请下载后查看完整内容</p>
-              <el-button
-                type="primary"
-                size="small"
-                @click="downloadResource(currentPreviewResource)"
-              >
-                下载PPT文件
-              </el-button>
-            </div>
-          </div>
-
-          <!-- 其他文件类型 -->
-          <div v-else class="other-preview-container">
-            <div class="other-preview-info">
-              <i class="el-icon-document"></i>
-              <p>该文件类型暂不支持预览</p>
-              <p>文件类型：{{ previewFileType }}</p>
-              <el-button
-                type="primary"
-                size="small"
-                @click="downloadResource(currentPreviewResource)"
-              >
-                下载文件
-              </el-button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- 文件预览区域 - 独立显示，不嵌套在资源组内 -->
@@ -368,7 +268,7 @@
 </template>
 
 <script setup>
-import { downloadQuestionResource } from "@/api";
+import { downloadQuestionResource } from "@/api/modules/practice/questionResource.js";
 import { useQuestionResourceStore } from "@/store";
 import {
 	ArrowDown,

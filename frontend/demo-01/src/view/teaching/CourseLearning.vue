@@ -39,7 +39,7 @@
           </el-icon>
           <span class="nav-tooltip">作业</span>
         </div>
-        <div
+        <!-- <div
           class="nav-item"
           :class="{ active: activeModule === 'exam' }"
           @click="switchModule('exam')"
@@ -49,7 +49,7 @@
             <Document />
           </el-icon>
           <span class="nav-tooltip">考试</span>
-        </div>
+        </div> -->
         <!-- <div class="nav-item" :class="{ active: activeModule === 'resource' }" @click="switchModule('resource')"
           :title="'资料'">
           <el-icon>
@@ -115,28 +115,28 @@ const switchModule = (module) => {
   activeModule.value = module;
 
   // 根据模块跳转到不同的路由
-  const courseId = route.params.id;
+  const courseSectionId = route.params.id;
   switch (module) {
     case "course":
-      router.push(`/teaching/course/${courseId}/learn`);
+      router.push(`/teaching/course/${courseSectionId}/learn`);
       break;
     case "task":
-      router.push(`/teaching/course/${courseId}/task`);
+      router.push(`/teaching/course/${courseSectionId}/task`);
       break;
     case "practice":
-      router.push(`/teaching/course/${courseId}/practice`);
+      router.push(`/teaching/course/${courseSectionId}/practice`);
       break;
     case "exam":
-      router.push(`/teaching/course/${courseId}/exam`);
+      router.push(`/teaching/course/${courseSectionId}/exam`);
       break;
     case "resource":
-      router.push(`/teaching/course/${courseId}/resource`);
+      router.push(`/teaching/course/${courseSectionId}/resource`);
       break;
     case "discussion":
-      router.push(`/teaching/course/${courseId}/discussion`);
+      router.push(`/teaching/course/${courseSectionId}/discussion`);
       break;
     case "knowledge":
-      router.push(`/teaching/course/${courseId}/knowledge`);
+      router.push(`/teaching/course/${courseSectionId}/knowledge`);
       break;
   }
 };
@@ -180,8 +180,8 @@ initModule();
 
 // 如果访问的是 /teaching/course/:id（没有子路径），默认跳转到课程列表页面
 if (route.path.match(/^\/teaching\/course\/\w+$/)) {
-  const courseId = route.params.id;
-  router.replace(`/teaching/course/${courseId}/learn`);
+  const courseSectionId = route.params.id;
+  router.replace(`/teaching/course/${courseSectionId}/learn`);
 }
 </script>
 

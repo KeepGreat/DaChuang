@@ -1,5 +1,6 @@
 import { useUserStore } from "@/store";
 import { ElMessage } from "element-plus";
+import component from "element-plus/es/components/tree-select/src/tree-select-option.mjs";
 import { createRouter, createWebHashHistory } from "vue-router";
 
 // 主界面路由
@@ -42,9 +43,10 @@ const teachingRoutes = [
   {
     path: "coursesection",
     name: "CourseSection",
-    component: () => import("@/view/teaching/CourseSection.vue"),
+    component: () => import("@/view/teaching/CourseSectionNew.vue"),
   },
   {
+    // :id 语义为 courseSectionId
     path: "teaching/course/:id",
     name: "TeachingCourse",
     component: () => import("@/view/teaching/Course.vue"),
@@ -132,6 +134,51 @@ const practiceRoutes = [
   },
 ];
 
+//教师页面路由
+const teacherRoutes = [
+  {
+    path: "/teacher",
+    component: () => import("@/view/teacher/WorkStation.vue")
+  },
+  {
+    path: "/teacher/cs",
+    component: () => import("@/components/admin/CourseSectionDisplay.vue")
+  },
+  {
+    path: "/teacher/cse",
+    component: () => import("@/components/admin/CourseSectionEditor.vue")
+  },{
+    path: "/teacher/me",
+    component: () => import("@/components/admin/MaterialEditor.vue")
+  },{
+    path: "/teacher/pe",
+    component: () => import("@/components/admin/PracticeEditor.vue")
+  },{
+    path: "/teacher/pd",
+    component: () => import("@/components/admin/PracticeDisplay.vue")
+  },
+  {
+    path: "/teacher/uae",
+    component: () => import("@/components/admin/UserAnswerEditor.vue")
+  },{
+    path: "/teacher/pme",
+    component: () => import("@/components/admin/PromptEditor.vue")
+  },{
+    path: "/teacher/qe",
+    component: () => import("@/components/admin/QuestionDisplay.vue")
+  }
+]
+
+const adminRoutes = [
+  {
+    path: "/admin",
+    component: () => import("@/view/teacher/WorkStation.vue")
+  },{
+    path: "/admin/user",
+    component: () => import("@/components/admin/UserEditor.vue")
+  }
+]
+
 // 其他页面路由
 const otherRoutes = [
   // {
@@ -140,15 +187,16 @@ const otherRoutes = [
   //   component: () => import("@/view/test/Experiment.vue"),
   // },
   // {
-  //   path: "filetest",
+  //   path: "test/file",
   //   name: "FileTest",
-  //   component: () => import("@/view/test/FileTest.vue"),
+  //   component: () => import("@/components/test/FileTest.vue"),
   // },
-  {
-    path: "test/material",
-    name: "MaterialTest",
-    component: () => import("@/view/test/MaterialTest.vue")
-  }
+  // {
+  //   path: "test/material",
+  //   name: "MaterialTest",
+  //   component: () => import("@/view/test/MaterialTest.vue")
+  // },
+
 ];
 
 // 独立路由 - 不使用主布局
@@ -185,10 +233,19 @@ const routes = [
   {
     path: "/",
     component: () => import("@/components/Layout.vue"),
-    children: [...profilingRoutes, ...teachingRoutes, ...practiceRoutes, ...otherRoutes],
+    children: [...profilingRoutes, ...teachingRoutes, ...practiceRoutes],
+  },
+  {
+    path: "/teacher",
+    component: () => import("@/components/TeacherLayout.vue"),
+    children: [...teacherRoutes]
+  },{
+    path:"/admin",
+    component: () => import("@/components/TeacherLayout.vue"),
+    children: [...adminRoutes]
   },
   ...independentRoutes,
-  ...authRoutes,
+  ...authRoutes
 ];
 
 // 创建路由实例

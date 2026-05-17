@@ -20,27 +20,93 @@
       v-model="isDrawerOpen"
       title="智能助教"
       direction="rtl"
-      size="450px"
+      :size="drawerSize"
       :show-close="true"
       :modal="false"
+      :lock-scroll="false"
       class="ai-drawer"
     >
-      <AIAssistant />
+      <div class="drawer-content">
+        <div class="drawer-resizer" @mousedown="startResize"></div>
+        <AIAssistant :material-ids="props.materialIds" />
+      </div>
     </el-drawer>
   </div>
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ElDrawer, ElIcon } from 'element-plus'
 import { ChatDotRound } from '@element-plus/icons-vue'
 import AIAssistant from '@/components/teaching/AIAssistant.vue'
+
+const props = defineProps({
+  materialIds: {
+    type: Array,
+    default: () => []
+  }
+})
+
+const DESKTOP_MIN_DRAWER_WIDTH = 420
+const MOBILE_MIN_DRAWER_WIDTH = 320
+const MAX_DRAWER_WIDTH = 900
+
+const getMinDrawerWidth = () => {
+  return window.innerWidth <= 768 ? MOBILE_MIN_DRAWER_WIDTH : DESKTOP_MIN_DRAWER_WIDTH
+}
+
+const getInitialDrawerWidth = () => {
+  const preferred = Math.round(window.innerWidth * 0.42)
+  const minWidth = Math.min(getMinDrawerWidth(), Math.max(280, window.innerWidth - 24))
+  return Math.min(Math.max(preferred, minWidth), Math.min(MAX_DRAWER_WIDTH, window.innerWidth - 24))
+}
+
+const clampDrawerWidth = (width) => {
+  const minWidth = Math.min(getMinDrawerWidth(), Math.max(280, window.innerWidth - 24))
+  const maxWidthByViewport = Math.max(minWidth, Math.min(MAX_DRAWER_WIDTH, window.innerWidth - 24))
+  return Math.min(Math.max(width, minWidth), maxWidthByViewport)
+}
+
+const drawerWidth = ref(getInitialDrawerWidth())
+const drawerSize = ref(`${drawerWidth.value}px`)
 
 const isDrawerOpen = ref(false)
 const ballPosition = ref({ x: 30, y: 200 })
 const isDragging = ref(false)
 const dragOffset = ref({ x: 0, y: 0 })
 const hasMoved = ref(false)
+const isResizing = ref(false)
+
+const updateDrawerSize = (width) => {
+  drawerWidth.value = clampDrawerWidth(width)
+  drawerSize.value = `${drawerWidth.value}px`
+}
+
+const startResize = (e) => {
+  e.preventDefault()
+  isResizing.value = true
+  document.body.style.userSelect = 'none'
+  document.addEventListener('mousemove', onResize)
+  document.addEventListener('mouseup', stopResize)
+}
+
+const onResize = (e) => {
+  if (!isResizing.value) return
+  const nextWidth = window.innerWidth - e.clientX
+  updateDrawerSize(nextWidth)
+}
+
+const stopResize = () => {
+  if (!isResizing.value) return
+  isResizing.value = false
+  document.body.style.userSelect = ''
+  document.removeEventListener('mousemove', onResize)
+  document.removeEventListener('mouseup', stopResize)
+}
+
+const handleViewportResize = () => {
+  updateDrawerSize(drawerWidth.value)
+}
 
 const startDrag = (e) => {
   isDragging.value = true
@@ -77,13 +143,36 @@ const handleBallClick = () => {
   }
 }
 
+onMounted(() => {
+  window.addEventListener('resize', handleViewportResize)
+})
+
 onUnmounted(() => {
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', stopDrag)
+  document.removeEventListener('mousemove', onResize)
+  document.removeEventListener('mouseup', stopResize)
+  window.removeEventListener('resize', handleViewportResize)
+  document.body.style.userSelect = ''
 })
 </script>
 
 <style scoped>
+.drawer-content {
+  position: relative;
+  height: 100%;
+}
+
+.drawer-resizer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 10px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 10;
+}
+
 .floating-ball {
   position: fixed;
   z-index: 1000;
@@ -174,5 +263,10 @@ onUnmounted(() => {
 :deep(.ai-drawer .el-drawer__body) {
   padding: 0;
   height: calc(100% - 60px);
+  overflow: hidden;
+}
+
+:deep(.ai-drawer .el-drawer) {
+  position: relative;
 }
 </style>

@@ -11,17 +11,28 @@
       <button class="nav-link" @click="go('courses')">课程</button>
       <button class="nav-link" @click="go('practice')">练习</button>
       <!-- <button class="nav-link" @click="go('community')">社区</button> -->
-      <button class="nav-ghost" @click="go('learningTime')">
-        <span class="avatar">👤</span>
-        <span class="nav-text">个人中心</span>
-      </button>
+      <div
+        class="user-menu-wrapper"
+        @mouseenter="showUserMenu = true"
+        @mouseleave="showUserMenu = false"
+      >
+        <button class="nav-ghost" @click="go('learningTime')">
+          <span class="avatar">👤</span>
+          <span class="nav-text">个人中心</span>
+        </button>
+        <button v-if="showUserMenu" class="logout-btn" @click.stop="handleLogout">退出登录</button>
+      </div>
     </nav>
   </header>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { ref } from 'vue';
+import { useUserStore } from '@/store/modules/auth/user';
 const router = useRouter();
+const userStore = useUserStore();
+const showUserMenu = ref(false);
 
 function go(target) {
   if (target === "learningTime") router.push("/learningTime");
@@ -31,6 +42,12 @@ function go(target) {
 }
 
 function goHome() { router.push("/"); }
+
+function handleLogout() {
+  userStore.logout();
+  showUserMenu.value = false;
+  router.push('/login');
+}
 </script>
 
 <style scoped>
@@ -79,6 +96,11 @@ function goHome() { router.push("/"); }
   gap: 12px;
 }
 
+.user-menu-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
 .nav-link {
   background: transparent;
   border: 0;
@@ -111,6 +133,27 @@ function goHome() { router.push("/"); }
 .nav-ghost:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 18px rgba(51, 75, 214, 0.08);
+}
+
+.logout-btn {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  white-space: nowrap;
+  border: 1px solid #cbd4ff;
+  background: #ffffff;
+  color: #3b6ca4;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(51, 75, 214, 0.12);
+  transition: all .18s ease;
+  z-index: 20;
+}
+
+.logout-btn:hover {
+  background: #f0f5ff;
+  color: #2f5f98;
 }
 
 @media(max-width:900px){

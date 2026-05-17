@@ -4,12 +4,10 @@
     <aside class="category-sidebar">
       <h3>课程分类</h3>
       <ul>
-        <li>All</li>
-        <li>AI Agents</li>
-        <li>Machine Learning</li>
-        <li>Deep Learning</li>
-        <li>Data Science</li>
-        <li>Robotics</li>
+        <li>所有课程</li>
+        <li>编程语言</li>
+        <li>练习实践</li>
+        <li>开发技术</li>
       </ul>
     </aside>
 
@@ -17,9 +15,9 @@
     <div class="course-grid">
       <div v-for="(row, rowIndex) in rows" :key="row.title" class="course-row">
          <!-- ⭐ only AI Agents 第一个模块显示单独 banner -->
-        <div v-if="row.title === 'AI Agents'" class="special-banner">
+        <!-- <div v-if="row.title === 'AI Agents'" class="special-banner">
          <img :src="bannerImage" alt="banner" class="banner-img" />
-      </div>
+        </div> -->
 
 
         <h2>{{ row.title }}</h2>
@@ -86,9 +84,9 @@ const courseImagesdeep = [deep1, deep2, deep3, deep4, deep5, deep6];
 const visibleCount = 4;
 
 const rows = reactive([
-  { title: "AI Agents", images: courseImagesai.slice(0,6), index: 0 },
-  { title: "Machine Learning", images: courseImagesmac.slice(0,6), index: 0 },
-  { title: "Deep Learning", images: courseImagesdeep.slice(0,6), index: 0 }
+  { title: "编程语言", images: courseImagesai.slice(0,6), index: 0 },
+  { title: "练习实践", images: courseImagesmac.slice(0,6), index: 0 },
+  { title: "开发技术", images: courseImagesdeep.slice(0,6), index: 0 }
 ]);
 
 function nextCourse(rowIndex) {

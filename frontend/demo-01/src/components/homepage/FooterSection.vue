@@ -2,8 +2,6 @@
   <footer class="footer">
     <div>© {{ (new Date()).getFullYear() }} 慧编未来 · AI 学习平台</div>
     <div class="footer-links">
-      <a @click.prevent="go('community')">社区</a>
-      <a @click.prevent="go('profile')">关于我们</a>
     </div>
   </footer>
 </template>

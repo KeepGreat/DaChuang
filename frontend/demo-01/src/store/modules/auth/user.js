@@ -46,7 +46,7 @@ export const useUserStore = defineStore(
     const getDefaultRoute = () => {
       const routeMap = {
         student: "/",
-        teacher: "/teach",
+        teacher: "/teacher",
         admin: "/admin",
       };
       return routeMap[role.value] || "/";

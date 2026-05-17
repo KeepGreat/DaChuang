@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { getUserRole, login } from "@/api";
+import { getUserId, getUserRole, login } from "@/api";
 import { useFormValidation } from "@/hooks";
 import { useUserStore } from "@/store";
 import { BusinessError } from "@/utils/error";
@@ -105,9 +105,11 @@ async function handleLogin() {
 
     // 调用getUserRole接口获取用户角色
     const roleRes = await getUserRole({ token: tokenRes.data });
+    const userId = await getUserId({token: tokenRes.data});
 
     // 保存角色到store
     userStore.setUserRole(roleRes.data);
+    userStore.setUserId(userId.data);
     ElMessage.success("登录成功");
 
     // 根据角色跳转到不同页面

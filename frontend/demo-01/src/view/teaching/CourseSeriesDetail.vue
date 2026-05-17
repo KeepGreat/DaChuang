@@ -1,7 +1,7 @@
 <template>
   <div class="course-series-detail">
     <!-- AI助教悬浮球 -->
-    <AIAssistantDrawer />
+    <AIAssistantDrawer :material-ids="materialIds" />
 
     <!-- 返回按钮 -->
     <div class="back-bar">
@@ -59,52 +59,8 @@
 
       <div v-else class="content-display">
         <!-- 内容展示区域 -->
-        <div v-if="contentList.length > 0" class="content-grid">
-          <div v-for="(item, index) in contentList" :key="index" class="content-card">
-            <!-- 内容标题 -->
-            <div class="card-header">
-              <h3>
-                <span class="title-text">{{ item.title || `内容 ${index + 1}` }}</span>
-                <el-tag :type="item.type === 'video' ? 'success' : 'info'" size="small">
-                  {{ item.type === 'video' ? '视频' : 'PDF文档' }}
-                </el-tag>
-              </h3>
-            </div>
-
-            <!-- 内容主体 -->
-            <div class="card-body">
-              <!-- 视频播放器 -->
-              <div v-if="item.type === 'video'" class="video-wrapper">
-                <video v-if="fileUrls[item.id]" :src="fileUrls[item.id]" controls preload="metadata">
-                  您的浏览器不支持视频播放
-                </video>
-                <div v-else class="loading-placeholder">
-                  <el-skeleton animated>
-                    <template #template>
-                      <el-skeleton-item variant="rect" style="width: 100%; height: 300px;" />
-                    </template>
-                  </el-skeleton>
-                </div>
-              </div>
-
-              <!-- PDF 查看器 -->
-              <div v-else-if="item.type === 'application/pdf'" class="pdf-wrapper">
-                <iframe v-if="fileUrls[item.id]" :src="fileUrls[item.id]" width="100%" height="600" frameborder="0"></iframe>
-                <div v-else class="loading-placeholder">
-                  <el-skeleton animated>
-                    <template #template>
-                      <el-skeleton-item variant="rect" style="width: 100%; height: 600px;" />
-                    </template>
-                  </el-skeleton>
-                </div>
-              </div>
-
-              <!-- 未知类型 -->
-              <div v-else class="unknown-type">
-                <el-empty description="不支持的资料类型" />
-              </div>
-            </div>
-          </div>
+        <div v-if="materialIds.length > 0" class="content-grid">
+          <MaterialPlayer :material-ids="materialIds" />
         </div>
 
         <!-- 空状态 -->
@@ -117,33 +73,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   ArrowLeft, VideoPlay, Document
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-// 导入 Pinia store
-import { useTeachingStore } from '@/store'
 // 导入 AI 助手图标组件
 import AIAssistantIcon from '@/components/teaching/AIAssistantIcon.vue'
 // 导入 AI 助教抽屉组件
 import AIAssistantDrawer from '@/components/teaching/AIAssistantDrawer.vue'
-// 导入文件下载 API
-import { downloadFile } from '@/api/modules/teaching/FileContentAPI'
+import MaterialPlayer from '@/components/teaching/MaterialPlayer.vue'
 
 const router = useRouter()
 const route = useRoute()
 
-// 使用 Pinia store
-const teachingStore = useTeachingStore()
-
 // 响应式数据
-const loading = teachingStore.loading
+const loading = ref(false)
 const seriesInfo = ref(null)
-const contentList = ref([])
+const materialIds = ref([])
 const hasFetched = ref(false)
-const fileUrls = ref({}) // 存储文件的 blob URL
 
 // 返回上一页
 const goBack = () => {
@@ -152,112 +101,69 @@ const goBack = () => {
 
 // 跳转到智能学伴
 const goToAICompanion = () => {
+  const validMaterialIds = (materialIds.value || []).filter(id => id !== null && id !== undefined)
   router.push({
     path: '/ai-companion',
     query: {
       courseId: seriesInfo.value?.id,
-      courseTitle: seriesInfo.value?.title
+      courseTitle: seriesInfo.value?.title,
+      materialIds: JSON.stringify(validMaterialIds)
     }
   })
 }
 
-// 加载文件内容并生成 blob URL
-const loadFileContent = async (item) => {
-  if (!item.fileId) {
-    console.warn('资料没有关联的文件:', item.title)
-    return
-  }
-
-  // 如果已经加载过，直接返回
-  if (fileUrls.value[item.id]) {
-    return
-  }
+const parseMaterialIds = (value) => {
+  if (!value) return []
 
   try {
-    const response = await downloadFile(item.fileId)
-    const blob = new Blob([response.data], { type: item.fileType || 'application/octet-stream' })
-    fileUrls.value[item.id] = window.URL.createObjectURL(blob)
-  } catch (err) {
-    console.error('加载文件失败:', err)
-    ElMessage.error(`加载文件 "${item.title}" 失败`)
-  }
-}
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value
+    if (!Array.isArray(parsed)) return []
 
-// 组件卸载时释放 blob URL
-onUnmounted(() => {
-  Object.values(fileUrls.value).forEach(url => {
-    if (url) window.URL.revokeObjectURL(url)
-  })
-})
-
-
-// 初始化页面数据（统一管理顶部汇总和课程内容）
-const initPageData = async () => {
-  // 检查路由中是否有传递的必要参数
-  const { id, title, description } = route.query
-
-  if (id && title) {
-    // 如果路由中有必要参数，直接使用
-    seriesInfo.value = {
-      id: id,
-      title: title,
-      description: description || '',  // description可选
-      videoCount: 0,  // 初始为0，会根据实际内容计算
-      pdfCount: 0,    // 初始为0，会根据实际内容计算
-      totalCount: 0   // 初始为0，会根据实际内容计算
-    }
-
-    // 使用传递的ID获取内容
-    await loadSeriesContent(id)
-  } else {
-    // 如果没有传递必要参数，显示错误
-    ElMessage.error('未获取到课程信息，请返回列表页重新选择')
-  }
-}
-
-// 加载系列内容
-const loadSeriesContent = async (seriesId) => {
-  try {
-    // 调用 store 的方法获取课程内容
-    ElMessage.info('正在获取课程内容数据...')
-
-    // 获取当前课程ID（从路由参数中获取）
-    const courseId = route.params.id
-
-    // 调用 teachingStore 的 fetchMaterials 方法
-    const response = await teachingStore.fetchMaterials(seriesId, courseId)
-
-    if (response.code >= 200 && response.code < 300 && response.data && response.data.length > 0) {
-      const contentData = response.data
-      contentList.value = contentData
-
-      // 统计视频和PDF数量
-      const videoCount = contentData.filter(item => item.type === 'video').length
-      const pdfCount = contentData.filter(item => item.type === 'pdf').length
-
-      // 更新系列信息
-      seriesInfo.value.videoCount = videoCount
-      seriesInfo.value.pdfCount = pdfCount
-      seriesInfo.value.totalCount = contentData.length
-
-      // 加载所有文件内容
-      await Promise.all(contentData.map(item => loadFileContent(item)))
-
-      ElMessage.success('课程数据加载完成！')
-    } else if (response.code >= 200 && response.data && response.data.length === 0) {
-      // 没有数据但请求成功
-      ElMessage.warning('该课程系列暂无内容')
-    }
-
-    hasFetched.value = true
+    return parsed
+      .map(id => Number(id))
+      .filter(id => Number.isFinite(id) && id > 0)
   } catch (error) {
-    console.error('加载内容失败:', error)
-    ElMessage.error('加载课程内容失败，请重试')
-
-    // store 已经处理了错误，包括返回模拟数据
-    contentList.value = teachingStore.getContentBySeriesId(seriesId)
-    hasFetched.value = true
+    console.error('解析 materialIds 失败:', error)
+    return []
   }
+}
+
+const toCount = (value) => {
+  const count = Number(value)
+  return Number.isFinite(count) && count >= 0 ? count : 0
+}
+
+// 初始化页面数据（只消费父页面传递数据，不再重复请求）
+const initPageData = () => {
+  const {
+    id,
+    title,
+    description,
+    materialIds: materialIdsQuery,
+    videoCount,
+    pdfCount,
+    totalCount
+  } = route.query
+
+  if (!id || !title) {
+    ElMessage.error('未获取到课程信息，请返回列表页重新选择')
+    hasFetched.value = true
+    return
+  }
+
+  const parsedIds = parseMaterialIds(materialIdsQuery)
+  materialIds.value = parsedIds
+
+  seriesInfo.value = {
+    id,
+    title,
+    description: description || '',
+    videoCount: toCount(videoCount),
+    pdfCount: toCount(pdfCount),
+    totalCount: totalCount !== undefined ? toCount(totalCount) : parsedIds.length
+  }
+
+  hasFetched.value = true
 }
 
 onMounted(() => {

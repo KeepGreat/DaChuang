@@ -71,33 +71,34 @@ request.interceptors.response.use(
     ); */
 
     // 获取data结构
-    const res = response.data;
+    // const res = response.data;
 
     // 如果响应是二进制流，则直接返回，用于下载文件、Excel 导出等
     if (response.config.responseType === "blob") {
       return response;
     }
 
-    // code在[200, 300)区间内时，视为业务成功响应
-    if (res.code >= 200 && res.code < 300) {
-      return res;
-    }
+    // // code在[200, 300)区间内时，视为业务成功响应
+    // if (res.code >= 200 && res.code < 300) {
+    //   return res;
+    // }
 
-    if(response.status >= 200 && response.status < 300){
-      return response;
-    }
+    // if(response.status >= 200 && response.status < 300){
+    //   return response;
+    // }
 
-    // 业务错误处理
-    const businessError = new BusinessError(
-      res.code,
-      res?.message || "BusinessError default message",
-      res?.data
-    );
-    console.error(
-      `${new Date().toLocaleTimeString()} BusinessError [${res.code}]:`,
-      businessError.message
-    );
-    return Promise.reject(businessError);
+    // // 业务错误处理
+    // const businessError = new BusinessError(
+    //   res.code,
+    //   res?.message || "BusinessError default message",
+    //   res?.data
+    // );
+    // console.error(
+    //   `${new Date().toLocaleTimeString()} BusinessError [${res.code}]:`,
+    //   businessError.message
+    // );
+    // return Promise.reject(businessError);
+    return response.data;
   },
   (error) => {
     console.error(`${new Date().toLocaleTimeString()} response error:`, error);

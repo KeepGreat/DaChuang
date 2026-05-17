@@ -44,11 +44,13 @@
             :show-correctness="showCorrectness"
             :single-question-mode="singleQuestionMode"
             :same-type-questions="filteredQuestions"
+            :practice-id="currentPracticeId"
             @set-show-correctness="toggleShowCorrectness"
             @answer-submitted="handleAnswerSubmitted"
             @previous="handlePreviousQuestion"
             @next="handleNextQuestion"
           />
+          <!-- <QuestionDisplayNew :practice-id="currentPracticeId" /> -->
         </div>
       </div>
     </div>
@@ -59,6 +61,7 @@
 import {
 	createUserAnswer,
 	getAnswersByQuestionIds,
+  getPractices,
 	getQuestionResources,
 	getUserAnswers,
 	getUserId,
@@ -68,6 +71,7 @@ import {
 import PracticeNavbar from "@/components/practice/PracticeNavbar.vue";
 import PracticeSiderbar from "@/components/practice/PracticeSiderbar.vue";
 import QuestionDisplay from "@/components/practice/QuestionDisplay.vue";
+import QuestionDisplayNew from "@/components/practice/QuestionDisplayNew.vue";
 import {
 	useAnswerStore,
 	usePracticeStore,
@@ -123,20 +127,63 @@ const fetchUserIdFromToken = async () => {
 
 // 路由参数获取当前练习ID和课程章节ID
 const currentPracticeId = computed(() => {
-  return route.params.practiceId || null;
+  const parsed = Number(route.params.practiceId);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 });
 
 const currentCourseSectionId = computed(() => {
-  return route.params.courseSectionId || null;
+  const parsed = Number(route.params.courseSectionId);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 });
+
+const currentPracticeName = ref("");
+
+const normalizePracticeList = (value) => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (value && typeof value === "object") {
+    return [value];
+  }
+  return [];
+};
+
+const fetchCurrentPracticeName = async () => {
+  if (!currentPracticeId.value) {
+    currentPracticeName.value = "";
+    return;
+  }
+
+  try {
+    const response = await getPractices(currentPracticeId.value);
+    if (response?.code !== 200) {
+      currentPracticeName.value = "";
+      return;
+    }
+
+    const practiceList = normalizePracticeList(response.data);
+    const matchedPractice = practiceList.find(
+      (item) => Number(item?.id) === Number(currentPracticeId.value)
+    );
+
+    currentPracticeName.value = matchedPractice?.name || "";
+  } catch (error) {
+    console.error("获取练习名称失败:", error);
+    currentPracticeName.value = "";
+  }
+};
 
 // 练习基本信息 - 从practiceStore中根据practiceId动态获取
 const practiceTitle = computed(() => {
+  if (currentPracticeName.value) {
+    return currentPracticeName.value;
+  }
+
   // 如果有practiceId，根据ID查找对应的练习
   if (currentPracticeId.value) {
     const practice = practiceStore.getPracticeById(currentPracticeId.value);
     if (practice) {
-      return practice.title;
+      return practice.name || practice.title;
     }
   }
   console.warn(`未找到ID为${currentPracticeId.value}的练习，使用第一个练习作为标题`);
@@ -149,6 +196,14 @@ const practiceTitle = computed(() => {
   // 如果没有练习数据，返回默认标题
   return "JavaScript基础练习";
 });
+
+watch(
+  () => currentPracticeId.value,
+  () => {
+    fetchCurrentPracticeName();
+  },
+  { immediate: true }
+);
 
 // 用户ID，从token获取
 const userId = ref(null);
@@ -491,7 +546,7 @@ watch(
   { deep: true }
 );
 // 提交用户答案到后端
-const submitUserAnswerToBackend = async (questionId, answer) => {
+const submitUserAnswerToBackend = async (questionId, answer, practiceId = currentPracticeId.value) => {
   try {
     // 获取问题信息
     const question = questionsStore.questions.find((q) => q.id === questionId);
@@ -511,6 +566,7 @@ const submitUserAnswerToBackend = async (questionId, answer) => {
       content: Array.isArray(answer) ? answer.join(",") : String(answer),
       userId: userId.value,
       questionId: questionId,
+      practiceId: practiceId,
       questionType: question.type,
     };
 
@@ -518,6 +574,7 @@ const submitUserAnswerToBackend = async (questionId, answer) => {
     const existingAnswers = await getUserAnswers({
       questionId: questionId,
       userId: answerData.userId,
+      practiceId: answerData.practiceId,
     });
 
     if (existingAnswers && existingAnswers.data && existingAnswers.data.length > 0) {
@@ -619,7 +676,11 @@ const handleAnswerSubmitted = async (result) => {
 
     // 只有在答案不为空时才提交到后端，并标记为已回答
     if (!result.isEmpty) {
-      await submitUserAnswerToBackend(result.questionId, result.answer);
+      await submitUserAnswerToBackend(
+        result.questionId,
+        result.answer,
+        result.practiceId || currentPracticeId.value
+      );
       // 提交成功后才标记为已回答
       question.status = "answered";
     } else {

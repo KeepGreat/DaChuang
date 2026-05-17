@@ -1,827 +1,1234 @@
 <template>
-  <div class="knowledge-graph">
-    <div class="graph-header">
-      <h2>知识图谱</h2>
+  <div class="knowledge-graph-page">
+    <div class="page-header">
+      <div class="title-group">
+        <h2>知识图谱</h2>
+        <p>支持图谱展示、节点关系编辑、节点资料索引维护与 Excel 导入。</p>
+      </div>
       <div class="header-actions">
-        <el-button @click="resetView">
+        <el-button @click="reloadAll" :loading="loadingAll">
           <el-icon><Refresh /></el-icon>
-          重置视图
+          刷新数据
         </el-button>
-        <el-button @click="exportGraph">
-          <el-icon><Download /></el-icon>
-          导出图谱
-        </el-button>
+        <!-- <el-button type="primary" @click="importDialogVisible = true">
+          <el-icon><Upload /></el-icon>
+          导入 XLSX
+        </el-button> -->
       </div>
     </div>
 
-    <!-- 筛选和搜索 -->
-    <div class="filter-section">
-      <div class="filter-left">
-        <el-select v-model="nodeFilter" placeholder="节点类型" style="width: 150px">
-          <el-option label="全部" value="all"></el-option>
-          <el-option label="章节" value="chapter"></el-option>
-          <el-option label="知识点" value="knowledge"></el-option>
-          <el-option label="重点" value="keypoint"></el-option>
-        </el-select>
-        <el-select v-model="relationFilter" placeholder="关系类型" style="width: 150px">
-          <el-option label="全部" value="all"></el-option>
-          <el-option label="包含" value="contains"></el-option>
-          <el-option label="前置" value="prerequisite"></el-option>
-          <el-option label="相关" value="related"></el-option>
-        </el-select>
-      </div>
-      <div class="search-box">
-        <el-input
-          v-model="searchQuery"
-          placeholder="搜索知识点..."
-          style="width: 300px"
-          clearable
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-      </div>
-    </div>
-
-    <!-- 知识图谱主体 -->
-    <div class="graph-container">
-      <div class="graph-main">
-        <div ref="graphRef" class="graph-canvas"></div>
-        <!-- 节点信息面板 -->
-        <div v-if="selectedNode" class="node-info-panel">
-          <div class="panel-header">
-            <h3>{{ selectedNode.name }}</h3>
-            <el-button text @click="closeNodeInfo">
-              <el-icon><Close /></el-icon>
-            </el-button>
-          </div>
-          <div class="panel-content">
-            <div class="info-item">
-              <span class="label">类型：</span>
-              <el-tag :type="getNodeTypeTagType(selectedNode.type)">
-                {{ getNodeTypeText(selectedNode.type) }}
-              </el-tag>
-            </div>
-            <div class="info-item">
-              <span class="label">权重：</span>
-              <el-progress
-                :percentage="selectedNode.weight || 50"
-                :stroke-width="6"
-                style="width: 100px;"
-              />
-            </div>
-            <div class="info-item">
-              <span class="label">描述：</span>
-              <p>{{ selectedNode.description || '暂无描述' }}</p>
-            </div>
-            <div v-if="selectedNode.resources" class="info-item">
-              <span class="label">相关资源：</span>
-              <div class="resource-list">
-                <el-tag
-                  v-for="resource in selectedNode.resources"
-                  :key="resource"
-                  type="info"
-                  size="small"
-                >
-                  {{ resource }}
-                </el-tag>
-              </div>
-            </div>
-          </div>
+    <el-card class="toolbar-card" shadow="never">
+      <div class="toolbar-row">
+        <div class="toolbar-item">
+          <span class="toolbar-label">当前课程系列 ID</span>
+          <el-tag type="primary" effect="plain">{{ currentCourseSectionId || '-' }}</el-tag>
+        </div>
+        <div class="toolbar-item">
+          <span class="toolbar-label">节点名称搜索</span>
+          <el-input
+            v-model="searchKeyword"
+            placeholder="输入关键字过滤图谱"
+            clearable
+            style="width: 260px"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
+        </div>
+        <div class="toolbar-item">
+          <span class="toolbar-label">关系类型</span>
+          <el-select v-model="relationTypeFilter" style="width: 180px">
+            <el-option :value="-1" label="全部关系" />
+            <el-option :value="0" label="父子关系" />
+            <el-option :value="1" label="前置关系" />
+            <el-option :value="2" label="后置关系" />
+            <el-option :value="3" label="关联关系" />
+          </el-select>
         </div>
       </div>
+    </el-card>
 
-      <!-- 侧边栏 -->
-      <div class="graph-sidebar">
-        <!-- 图例 -->
-        <el-card class="legend-card">
-          <template #header>
-            <h4>图例</h4>
-          </template>
-          <div class="legend-items">
-            <div class="legend-item">
-              <div class="legend-node chapter"></div>
-              <span>章节</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-node knowledge"></div>
-              <span>知识点</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-node keypoint"></div>
-              <span>重点</span>
-            </div>
+    <div class="main-grid">
+      <el-card class="toc-card" shadow="never">
+        <template #header>
+          <div class="card-header">
+            <span>一级目录</span>
+            <el-tag type="primary" effect="plain">{{ rootNodes.length }}</el-tag>
           </div>
-          <div class="legend-relations">
-            <h5>关系类型</h5>
-            <div class="legend-item">
-              <div class="legend-line contains"></div>
-              <span>包含</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-line prerequisite"></div>
-              <span>前置</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-line related"></div>
-              <span>相关</span>
-            </div>
-          </div>
-        </el-card>
+        </template>
+        <div class="toc-list">
+          <el-empty v-if="rootNodes.length === 0" description="暂无一级节点" :image-size="56" />
+          <el-button
+            v-for="root in rootNodes"
+            :key="root.id"
+            class="toc-item"
+            :type="Number(activeRootId) === Number(root.id) ? 'primary' : 'default'"
+            @click="activeRootId = root.id"
+          >
+            <span class="toc-name">{{ root.name || `节点-${root.id}` }}</span>
+            <span class="toc-level">L{{ root.level }}</span>
+          </el-button>
+        </div>
+      </el-card>
 
-        <!-- 统计信息 -->
-        <el-card class="stats-card">
-          <template #header>
-            <h4>统计信息</h4>
-          </template>
-          <div class="stat-items">
-            <div class="stat-item">
-              <span class="stat-number">{{ nodeStats.total }}</span>
-              <span class="stat-label">总节点数</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">{{ nodeStats.chapters }}</span>
-              <span class="stat-label">章节数</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">{{ nodeStats.knowledge }}</span>
-              <span class="stat-label">知识点数</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">{{ nodeStats.keypoints }}</span>
-              <span class="stat-label">重点数</span>
-            </div>
+      <el-card class="graph-card" shadow="never">
+        <template #header>
+          <div class="card-header">
+            <span>图谱展示（单章视图）</span>
+            <el-tag type="primary">节点 {{ displayNodes.length }}</el-tag>
           </div>
-        </el-card>
+        </template>
+        <div ref="chartRef" class="graph-canvas" />
+        <div class="graph-controls">
+          <el-button-group>
+            <el-button @click="zoomOutGraph">缩小</el-button>
+            <el-button @click="resetGraphViewport">重置</el-button>
+            <el-button @click="zoomInGraph">放大</el-button>
+          </el-button-group>
+          <el-button :type="graphRoamEnabled ? 'primary' : 'default'" @click="toggleGraphRoam">
+            {{ graphRoamEnabled ? '关闭鼠标拖动' : '开启鼠标拖动' }}
+          </el-button>
+        </div>
+      </el-card>
 
-        <!-- 学习路径 -->
-        <el-card class="path-card">
+      <div class="side-column">
+        <el-card class="info-card" shadow="never">
           <template #header>
             <div class="card-header">
-              <h4>推荐学习路径</h4>
-              <el-button type="primary" size="small" @click="generatePath">
-                生成路径
-              </el-button>
+              <span>节点详情</span>
             </div>
           </template>
-          <div v-if="learningPath.length === 0" class="empty-path">
-            <el-empty description="暂无学习路径" :image-size="80" />
-          </div>
-          <div v-else class="path-list">
-            <div
-              v-for="(item, index) in learningPath"
-              :key="item.id"
-              class="path-item"
-            >
-              <div class="path-index">{{ index + 1 }}</div>
-              <div class="path-content">
-                <div class="path-name">{{ item.name }}</div>
-                <div class="path-desc">{{ item.description }}</div>
-              </div>
-              <div class="path-status">
-                <el-icon v-if="item.completed" color="#67c23a"><Check /></el-icon>
-                <el-icon v-else color="#909399"><Clock /></el-icon>
+          <div v-if="selectedNode" class="node-detail">
+            <div class="detail-row"><span>节点 ID</span><strong>{{ selectedNode.id }}</strong></div>
+            <div class="detail-row"><span>名称</span><strong>{{ selectedNode.name }}</strong></div>
+            <div class="detail-row"><span>层级</span><strong>{{ selectedNode.level }}</strong></div>
+            <div class="detail-row"><span>标签</span><strong>{{ selectedNode.label || '-' }}</strong></div>
+            <div class="detail-row"><span>认知维度</span><strong>{{ selectedNode.cognition || '-' }}</strong></div>
+            <div class="detail-row"><span>课程章节 ID</span><strong>{{ selectedNode.courseSectionId }}</strong></div>
+            <div class="detail-row block">
+              <span>描述</span>
+              <p>{{ selectedNode.description || '暂无描述' }}</p>
+            </div>
+            <div class="detail-row block">
+              <span>关联资料 ID</span>
+              <div class="tag-wrap">
+                <el-tag
+                  v-for="materialId in selectedNodeMaterialIds"
+                  :key="materialId"
+                  effect="plain"
+                  type="primary"
+                >
+                  {{ materialId }}
+                </el-tag>
+                <span v-if="selectedNodeMaterialIds.length === 0" class="empty-text">暂无关联</span>
               </div>
             </div>
           </div>
+          <el-empty v-else description="点击图谱中的节点查看详情" :image-size="72" />
+        </el-card>
+
+        <el-card class="manager-card" shadow="never">
+          <template #header>
+            <div class="card-header">
+              <span>图谱详情</span>
+            </div>
+          </template>
+
+          <el-tabs v-model="activeTab">
+            <el-tab-pane label="节点 Node" name="node">
+              <!-- <div class="tab-actions">
+                <el-button type="primary" @click="openNodeDialog()">新增节点</el-button>
+              </div> -->
+              <el-table :data="scopedNodes" stripe height="260">
+                <el-table-column prop="id" label="ID" width="70" />
+                <el-table-column prop="name" label="名称" min-width="120" />
+                <el-table-column prop="level" label="层级" width="80" />
+                <el-table-column prop="courseSectionId" label="章节ID" width="90" />
+                <!-- <el-table-column label="操作" width="150" fixed="right">
+                  <template #default="scope">
+                    <el-button link type="primary" @click="openNodeDialog(scope.row)">编辑</el-button>
+                    <el-button link type="danger" @click="removeNode(scope.row)">删除</el-button>
+                  </template>
+                </el-table-column> -->
+              </el-table>
+            </el-tab-pane>
+
+            <el-tab-pane label="关系 Edge" name="edge">
+              <!-- <div class="tab-actions">
+                <el-button type="primary" @click="openEdgeDialog()">新增关系</el-button>
+              </div> -->
+              <el-table :data="scopedEdges" stripe height="260">
+                <el-table-column prop="id" label="ID" width="70" />
+                <el-table-column prop="fromNodeId" label="起点" width="90" />
+                <el-table-column prop="toNodeId" label="终点" width="90" />
+                <el-table-column label="关系类型" min-width="110">
+                  <template #default="scope">
+                    <el-tag effect="plain">{{ relationText(scope.row.relationType) }}</el-tag>
+                  </template>
+                </el-table-column>
+                <!-- <el-table-column label="操作" width="150" fixed="right">
+                  <template #default="scope">
+                    <el-button link type="primary" @click="openEdgeDialog(scope.row)">编辑</el-button>
+                    <el-button link type="danger" @click="removeEdge(scope.row)">删除</el-button>
+                  </template>
+                </el-table-column> -->
+              </el-table>
+            </el-tab-pane>
+
+            <el-tab-pane label="索引 NodeIndex" name="index">
+              <!-- <div class="tab-actions">
+                <el-button type="primary" @click="openIndexDialog()">新增索引</el-button>
+              </div> -->
+              <el-table :data="scopedIndexes" stripe height="260">
+                <el-table-column prop="id" label="ID" width="70" />
+                <el-table-column prop="nodeId" label="节点ID" width="90" />
+                <el-table-column prop="materialId" label="资料ID" width="90" />
+                <!-- <el-table-column label="操作" width="120" fixed="right">
+                  <template #default="scope">
+                    <el-button link type="danger" @click="removeIndex(scope.row)">删除</el-button>
+                  </template>
+                </el-table-column> -->
+              </el-table>
+            </el-tab-pane>
+          </el-tabs>
         </el-card>
       </div>
     </div>
+
+    <el-dialog
+      v-model="nodeDialog.visible"
+      :title="nodeDialog.isEdit ? '编辑节点' : '新增节点'"
+      width="560px"
+      destroy-on-close
+    >
+      <el-form :model="nodeForm" label-width="96px">
+        <el-form-item label="名称">
+          <el-input v-model="nodeForm.name" maxlength="50" />
+        </el-form-item>
+        <el-form-item label="层级">
+          <el-input-number v-model="nodeForm.level" :min="1" :controls="false" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="标签">
+          <el-input v-model="nodeForm.label" maxlength="10" />
+        </el-form-item>
+        <el-form-item label="认知维度">
+          <el-input v-model="nodeForm.cognition" maxlength="10" />
+        </el-form-item>
+        <el-form-item label="章节 ID">
+          <el-input-number v-model="nodeForm.courseSectionId" :min="1" :controls="false" disabled style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="nodeForm.description" type="textarea" :rows="3" maxlength="100" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="nodeDialog.visible = false">取消</el-button>
+        <el-button type="primary" :loading="nodeDialog.saving" @click="submitNode">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="edgeDialog.visible"
+      :title="edgeDialog.isEdit ? '编辑关系' : '新增关系'"
+      width="520px"
+      destroy-on-close
+    >
+      <el-form :model="edgeForm" label-width="96px">
+        <el-form-item label="起点节点 ID">
+          <el-input-number v-model="edgeForm.fromNodeId" :min="1" :controls="false" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="终点节点 ID">
+          <el-input-number v-model="edgeForm.toNodeId" :min="1" :controls="false" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="关系类型">
+          <el-select v-model="edgeForm.relationType" style="width: 100%">
+            <el-option :value="0" label="父子关系" />
+            <el-option :value="1" label="前置关系" />
+            <el-option :value="2" label="后置关系" />
+            <el-option :value="3" label="关联关系" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="edgeDialog.visible = false">取消</el-button>
+        <el-button type="primary" :loading="edgeDialog.saving" @click="submitEdge">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="indexDialog.visible"
+      title="新增节点索引"
+      width="520px"
+      destroy-on-close
+    >
+      <el-form :model="indexForm" label-width="96px">
+        <el-form-item label="节点 ID">
+          <el-input-number v-model="indexForm.nodeId" :min="1" :controls="false" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="资料 ID">
+          <el-input-number v-model="indexForm.materialId" :min="1" :controls="false" style="width: 100%" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="indexDialog.visible = false">取消</el-button>
+        <el-button type="primary" :loading="indexDialog.saving" @click="submitIndex">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="importDialogVisible"
+      title="导入知识图谱（XLSX）"
+      width="520px"
+      destroy-on-close
+    >
+      <el-form label-width="96px">
+        <el-form-item label="章节 ID">
+          <el-input :model-value="String(currentCourseSectionId || '')" disabled />
+        </el-form-item>
+        <el-form-item label="Excel 文件">
+          <el-upload
+            :show-file-list="true"
+            :limit="1"
+            accept=".xlsx"
+            :auto-upload="false"
+            :on-change="onImportFileChange"
+            :on-remove="onImportFileRemove"
+          >
+            <template #trigger>
+              <el-button>选择 XLSX 文件</el-button>
+            </template>
+            <template #tip>
+              <div class="upload-tip">仅支持 .xlsx 文件</div>
+            </template>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="importDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="importing" @click="submitImport">开始导入</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Refresh, Search, Upload } from "@element-plus/icons-vue";
+import * as echarts from "echarts";
+import { useRoute } from "vue-router";
 import {
-  Refresh, Download, Search, Close, Check, Clock
-} from '@element-plus/icons-vue'
+  addKnowledgeGraphEdge,
+  addKnowledgeGraphNode,
+  addKnowledgeGraphNodeIndex,
+  deleteKnowledgeGraphEdge,
+  deleteKnowledgeGraphNode,
+  deleteKnowledgeGraphNodeIndex,
+  getKnowledgeGraphEdges,
+  getKnowledgeGraphNodeIndexes,
+  getKnowledgeGraphNodes,
+  importKnowledgeGraphFromExcel,
+  updateKnowledgeGraphEdge,
+  updateKnowledgeGraphNode,
+} from "@/api/modules/teaching/KnowledgeGraphAPI";
 
-// 模拟知识图谱数据
-const knowledgeData = ref({
-  nodes: [
-    { id: 1, name: 'Python基础', type: 'chapter', weight: 90, x: 400, y: 100 },
-    { id: 2, name: '变量与数据类型', type: 'knowledge', weight: 80, x: 200, y: 200 },
-    { id: 3, name: '运算符', type: 'knowledge', weight: 70, x: 600, y: 200 },
-    { id: 4, name: '流程控制', type: 'chapter', weight: 85, x: 400, y: 300 },
-    { id: 5, name: 'if语句', type: 'keypoint', weight: 90, x: 200, y: 400 },
-    { id: 6, name: '循环语句', type: 'keypoint', weight: 95, x: 600, y: 400 },
-    { id: 7, name: '函数', type: 'chapter', weight: 88, x: 400, y: 500 }
-  ],
-  relations: [
-    { from: 1, to: 2, type: 'contains' },
-    { from: 1, to: 3, type: 'contains' },
-    { from: 2, to: 4, type: 'prerequisite' },
-    { from: 3, to: 4, type: 'prerequisite' },
-    { from: 4, to: 5, type: 'contains' },
-    { from: 4, to: 6, type: 'contains' },
-    { from: 5, to: 7, type: 'prerequisite' },
-    { from: 6, to: 7, type: 'prerequisite' }
-  ]
-})
+const chartRef = ref(null);
+let chartInstance = null;
+const route = useRoute();
 
-// 响应式数据
-const graphRef = ref(null)
-const selectedNode = ref(null)
-const nodeFilter = ref('all')
-const relationFilter = ref('all')
-const searchQuery = ref('')
-const learningPath = ref([])
+const loadingAll = ref(false);
+const importing = ref(false);
+const importDialogVisible = ref(false);
+const importFile = ref(null);
 
-// 计算属性
-const nodeStats = computed(() => ({
-  total: knowledgeData.value.nodes.length,
-  chapters: knowledgeData.value.nodes.filter(n => n.type === 'chapter').length,
-  knowledge: knowledgeData.value.nodes.filter(n => n.type === 'knowledge').length,
-  keypoints: knowledgeData.value.nodes.filter(n => n.type === 'keypoint').length
-}))
+const searchKeyword = ref("");
+const relationTypeFilter = ref(-1);
+const activeTab = ref("node");
+const activeRootId = ref(null);
+const graphZoom = ref(1);
+const graphRoamEnabled = ref(true);
+
+const nodes = ref([]);
+const edges = ref([]);
+const indexes = ref([]);
+
+const selectedNodeId = ref(null);
+
+const currentCourseSectionId = computed(() => {
+  const id = Number(route.params.id);
+  return Number.isFinite(id) && id > 0 ? id : null;
+});
+
+const nodeDialog = reactive({
+  visible: false,
+  isEdit: false,
+  saving: false,
+});
+
+const edgeDialog = reactive({
+  visible: false,
+  isEdit: false,
+  saving: false,
+});
+
+const indexDialog = reactive({
+  visible: false,
+  saving: false,
+});
+
+const nodeForm = reactive({
+  id: null,
+  name: "",
+  level: 1,
+  label: "",
+  description: "",
+  cognition: "",
+  courseSectionId: undefined,
+});
+
+const edgeForm = reactive({
+  id: null,
+  fromNodeId: undefined,
+  toNodeId: undefined,
+  relationType: 0,
+});
+
+const indexForm = reactive({
+  nodeId: undefined,
+  materialId: undefined,
+});
+
+const relationText = (relationType) => {
+  const relationMap = {
+    0: "父子关系",
+    1: "前置关系",
+    2: "后置关系",
+    3: "关联关系",
+  };
+  return relationMap[relationType] || "未知";
+};
+
+const extractList = (res) => {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.data)) return res.data;
+  if (Array.isArray(res?.data?.records)) return res.data.records;
+  return [];
+};
 
 const filteredNodes = computed(() => {
-  let nodes = knowledgeData.value.nodes
+  return scopedNodes.value.filter((node) => {
+    const matchKeyword = !searchKeyword.value || (node.name || "").toLowerCase().includes(searchKeyword.value.toLowerCase());
+    return matchKeyword;
+  });
+});
 
-  if (nodeFilter.value !== 'all') {
-    nodes = nodes.filter(n => n.type === nodeFilter.value)
+const filteredEdges = computed(() => {
+  return scopedEdges.value.filter((edge) => {
+    const matchType = relationTypeFilter.value < 0 || Number(edge.relationType) === Number(relationTypeFilter.value);
+    const nodeSet = new Set(filteredNodes.value.map((node) => node.id));
+    return matchType && nodeSet.has(edge.fromNodeId) && nodeSet.has(edge.toNodeId);
+  });
+});
+
+const scopedNodes = computed(() => {
+  if (!currentCourseSectionId.value) return [];
+  return nodes.value.filter((node) => Number(node.courseSectionId) === Number(currentCourseSectionId.value));
+});
+
+const scopedEdges = computed(() => {
+  const nodeIdSet = new Set(scopedNodes.value.map((item) => Number(item.id)));
+  return edges.value.filter((edge) => nodeIdSet.has(Number(edge.fromNodeId)) && nodeIdSet.has(Number(edge.toNodeId)));
+});
+
+const scopedIndexes = computed(() => {
+  const nodeIdSet = new Set(scopedNodes.value.map((item) => Number(item.id)));
+  return indexes.value.filter((index) => nodeIdSet.has(Number(index.nodeId)));
+});
+
+const rootNodes = computed(() => {
+  return scopedNodes.value
+    .filter((node) => Number(node.level) === 1)
+    .sort((a, b) => Number(a.id) - Number(b.id));
+});
+
+const rootSubtreeNodeIds = computed(() => {
+  if (!activeRootId.value) return new Set();
+
+  const idSet = new Set([Number(activeRootId.value)]);
+  const queue = [Number(activeRootId.value)];
+  const hierarchyEdges = scopedEdges.value.filter((edge) => Number(edge.relationType) === 0);
+
+  while (queue.length) {
+    const current = queue.shift();
+    hierarchyEdges
+      .filter((edge) => Number(edge.fromNodeId) === Number(current))
+      .forEach((edge) => {
+        const childId = Number(edge.toNodeId);
+        if (!idSet.has(childId)) {
+          idSet.add(childId);
+          queue.push(childId);
+        }
+      });
   }
 
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
-    nodes = nodes.filter(n => n.name.toLowerCase().includes(query))
-  }
-
-  return nodes
-})
-
-const filteredRelations = computed(() => {
-  if (relationFilter.value === 'all') {
-    return knowledgeData.value.relations
-  }
-  return knowledgeData.value.relations.filter(r => r.type === relationFilter.value)
-})
-
-// 方法
-const initGraph = () => {
-  nextTick(() => {
-    if (!graphRef.value) return
-    drawGraph()
-  })
-}
-
-const drawGraph = () => {
-  const canvas = graphRef.value
-  const ctx = canvas.getContext('2d')
-
-  // 设置canvas大小
-  canvas.width = canvas.offsetWidth
-  canvas.height = canvas.offsetHeight
-
-  // 清空画布
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-  // 绘制关系线
-  filteredRelations.value.forEach(relation => {
-    const fromNode = knowledgeData.value.nodes.find(n => n.id === relation.from)
-    const toNode = knowledgeData.value.nodes.find(n => n.id === relation.to)
-
-    if (fromNode && toNode && filteredNodes.value.includes(fromNode) && filteredNodes.value.includes(toNode)) {
-      drawRelation(ctx, fromNode, toNode, relation.type)
+  if (idSet.size === 1) {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      hierarchyEdges.forEach((edge) => {
+        const fromId = Number(edge.fromNodeId);
+        const toId = Number(edge.toNodeId);
+        if (idSet.has(fromId) && !idSet.has(toId)) {
+          idSet.add(toId);
+          changed = true;
+        }
+        if (idSet.has(toId) && !idSet.has(fromId)) {
+          idSet.add(fromId);
+          changed = true;
+        }
+      });
     }
-  })
-
-  // 绘制节点
-  filteredNodes.value.forEach(node => {
-    drawNode(ctx, node)
-  })
-}
-
-const drawNode = (ctx, node) => {
-  const { x, y, type, name } = node
-
-  // 节点样式
-  const nodeColors = {
-    chapter: '#409eff',
-    knowledge: '#67c23a',
-    keypoint: '#e6a23c'
   }
 
-  // 绘制节点
-  ctx.beginPath()
-  ctx.arc(x, y, 30, 0, 2 * Math.PI)
-  ctx.fillStyle = nodeColors[type] || '#909399'
-  ctx.fill()
-  ctx.strokeStyle = '#fff'
-  ctx.lineWidth = 2
-  ctx.stroke()
+  return idSet;
+});
 
-  // 绘制文字
-  ctx.fillStyle = '#333'
-  ctx.font = '14px Arial'
-  ctx.textAlign = 'center'
-  ctx.fillText(name, x, y + 50)
-}
+const displayNodes = computed(() => {
+  const visibleIdSet = rootSubtreeNodeIds.value;
+  if (visibleIdSet.size === 0) return [];
+  return filteredNodes.value.filter((node) => visibleIdSet.has(Number(node.id)));
+});
 
-const drawRelation = (ctx, fromNode, toNode, type) => {
-  // 关系线样式
-  const lineColors = {
-    contains: '#409eff',
-    prerequisite: '#e6a23c',
-    related: '#67c23a'
+const displayEdges = computed(() => {
+  const nodeIdSet = new Set(displayNodes.value.map((node) => Number(node.id)));
+  return filteredEdges.value.filter((edge) => nodeIdSet.has(Number(edge.fromNodeId)) && nodeIdSet.has(Number(edge.toNodeId)));
+});
+
+const selectedNode = computed(() => {
+  if (!selectedNodeId.value) return null;
+  return nodes.value.find((node) => Number(node.id) === Number(selectedNodeId.value)) || null;
+});
+
+const selectedNodeMaterialIds = computed(() => {
+  if (!selectedNode.value) return [];
+  return indexes.value
+    .filter((item) => Number(item.nodeId) === Number(selectedNode.value.id))
+    .map((item) => item.materialId);
+});
+
+const buildChartOption = () => {
+  const nodeColorByLevel = {
+    1: "#93c5fd",
+    2: "#a5d2fd",
+    3: "#bfdbfe",
+    4: "#dbeafe",
+  };
+
+  const data = displayNodes.value.map((node) => ({
+    id: String(node.id),
+    name: node.name || `节点-${node.id}`,
+    value: node.description || "暂无描述",
+    symbolSize: Math.max(28, 82 - (Number(node.level) || 1) * 12),
+    itemStyle: {
+      color: nodeColorByLevel[node.level] || "#3b82f6",
+      borderColor: "#60a5fa",
+      borderWidth: 2,
+    },
+    label: {
+      show: true,
+      color: "#1e293b",
+      fontSize: 12,
+      fontWeight: 600,
+    },
+  }));
+
+  const links = displayEdges.value.map((edge) => ({
+    source: String(edge.fromNodeId),
+    target: String(edge.toNodeId),
+    value: relationText(edge.relationType),
+    lineStyle: {
+      width: 2,
+      color: "#60a5fa",
+      opacity: 0.9,
+      curveness: 0.1,
+    },
+    label: {
+      show: true,
+      formatter: relationText(edge.relationType),
+      color: "#1e40af",
+      fontSize: 11,
+      backgroundColor: "rgba(255,255,255,0.7)",
+      padding: [2, 4],
+      borderRadius: 4,
+    },
+  }));
+
+  return {
+    backgroundColor: "transparent",
+    tooltip: {
+      trigger: "item",
+      formatter: (params) => {
+        if (params.dataType === "node") {
+          const row = nodes.value.find((item) => String(item.id) === String(params.data.id));
+          return [
+            `<strong>${params.name}</strong>`,
+            `ID: ${row?.id ?? "-"}`,
+            `层级: ${row?.level ?? "-"}`,
+            `标签: ${row?.label || "-"}`,
+            `认知维度: ${row?.cognition || "-"}`,
+          ].join("<br/>");
+        }
+        return `关系: ${params.data.value || "-"}`;
+      },
+    },
+    series: [
+      {
+        type: "graph",
+        layout: "force",
+        roam: graphRoamEnabled.value,
+        zoom: graphZoom.value,
+        draggable: true,
+        force: {
+          repulsion: 520,
+          edgeLength: [120, 220],
+          gravity: 0.08,
+        },
+        edgeSymbol: ["none", "arrow"],
+        edgeSymbolSize: [4, 10],
+        emphasis: {
+          focus: "adjacency",
+          lineStyle: {
+            width: 3,
+            color: "#2563eb",
+          },
+        },
+        data,
+        links,
+      },
+    ],
+  };
+};
+
+const renderChart = () => {
+  if (!chartRef.value) return;
+
+  if (!chartInstance) {
+    chartInstance = echarts.init(chartRef.value);
+    chartInstance.on("click", (params) => {
+      if (params.dataType === "node") {
+        selectedNodeId.value = Number(params.data.id);
+      }
+    });
   }
 
-  // 绘制连线
-  ctx.beginPath()
-  ctx.moveTo(fromNode.x, fromNode.y)
-  ctx.lineTo(toNode.x, toNode.y)
-  ctx.strokeStyle = lineColors[type] || '#909399'
-  ctx.lineWidth = 2
-  ctx.stroke()
+  chartInstance.setOption(buildChartOption(), true);
+};
 
-  // 绘制箭头
-  const angle = Math.atan2(toNode.y - fromNode.y, toNode.x - fromNode.x)
-  const arrowLength = 15
-  ctx.beginPath()
-  ctx.moveTo(toNode.x - 30 * Math.cos(angle), toNode.y - 30 * Math.sin(angle))
-  ctx.lineTo(
-    toNode.x - 30 * Math.cos(angle) - arrowLength * Math.cos(angle - Math.PI / 6),
-    toNode.y - 30 * Math.sin(angle) - arrowLength * Math.sin(angle - Math.PI / 6)
-  )
-  ctx.moveTo(toNode.x - 30 * Math.cos(angle), toNode.y - 30 * Math.sin(angle))
-  ctx.lineTo(
-    toNode.x - 30 * Math.cos(angle) - arrowLength * Math.cos(angle + Math.PI / 6),
-    toNode.y - 30 * Math.sin(angle) - arrowLength * Math.sin(angle + Math.PI / 6)
-  )
-  ctx.stroke()
-}
+const reloadAll = async () => {
+  loadingAll.value = true;
+  try {
+    const [nodeRes, edgeRes, indexRes] = await Promise.all([
+      getKnowledgeGraphNodes(undefined, undefined, undefined, currentCourseSectionId.value || undefined),
+      getKnowledgeGraphEdges(undefined, undefined, undefined, currentCourseSectionId.value || undefined),
+      getKnowledgeGraphNodeIndexes(undefined, undefined, undefined, currentCourseSectionId.value || undefined),
+    ]);
 
-const handleCanvasClick = (event) => {
-  const canvas = graphRef.value
-  const rect = canvas.getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const y = event.clientY - rect.top
+    nodes.value = extractList(nodeRes);
+    edges.value = extractList(edgeRes);
+    indexes.value = extractList(indexRes);
 
-  // 检查是否点击了节点
-  const clickedNode = filteredNodes.value.find(node => {
-    const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2)
-    return distance <= 30
-  })
-
-  selectedNode.value = clickedNode
-}
-
-const closeNodeInfo = () => {
-  selectedNode.value = null
-}
-
-const resetView = () => {
-  nodeFilter.value = 'all'
-  relationFilter.value = 'all'
-  searchQuery.value = ''
-  selectedNode.value = null
-  drawGraph()
-}
-
-const exportGraph = () => {
-  const canvas = graphRef.value
-  const url = canvas.toDataURL('image/png')
-  const link = document.createElement('a')
-  link.download = 'knowledge-graph.png'
-  link.href = url
-  link.click()
-  ElMessage.success('图谱已导出')
-}
-
-const generatePath = () => {
-  // 模拟生成学习路径
-  learningPath.value = [
-    {
-      id: 1,
-      name: 'Python基础入门',
-      description: '了解Python的基本概念和环境搭建',
-      completed: true
-    },
-    {
-      id: 2,
-      name: '变量与数据类型',
-      description: '掌握Python的变量定义和各种数据类型',
-      completed: true
-    },
-    {
-      id: 3,
-      name: '运算符使用',
-      description: '学习Python的各种运算符及其优先级',
-      completed: false
-    },
-    {
-      id: 4,
-      name: '流程控制语句',
-      description: '掌握if条件语句和循环语句的使用',
-      completed: false
+    if (rootNodes.value.length > 0) {
+      const exists = rootNodes.value.some((item) => Number(item.id) === Number(activeRootId.value));
+      if (!exists) {
+        activeRootId.value = rootNodes.value[0].id;
+      }
+    } else {
+      activeRootId.value = null;
     }
-  ]
-  ElMessage.success('学习路径已生成')
-}
 
-const getNodeTypeTagType = (type) => {
-  const typeMap = {
-    'chapter': 'primary',
-    'knowledge': 'success',
-    'keypoint': 'warning'
-  }
-  return typeMap[type] || 'info'
-}
-
-const getNodeTypeText = (type) => {
-  const textMap = {
-    'chapter': '章节',
-    'knowledge': '知识点',
-    'keypoint': '重点'
-  }
-  return textMap[type] || '未知'
-}
-
-// 生命周期
-onMounted(() => {
-  initGraph()
-  window.addEventListener('resize', initGraph)
-
-  // 添加canvas点击事件
-  nextTick(() => {
-    if (graphRef.value) {
-      graphRef.value.addEventListener('click', handleCanvasClick)
+    if (selectedNodeId.value && !nodes.value.some((item) => Number(item.id) === Number(selectedNodeId.value))) {
+      selectedNodeId.value = null;
     }
-  })
-})
+
+    await nextTick();
+    renderChart();
+  } catch (error) {
+    ElMessage.error(error?.message || "加载知识图谱失败");
+  } finally {
+    loadingAll.value = false;
+  }
+};
+
+const openNodeDialog = (row) => {
+  if (row) {
+    nodeDialog.isEdit = true;
+    Object.assign(nodeForm, {
+      id: row.id,
+      name: row.name || "",
+      level: row.level ?? 1,
+      label: row.label || "",
+      description: row.description || "",
+      cognition: row.cognition || "",
+      courseSectionId: row.courseSectionId,
+    });
+  } else {
+    nodeDialog.isEdit = false;
+    Object.assign(nodeForm, {
+      id: null,
+      name: "",
+      level: 1,
+      label: "",
+      description: "",
+      cognition: "",
+      courseSectionId: currentCourseSectionId.value,
+    });
+  }
+  nodeDialog.visible = true;
+};
+
+const submitNode = async () => {
+  if (!nodeForm.name || !nodeForm.level || !nodeForm.courseSectionId) {
+    ElMessage.warning("请填写节点名称、层级、章节 ID");
+    return;
+  }
+
+  nodeDialog.saving = true;
+  try {
+    const payload = {
+      id: nodeForm.id,
+      name: nodeForm.name,
+      level: Number(nodeForm.level),
+      label: nodeForm.label,
+      description: nodeForm.description,
+      cognition: nodeForm.cognition,
+      courseSectionId: Number(currentCourseSectionId.value),
+    };
+
+    if (nodeDialog.isEdit) {
+      await updateKnowledgeGraphNode(payload);
+      ElMessage.success("节点更新成功");
+    } else {
+      delete payload.id;
+      await addKnowledgeGraphNode(payload);
+      ElMessage.success("节点新增成功");
+    }
+
+    nodeDialog.visible = false;
+    await reloadAll();
+  } catch (error) {
+    ElMessage.error(error?.message || "节点保存失败");
+  } finally {
+    nodeDialog.saving = false;
+  }
+};
+
+const removeNode = async (row) => {
+  try {
+    await ElMessageBox.confirm(`确认删除节点「${row.name}」吗？`, "删除节点", {
+      type: "warning",
+      confirmButtonText: "删除",
+      cancelButtonText: "取消",
+    });
+    await deleteKnowledgeGraphNode(row.id);
+    ElMessage.success("节点删除成功");
+    await reloadAll();
+  } catch (error) {
+    if (error !== "cancel") {
+      ElMessage.error(error?.message || "节点删除失败");
+    }
+  }
+};
+
+const openEdgeDialog = (row) => {
+  if (row) {
+    edgeDialog.isEdit = true;
+    Object.assign(edgeForm, {
+      id: row.id,
+      fromNodeId: row.fromNodeId,
+      toNodeId: row.toNodeId,
+      relationType: row.relationType,
+    });
+  } else {
+    edgeDialog.isEdit = false;
+    Object.assign(edgeForm, {
+      id: null,
+      fromNodeId: undefined,
+      toNodeId: undefined,
+      relationType: 0,
+    });
+  }
+  edgeDialog.visible = true;
+};
+
+const submitEdge = async () => {
+  if (!edgeForm.fromNodeId || !edgeForm.toNodeId) {
+    ElMessage.warning("请填写起点和终点节点 ID");
+    return;
+  }
+  if (!currentCourseSectionId.value) {
+    ElMessage.warning("当前课程系列 ID 无效");
+    return;
+  }
+
+  edgeDialog.saving = true;
+  try {
+    const payload = {
+      id: edgeForm.id,
+      fromNodeId: Number(edgeForm.fromNodeId),
+      toNodeId: Number(edgeForm.toNodeId),
+      relationType: Number(edgeForm.relationType),
+      courseSectionId: Number(currentCourseSectionId.value),
+    };
+
+    if (edgeDialog.isEdit) {
+      await updateKnowledgeGraphEdge(payload);
+      ElMessage.success("关系更新成功");
+    } else {
+      delete payload.id;
+      await addKnowledgeGraphEdge(payload);
+      ElMessage.success("关系新增成功");
+    }
+
+    edgeDialog.visible = false;
+    await reloadAll();
+  } catch (error) {
+    ElMessage.error(error?.message || "关系保存失败");
+  } finally {
+    edgeDialog.saving = false;
+  }
+};
+
+const removeEdge = async (row) => {
+  try {
+    await ElMessageBox.confirm("确认删除该关系吗？", "删除关系", {
+      type: "warning",
+      confirmButtonText: "删除",
+      cancelButtonText: "取消",
+    });
+    await deleteKnowledgeGraphEdge(row.id);
+    ElMessage.success("关系删除成功");
+    await reloadAll();
+  } catch (error) {
+    if (error !== "cancel") {
+      ElMessage.error(error?.message || "关系删除失败");
+    }
+  }
+};
+
+const openIndexDialog = () => {
+  Object.assign(indexForm, {
+    nodeId: selectedNode.value?.id,
+    materialId: undefined,
+  });
+  indexDialog.visible = true;
+};
+
+const submitIndex = async () => {
+  if (!indexForm.nodeId || !indexForm.materialId) {
+    ElMessage.warning("请填写节点 ID 与资料 ID");
+    return;
+  }
+  if (!currentCourseSectionId.value) {
+    ElMessage.warning("当前课程系列 ID 无效");
+    return;
+  }
+
+  indexDialog.saving = true;
+  try {
+    await addKnowledgeGraphNodeIndex({
+      nodeId: Number(indexForm.nodeId),
+      materialId: Number(indexForm.materialId),
+      courseSectionId: Number(currentCourseSectionId.value),
+    });
+    ElMessage.success("索引新增成功");
+    indexDialog.visible = false;
+    await reloadAll();
+  } catch (error) {
+    ElMessage.error(error?.message || "索引新增失败");
+  } finally {
+    indexDialog.saving = false;
+  }
+};
+
+const removeIndex = async (row) => {
+  try {
+    await ElMessageBox.confirm("确认删除该索引吗？", "删除索引", {
+      type: "warning",
+      confirmButtonText: "删除",
+      cancelButtonText: "取消",
+    });
+    await deleteKnowledgeGraphNodeIndex(row.id);
+    ElMessage.success("索引删除成功");
+    await reloadAll();
+  } catch (error) {
+    if (error !== "cancel") {
+      ElMessage.error(error?.message || "索引删除失败");
+    }
+  }
+};
+
+const onImportFileChange = (file) => {
+  importFile.value = file.raw;
+};
+
+const onImportFileRemove = () => {
+  importFile.value = null;
+};
+
+const submitImport = async () => {
+  if (!currentCourseSectionId.value) {
+    ElMessage.warning("当前课程系列 ID 无效，无法导入");
+    return;
+  }
+  if (!importFile.value) {
+    ElMessage.warning("请先选择 xlsx 文件");
+    return;
+  }
+
+  importing.value = true;
+  try {
+    await importKnowledgeGraphFromExcel(importFile.value, Number(currentCourseSectionId.value));
+    ElMessage.success("导入成功");
+    importDialogVisible.value = false;
+    importFile.value = null;
+    await reloadAll();
+  } catch (error) {
+    ElMessage.error(error?.message || "导入失败");
+  } finally {
+    importing.value = false;
+  }
+};
+
+const zoomInGraph = () => {
+  graphZoom.value = Math.min(3, Number((graphZoom.value + 0.2).toFixed(2)));
+  renderChart();
+};
+
+const zoomOutGraph = () => {
+  graphZoom.value = Math.max(0.4, Number((graphZoom.value - 0.2).toFixed(2)));
+  renderChart();
+};
+
+const resetGraphViewport = () => {
+  graphZoom.value = 1;
+  renderChart();
+};
+
+const toggleGraphRoam = () => {
+  graphRoamEnabled.value = !graphRoamEnabled.value;
+  renderChart();
+};
+
+watch([displayNodes, displayEdges, activeRootId], () => {
+  const visibleSet = new Set(displayNodes.value.map((item) => Number(item.id)));
+  if (selectedNodeId.value && !visibleSet.has(Number(selectedNodeId.value))) {
+    selectedNodeId.value = null;
+  }
+  nextTick(() => renderChart());
+});
+
+watch(currentCourseSectionId, async () => {
+  await reloadAll();
+});
+
+onMounted(async () => {
+  await reloadAll();
+  window.addEventListener("resize", renderChart);
+});
 
 onUnmounted(() => {
-  window.removeEventListener('resize', initGraph)
-
-  // 移除canvas点击事件
-  if (graphRef.value) {
-    graphRef.value.removeEventListener('click', handleCanvasClick)
+  window.removeEventListener("resize", renderChart);
+  if (chartInstance) {
+    chartInstance.dispose();
+    chartInstance = null;
   }
-})
+});
 </script>
 
 <style scoped>
-.knowledge-graph {
+.knowledge-graph-page {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f5f7fa;
+  gap: 12px;
+  padding: 14px;
+  background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-primary-grey) 100%);
 }
 
-.graph-header {
+.page-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  background: #fff;
-  border-bottom: 1px solid #e4e7ed;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--bg-white);
 }
 
-.graph-header h2 {
+.title-group h2 {
   margin: 0;
-  color: #2c3e50;
-  font-size: 24px;
+  color: var(--primary-dark);
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.title-group p {
+  margin: 6px 0 0;
+  color: var(--text-regular);
+  font-size: 13px;
 }
 
 .header-actions {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.filter-section {
+.toolbar-card {
+  border: 1px solid var(--border-light);
+}
+
+.toolbar-row {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.toolbar-item {
+  display: flex;
   align-items: center;
-  padding: 15px 20px;
-  background: #fff;
-  border-bottom: 1px solid #e4e7ed;
-}
-
-.filter-left {
-  display: flex;
   gap: 10px;
 }
 
-.graph-container {
-  flex: 1;
-  display: flex;
-  padding: 20px;
-  gap: 20px;
-  overflow: hidden;
+.toolbar-label {
+  color: var(--text-primary);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
-.graph-main {
+.main-grid {
   flex: 1;
-  position: relative;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr) 420px;
+  gap: 12px;
+}
+
+.toc-card,
+.graph-card,
+.info-card,
+.manager-card {
+  border: 1px solid var(--border-light);
+}
+
+.toc-card :deep(.el-card__body) {
+  height: calc(100% - 56px);
+  overflow: auto;
+}
+
+.toc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toc-item {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.toc-list :deep(.el-button + .el-button) {
+  margin-left: 0;
+}
+
+.toc-name {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toc-level {
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+.graph-card :deep(.el-card__body) {
+  height: calc(100% - 56px);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
 .graph-canvas {
   width: 100%;
-  height: 100%;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  cursor: pointer;
+  flex: 1;
+  min-height: 360px;
+  border-radius: 10px;
+  border: 1px solid var(--primary-alpha-20);
+  background:
+    radial-gradient(circle at 12% 18%, var(--primary-alpha-10), transparent 40%),
+    radial-gradient(circle at 86% 82%, var(--primary-alpha-10), transparent 38%),
+    var(--bg-white);
 }
 
-.node-info-panel {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 300px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  z-index: 10;
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  border-bottom: 1px solid #e4e7ed;
-}
-
-.panel-header h3 {
-  margin: 0;
-  font-size: 16px;
-  color: #303133;
-}
-
-.panel-content {
-  padding: 20px;
-}
-
-.info-item {
-  margin-bottom: 15px;
-}
-
-.info-item:last-child {
-  margin-bottom: 0;
-}
-
-.info-item .label {
-  display: block;
-  color: #606266;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.info-item p {
-  margin: 0;
-  color: #303133;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.resource-list {
+.graph-controls {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-primary-lighter);
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.graph-sidebar {
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.legend-card,
-.stats-card,
-.path-card {
-  background: #fff;
-}
-
-.legend-card :deep(.el-card__header),
-.stats-card :deep(.el-card__header),
-.path-card :deep(.el-card__header) {
-  padding: 15px 20px;
-  border-bottom: 1px solid #e4e7ed;
-}
-
-.legend-card :deep(.el-card__body),
-.stats-card :deep(.el-card__body),
-.path-card :deep(.el-card__body) {
-  padding: 20px;
-}
-
-.legend-card h4,
-.stats-card h4,
-.path-card h4 {
-  margin: 0;
-  font-size: 16px;
-  color: #303133;
-}
-
-.legend-items {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.legend-item {
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.legend-node {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
-
-.legend-node.chapter {
-  background: #409eff;
-}
-
-.legend-node.knowledge {
-  background: #67c23a;
-}
-
-.legend-node.keypoint {
-  background: #e6a23c;
-}
-
-.legend-relations h5 {
-  margin: 0 0 10px 0;
-  font-size: 14px;
-  color: #606266;
-}
-
-.legend-line {
-  width: 40px;
-  height: 2px;
-  position: relative;
-}
-
-.legend-line.contains {
-  background: #409eff;
-}
-
-.legend-line.prerequisite {
-  background: #e6a23c;
-}
-
-.legend-line.related {
-  background: #67c23a;
-}
-
-.legend-line::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: -4px;
-  width: 0;
-  height: 0;
-  border-left: 8px solid;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-}
-
-.legend-line.contains::after {
-  border-left-color: #409eff;
-}
-
-.legend-line.prerequisite::after {
-  border-left-color: #e6a23c;
-}
-
-.legend-line.related::after {
-  border-left-color: #67c23a;
-}
-
-.stat-items {
+.side-column {
+  min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 10px;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.stat-number {
-  display: block;
-  font-size: 24px;
-  font-weight: 600;
-  color: #409eff;
-  margin-bottom: 5px;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: #909399;
+  grid-template-rows: 280px minmax(0, 1fr);
+  gap: 12px;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.path-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.path-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.path-index {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #409eff;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
-.path-content {
-  flex: 1;
+.info-card :deep(.el-card__body) {
+  height: calc(100% - 56px);
+  overflow: auto;
 }
 
-.path-name {
-  font-weight: 500;
-  color: #303133;
-  margin-bottom: 4px;
+.node-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.path-desc {
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.detail-row.block {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.detail-row p {
+  margin: 0;
+  color: var(--text-regular);
+  line-height: 1.5;
+}
+
+.tag-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.empty-text {
+  color: var(--text-placeholder);
   font-size: 12px;
-  color: #909399;
 }
 
-.empty-path {
-  padding: 20px;
-  text-align: center;
+.manager-card :deep(.el-card__body) {
+  height: calc(100% - 56px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-/* 响应式设计 */
-@media (max-width: 1200px) {
-  .graph-sidebar {
-    width: 250px;
+.manager-card :deep(.el-tabs) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.manager-card :deep(.el-tabs__content) {
+  flex: 1;
+  min-height: 0;
+}
+
+.manager-card :deep(.el-tab-pane) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tab-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.upload-tip {
+  color: var(--text-placeholder);
+  font-size: 12px;
+}
+
+:deep(.el-button--primary) {
+  --el-button-bg-color: var(--primary);
+  --el-button-border-color: var(--primary);
+  --el-button-hover-bg-color: var(--primary-hover);
+  --el-button-hover-border-color: var(--primary-hover);
+  --el-button-active-bg-color: var(--primary-dark);
+  --el-button-active-border-color: var(--primary-dark);
+}
+
+:deep(.el-tag.el-tag--primary) {
+  --el-tag-bg-color: var(--primary-alpha-10);
+  --el-tag-border-color: var(--primary-alpha-20);
+  --el-tag-text-color: var(--primary-dark);
+}
+
+@media (max-width: 1280px) {
+  .main-grid {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .side-column {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .graph-canvas {
+    min-height: 420px;
   }
 }
 
 @media (max-width: 768px) {
-  .graph-container {
+  .knowledge-graph-page {
+    padding: 10px;
+  }
+
+  .main-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page-header {
     flex-direction: column;
+    align-items: flex-start;
   }
 
-  .graph-sidebar {
-    width: 100%;
-    flex-direction: row;
-    overflow-x: auto;
+  .toolbar-row {
+    gap: 12px;
   }
 
-  .legend-card,
-  .stats-card,
-  .path-card {
-    min-width: 200px;
-  }
-
-  .filter-section {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .filter-left {
+  .toolbar-item {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .search-box {
-    width: 100%;
-  }
-
-  .search-box :deep(.el-input) {
-    width: 100% !important;
-  }
-
-  .node-info-panel {
-    width: calc(100% - 40px);
-    right: 20px;
   }
 }
 </style>

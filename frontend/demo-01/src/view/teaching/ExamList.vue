@@ -163,7 +163,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useExamStore } from '@/store'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search, Document, Promotion, CircleCheck,
   Clock, User
@@ -181,9 +180,9 @@ const currentPage = ref(1)
 const pageSize = ref(12)
 
 // 计算属性
-const courseId = computed(() => route.params.courseId)
-const exams = computed(() => examStore.getExamsByCourseId(courseId.value))
-const examStats = computed(() => examStore.getExamStats(courseId.value))
+const courseSectionId = computed(() => route.params.id || null)
+const exams = computed(() => examStore.getExamsByCourseId(courseSectionId.value))
+const examStats = computed(() => examStore.getExamStats(courseSectionId.value))
 
 const filteredExams = computed(() => {
   let result = [...exams.value]
@@ -219,7 +218,7 @@ const paginatedExams = computed(() => {
 
 // 方法
 const enterExam = (examId) => {
-  router.push(`/teaching/course/${courseId.value}/exam/${examId}`)
+  router.push(`/teaching/course/${courseSectionId.value}/exam/${examId}`)
 }
 
 

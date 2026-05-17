@@ -283,6 +283,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  practiceId: {
+    type: [String, Number, null],
+    default: null,
+  },
 });
 
 // Emits 定义：用于与父组件通信的事件列表
@@ -487,6 +491,7 @@ const handleOptionSelection = (value, questionId = props.question?.id) => {
 
 // 统一的答案提交处理
 const handleAnswerSubmit = (questionId, answer) => {
+  const practiceId = props.practiceId;
   const isEmpty = checkAnswerEmpty(
     answer,
     props.singleQuestionMode
@@ -499,6 +504,7 @@ const handleAnswerSubmit = (questionId, answer) => {
     emit("answer-submitted", {
       questionId: questionId,
       answer: answer,
+      practiceId: practiceId,
       isEmpty: true,
     });
 
@@ -509,6 +515,7 @@ const handleAnswerSubmit = (questionId, answer) => {
   emit("answer-submitted", {
     questionId: questionId,
     answer: answer,
+    practiceId: practiceId,
     isEmpty: false,
   });
   return true; // 返回true表示答案提交成功
@@ -663,7 +670,10 @@ const unsubmittedCount = computed(() => {
 // 事件处理
 // 处理编程题答案提交
 const handleProgrammingAnswerSubmitted = (result) => {
-  emit("answer-submitted", result);
+  emit("answer-submitted", {
+    ...result,
+    practiceId: result?.practiceId ?? props.practiceId,
+  });
 };
 
 // 处理简答题失去焦点事件

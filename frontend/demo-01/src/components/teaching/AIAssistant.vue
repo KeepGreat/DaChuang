@@ -1,100 +1,119 @@
 <template>
   <div class="ai-assistant-container">
-    <!-- 对话记录区域 -->
-    <div class="chat-history">
-      <div v-if="messages.length === 0" class="empty-state">
-        <p>智能助教随时为您解答问题</p>
-        <p>您可以提问或分享代码</p>
-      </div>
-      <div 
-        v-for="(message, index) in messages" 
-        :key="index" 
-        :class="['message', message.role]"
-      >
-        <div class="message-header">
-          <span class="role-label">{{ message.role === 'user' ? '您' : '助教' }}</span>
-          <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
-        </div>
-        <div class="message-content">
-          <div v-if="message.question" class="question-content">{{ message.question }}</div>
-          <div v-if="message.code" class="code-content">
-            <div class="code-header">
-              <span>{{ message.codeLanguage || '代码' }}</span>
-            </div>
-            <pre>{{ message.code }}</pre>
+    <div class="assistant-main">
+      <div class="chat-panel">
+        <!-- 对话记录区域 -->
+        <div ref="chatHistoryRef" class="chat-history">
+          <div v-if="messages.length === 0" class="empty-state">
+            <p>智能助教随时为您解答问题</p>
+            <p>您可以提问或分享代码</p>
           </div>
-          <div v-if="message.response" class="response-content">
-            <!-- 使用v-html指令渲染Markdown内容 -->
-            <div v-html="renderMarkdown(message.response)"></div>
-            <!-- 流式加载指示器 -->
-            <div v-if="message.isStreaming" class="typing-indicator">
-              <span class="typing-dot"></span>
-              <span class="typing-dot"></span>
-              <span class="typing-dot"></span>
+          <div 
+            v-for="(message, index) in messages" 
+            :key="index" 
+            :class="['message', message.role]"
+          >
+            <div class="message-header">
+              <span class="role-label">{{ message.role === 'user' ? '您' : '助教' }}</span>
+              <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
             </div>
+            <div class="message-content">
+              <div v-if="message.question" class="question-content">{{ message.question }}</div>
+              <div v-if="message.code" class="code-content">
+                <div class="code-header">
+                  <span>{{ message.codeLanguage || '代码' }}</span>
+                </div>
+                <pre>{{ message.code }}</pre>
+              </div>
+              <div v-if="message.response" class="response-content">
+                <!-- 使用v-html指令渲染Markdown内容 -->
+                <div v-html="renderMarkdown(message.response)"></div>
+                <!-- 流式加载指示器 -->
+                <div v-if="message.isStreaming" class="typing-indicator">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-if="isLoading" class="loading-message">
+            <div class="loading-spinner"></div>
+            <span>正在生成回复...</span>
+          </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="input-area">
+          <!-- 问题输入框 -->
+          <div class="question-input-wrapper">
+            <textarea
+              v-model="inputQuestion"
+              class="question-input"
+              placeholder="请输入您的问题..."
+              rows="3"
+            ></textarea>
+          </div>
+
+          <!-- 操作按钮 -->
+          <div class="action-buttons">
+            <el-button 
+              type="default" 
+              class="toggle-code-button"
+              @click="toggleCodeInput"
+            >
+              {{ showCodeInput ? '收起代码侧栏' : '打开代码侧栏' }}
+            </el-button>
+            <el-button 
+              type="primary" 
+              class="send-button"
+              @click="sendMessage"
+              :loading="isLoading"
+              :disabled="!canSend"
+            >
+              发送
+            </el-button>
           </div>
         </div>
       </div>
-      <div v-if="isLoading" class="loading-message">
-        <div class="loading-spinner"></div>
-        <span>正在生成回复...</span>
-      </div>
-    </div>
 
-    <!-- 输入区域 -->
-    <div class="input-area">
-      <!-- 问题输入框 -->
-      <div class="question-input-wrapper">
-        <textarea
-          v-model="inputQuestion"
-          class="question-input"
-          placeholder="请输入您的问题..."
-          rows="3"
-        ></textarea>
-      </div>
-
-      <!-- 代码输入（集成CodeSandbox组件） -->
-      <div class="code-input-wrapper" v-show="showCodeInput">
-        <CodeSandbox
-          ref="codeSandboxRef"
-          :initialLanguage="sandboxInitialLanguage"
-          :initialCode="sandboxInitialCode"
-          :initialInput="sandboxInitialInput"
-          @codeChange="handleCodeChange"
-        />
-      </div>
-
-      <!-- 操作按钮 -->
-      <div class="action-buttons">
-        <el-button 
-          type="default" 
-          class="toggle-code-button"
-          @click="toggleCodeInput"
-        >
-          {{ showCodeInput ? '隐藏代码输入' : '添加代码' }}
-        </el-button>
-        <el-button 
-          type="primary" 
-          class="send-button"
-          @click="sendMessage"
-          :loading="isLoading"
-          :disabled="!canSend"
-        >
-          发送
-        </el-button>
-      </div>
+      <transition name="code-sidebar-slide">
+        <aside v-show="showCodeInput" class="code-sidebar">
+          <div class="code-sidebar-header">
+            <h3>代码输入区</h3>
+            <el-button text @click="toggleCodeInput">关闭</el-button>
+          </div>
+          <p class="code-sidebar-tip">在这里输入代码，发送问题时会自动附带。</p>
+          <div class="code-sidebar-body">
+            <CodeSandbox
+              ref="codeSandboxRef"
+              :initialLanguage="sandboxInitialLanguage"
+              :initialCode="sandboxInitialCode"
+              :initialInput="sandboxInitialInput"
+              @codeChange="handleCodeChange"
+            />
+          </div>
+        </aside>
+      </transition>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, reactive, computed, onBeforeUnmount, nextTick } from 'vue';
 import { ElButton } from 'element-plus';
 import CodeSandbox from './CodeSandbox.vue';
-import { teach, answer } from '../../api/modules/teaching/AIAssistantAPI.js';
+import { teachStream, answerStream } from '../../api/modules/teaching/AIAssistantAPI.js';
 
 // 添加marked库用于Markdown解析
 import { marked } from 'marked';
+
+const props = defineProps({
+  materialIds: {
+    type: Array,
+    default: () => []
+  }
+});
 
 // 配置marked
 marked.setOptions({
@@ -120,12 +139,13 @@ const renderMarkdown = (text) => {
 const messages = ref([]);
 const inputQuestion = ref('');
 const showCodeInput = ref(false);
-const selectedLanguage = ref('cpp');
 const isLoading = ref(false);
+const chatHistoryRef = ref(null);
 const codeSandboxRef = ref(null);
 const currentCode = ref('');
 const currentCodeLanguage = ref('cpp');
 const currentProgramInput = ref(''); // 添加程序输入状态
+const currentAbortController = ref(null);
 
 // 添加用于控制CodeSandbox组件props的响应式变量
 const sandboxInitialLanguage = ref('cpp');
@@ -162,158 +182,116 @@ const toggleCodeInput = () => {
 };
 
 // 发送消息
-  const sendMessage = async () => {
-    if (!canSend.value || isLoading.value) return;
-    
-    const question = inputQuestion.value.trim();
-    
-    // 创建用户消息
-    const userMessage = {
-      role: 'user',
-      question: question,
-      code: currentCode.value,
-      codeLanguage: currentCodeLanguage.value,
-      codeInput: currentProgramInput.value, // 添加程序输入到用户消息中
-      timestamp: new Date()
-    };
-    
-    // 创建AI响应占位符消息
-    const aiMessage = {
-      role: 'assistant',
-      response: '',
-      isStreaming: true,
-      timestamp: new Date()
-    };
-    
-    // 添加消息到列表
-    messages.value.push(userMessage, aiMessage);
-    
-    // 清空输入
-    inputQuestion.value = '';
-    
-    // 滚动到底部
-    scrollToBottom();
-    
-    // 调用API
-    isLoading.value = true;
-    
-    try {
-      // 根据是否有代码选择不同的API
-      // 重要：在清空代码前进行判断
-      const endpoint = currentCode.value && currentCode.value.trim() ? 'teach' : 'answer';
-      
-      // 构建请求参数，严格按照后端实体类设计
-      // 使用userMessage中的code和codeLanguage，避免重复定义临时变量
-      const teachingInput = userMessage.code ? {
-        question: question,
-        codeSandboxInput: {
-          codeLanguage: userMessage.codeLanguage,
-          code: userMessage.code,
-          input: userMessage.codeInput || '' // 使用用户输入的程序输入内容，默认为空
-        }
-      } : {
-        question: question,
-        codeSandboxInput: null
-      };
-      
-      // 现在可以安全地清空代码状态，因为已经保存了需要的值
-      // 移除条件判断，确保代码总是被清空
-      // 重置本地代码状态
-      currentCode.value = '';
-      currentProgramInput.value = ''; // 重置程序输入
-      // 重置语言为默认值
-      currentCodeLanguage.value = 'cpp';
-      
-      // 使用CodeSandbox组件暴露的reset方法清空内容
-      // 这是最直接有效的方法，可以确保组件内部状态正确重置
-      if (codeSandboxRef.value) {
-        // 使用nextTick确保DOM更新完成后再调用reset方法
-        nextTick(() => {
-          codeSandboxRef.value.reset('cpp', '', '');
-        });
-      }
-      
-      // 不再需要通过props更新和highlightCode方法调用
-      // 使用组件自己的reset方法即可处理所有逻辑
-      // 通过更新props控制CodeSandbox组件重置（保留作为备选方案）
-      sandboxInitialLanguage.value = 'cpp';
-      sandboxInitialCode.value = '';
-      sandboxInitialInput.value = '';
-      
-      // 移除多余的nextTick函数块
-      // 因为我们已经在调用reset方法时使用了nextTick
-      // 使用nextTick确保DOM更新完成
-      // nextTick(() => {
-      //   // 不需要调用highlightCode方法
-      //   // CodeSandbox组件内部的watch会自动处理高亮更新
-      // });
-      
-      // 使用TeachingAPI.js中的函数调用接口
-      const response = endpoint === 'teach' ? 
-        await teach(teachingInput) : 
-        await answer(teachingInput);
-      
-      // 获取响应数据
-      const responseData = response.data;
-      
-      // 检查是否支持流式处理
-      if (responseData && typeof responseData.getReader === 'function') {
-        // 支持流式处理的情况
-        const reader = responseData.getReader();
-        const decoder = new TextDecoder('utf-8');
-        
-        // 处理流式响应
-        let accumulatedResponse = '';
-        
-        while (true) {
-          const { done, value } = await reader.read();
-          
-          if (done) {
-            // 流式传输完成
-            aiMessage.isStreaming = false;
-            break;
-          }
-          
-          try {
-            // 解码新的数据块
-            const chunk = decoder.decode(value, { stream: true });
-            accumulatedResponse += chunk;
-            
-            // 更新AI消息响应内容
-            aiMessage.response = accumulatedResponse;
-            
-            // 滚动到底部
-            scrollToBottom();
-          } catch (decodeError) {
-            console.error('流式数据解码错误:', decodeError);
-            // 继续处理下一个数据块
-            continue;
-          }
-        }
-      } else {
-        // 不支持流式处理，直接获取完整数据
-        // 假设responseData是完整的响应内容字符串
-        const fullResponse = typeof responseData === 'string' ? responseData : JSON.stringify(responseData);
-        aiMessage.response = fullResponse;
-        aiMessage.isStreaming = false;
-        scrollToBottom();
-      }
-      
-    } catch (error) {
-      console.error('发送消息错误:', error);
-      aiMessage.isStreaming = false;
-      // 显示错误信息
-      aiMessage.response = `抱歉，处理您的请求时出错：${error.message || '未知错误'}`;
-    } finally {
-      isLoading.value = false;
-      // 最终滚动到底部
-      scrollToBottom();
-    }
+const sendMessage = async () => {
+  if (!canSend.value || isLoading.value) return;
+
+  const question = inputQuestion.value.trim();
+  const relativeMaterialIds = Array.isArray(props.materialIds)
+    ? props.materialIds
+        .map((id) => Number(id))
+        .filter((id) => Number.isInteger(id) && id > 0)
+    : [];
+
+  // 创建用户消息
+  const userMessage = {
+    role: 'user',
+    question: question,
+    code: currentCode.value,
+    codeLanguage: currentCodeLanguage.value,
+    codeInput: currentProgramInput.value,
+    timestamp: new Date()
   };
+
+  // 创建AI响应占位符消息
+  const aiMessage = reactive({
+    role: 'assistant',
+    response: '',
+    isStreaming: true,
+    timestamp: new Date()
+  });
+
+  // 添加消息到列表
+  messages.value.push(userMessage, aiMessage);
+
+  // 清空输入
+  inputQuestion.value = '';
+
+  // 滚动到底部
+  scrollToBottom();
+
+  isLoading.value = true;
+
+  try {
+    const hasCode = !!(userMessage.code && userMessage.code.trim());
+    const teachingInput = hasCode
+      ? {
+          question: question,
+          relativeMaterialIds,
+          codeSandboxInput: {
+            codeLanguage: userMessage.codeLanguage,
+            code: userMessage.code,
+            input: userMessage.codeInput || ''
+          }
+        }
+      : {
+          question: question,
+          relativeMaterialIds,
+          codeSandboxInput: null
+        };
+
+    // 发送后立即重置本地编辑状态
+    currentCode.value = '';
+    currentProgramInput.value = '';
+    currentCodeLanguage.value = 'cpp';
+
+    if (codeSandboxRef.value) {
+      nextTick(() => {
+        codeSandboxRef.value.reset('cpp', '', '');
+      });
+    }
+
+    sandboxInitialLanguage.value = 'cpp';
+    sandboxInitialCode.value = '';
+    sandboxInitialInput.value = '';
+
+    const controller = new AbortController();
+    currentAbortController.value = controller;
+
+    const streamApi = hasCode ? teachStream : answerStream;
+    const fullResponse = await streamApi(
+      teachingInput,
+      (chunk) => {
+        aiMessage.response += chunk;
+        scrollToBottom();
+      },
+      controller.signal
+    );
+
+    // 兼容极端情况下 onChunk 未触发的场景
+    if (!aiMessage.response && fullResponse) {
+      aiMessage.response = fullResponse;
+    }
+
+    aiMessage.isStreaming = false;
+  } catch (error) {
+    console.error('发送消息错误:', error);
+    aiMessage.isStreaming = false;
+
+    if (error?.name === 'AbortError') {
+      aiMessage.response = aiMessage.response || '本次请求已取消';
+    } else {
+      aiMessage.response = `抱歉，处理您的请求时出错：${error.message || '未知错误'}`;
+    }
+  } finally {
+    currentAbortController.value = null;
+    isLoading.value = false;
+    scrollToBottom();
+  }
+};
 
 // 滚动到底部
 const scrollToBottom = () => {
-  const chatHistory = document.querySelector('.chat-history');
+  const chatHistory = chatHistoryRef.value;
   if (chatHistory) {
     chatHistory.scrollTop = chatHistory.scrollHeight;
   }
@@ -327,21 +305,82 @@ const formatTime = (date) => {
   return `${hours}:${minutes}`;
 };
 
-// 组件挂载时
-onMounted(() => {
-  // 可以在这里初始化一些数据或状态
+onBeforeUnmount(() => {
+  if (currentAbortController.value) {
+    currentAbortController.value.abort();
+  }
 });
 </script>
 
 <style scoped>
 /* 智能助教容器 */
 .ai-assistant-container {
-  display: flex;
-  flex-direction: column;
   height: 100%;
   background-color: #f0f7ff;
+}
+
+.assistant-main {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+}
+
+.chat-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   border-radius: 8px;
   overflow: hidden;
+}
+
+.code-sidebar {
+  width: min(46%, 460px);
+  min-width: 300px;
+  background: #ffffff;
+  border-left: 1px solid #d9ecff;
+  display: flex;
+  flex-direction: column;
+}
+
+.code-sidebar-header {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #eef5ff;
+}
+
+.code-sidebar-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2d3d;
+}
+
+.code-sidebar-tip {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #7a8599;
+  border-bottom: 1px solid #f3f7ff;
+}
+
+.code-sidebar-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.code-sidebar-slide-enter-active,
+.code-sidebar-slide-leave-active {
+  transition: all 0.25s ease;
+}
+
+.code-sidebar-slide-enter-from,
+.code-sidebar-slide-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
 }
 
 /* 对话记录区域 */
@@ -369,6 +408,8 @@ onMounted(() => {
   padding: 12px;
   border-radius: 8px;
   max-width: 90%;
+  width: fit-content;
+  min-width: 0;
 }
 
 .message.user {
@@ -379,6 +420,7 @@ onMounted(() => {
 .message.assistant {
   background-color: #f0f9ff;
   border: 1px solid #bae7ff;
+  margin-right: auto;
 }
 
 /* 消息头部 */
@@ -432,30 +474,34 @@ onMounted(() => {
 .response-content {
   color: #303133;
   word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
-/* Markdown内容样式 */
-.response-content [v-html] {
+/* Markdown内容样式（v-html内容需使用:deep） */
+.response-content :deep(*) {
   line-height: 1.6;
   word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 /* Markdown标题样式 */
-.response-content h1 {
+.response-content :deep(h1) {
   font-size: 1.5em;
   margin: 1em 0 0.5em 0;
   font-weight: bold;
   color: #333;
 }
 
-.response-content h2 {
+.response-content :deep(h2) {
   font-size: 1.3em;
   margin: 1em 0 0.5em 0;
   font-weight: bold;
   color: #333;
 }
 
-.response-content h3 {
+.response-content :deep(h3) {
   font-size: 1.1em;
   margin: 1em 0 0.5em 0;
   font-weight: bold;
@@ -463,17 +509,17 @@ onMounted(() => {
 }
 
 /* Markdown列表样式 */
-.response-content ul, .response-content ol {
+.response-content :deep(ul), .response-content :deep(ol) {
   margin: 0.5em 0;
   padding-left: 2em;
 }
 
-.response-content li {
+.response-content :deep(li) {
   margin: 0.3em 0;
 }
 
 /* Markdown代码块样式 */
-.response-content pre {
+.response-content :deep(pre) {
   background-color: #f5f7fa;
   border-radius: 4px;
   padding: 12px;
@@ -484,7 +530,7 @@ onMounted(() => {
   margin: 1em 0;
 }
 
-.response-content code {
+.response-content :deep(code) {
   background-color: #f5f7fa;
   padding: 2px 4px;
   border-radius: 3px;
@@ -492,13 +538,13 @@ onMounted(() => {
   font-size: 0.9em;
 }
 
-.response-content pre code {
+.response-content :deep(pre code) {
   background-color: transparent;
   padding: 0;
 }
 
 /* Markdown引用样式 */
-.response-content blockquote {
+.response-content :deep(blockquote) {
   border-left: 4px solid #409eff;
   padding-left: 12px;
   margin: 1em 0;
@@ -593,14 +639,6 @@ onMounted(() => {
   border-color: #409eff;
 }
 
-/* 代码输入包装器 */
-.code-input-wrapper {
-  margin-bottom: 12px;
-  background-color: #fff;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
 /* 操作按钮 */
 .action-buttons {
   display: flex;
@@ -626,5 +664,22 @@ onMounted(() => {
   background-color: #f5f7fa;
   border-color: #d9d9d9;
   color: #bfbfbf;
+}
+
+@media (max-width: 768px) {
+  .assistant-main {
+    position: relative;
+  }
+
+  .code-sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    min-width: 0;
+    z-index: 20;
+    box-shadow: -8px 0 24px rgba(15, 34, 62, 0.15);
+  }
 }
 </style>

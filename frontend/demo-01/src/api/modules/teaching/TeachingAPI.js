@@ -3,14 +3,15 @@ import request from "@/api/request";
 
 export default {
   // 创建会话
-  createSession() {
+  createSession(payload = {}) {
     return request({
       url: "/api/teaching/smartcompanion/session/create",
       method: "post",
       data: {
         session_id: null,
         clear_history: true,
-        max_turns: null
+        max_turns: null,
+        ...payload
       }
     });
   },

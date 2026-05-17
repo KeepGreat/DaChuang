@@ -1,5 +1,16 @@
 import request from "@/api/request";
 
+/**
+ * 后端实体类设计
+public class User {
+    private String id;
+
+    private String username;
+    private String password;
+    private String role;
+}
+ */
+
 export function getAllUsers(params = {}) {
   return request({
     url: "/user",

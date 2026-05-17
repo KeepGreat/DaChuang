@@ -12,6 +12,7 @@ import request from "@/api/request";
  * @property {string} content - 用户答案
  * @property {string} userId - 用户id
  * @property {number} questionId - 问题id
+ * @property {number} practiceId - 练习id
  * @property {number} questionType - 问题类型，0:判断，1:选择，2:简答，3:编程
  * @property {number} score - 得分应小于等于问题分值，-1代表未批改
  * @property {string} comment - 批注，教师或AI对用户答案的评价
@@ -53,6 +54,7 @@ import request from "@/api/request";
  * @property {string} userId
  * @property {number} questionId
  * @property {number} questionType - 问题类型，0:判断，1:选择，2:简答，3:编程（必填）
+ * @property {number} [practiceId] - 练习id
  */
 
 /**
@@ -62,6 +64,7 @@ import request from "@/api/request";
  * @property {string} [content]
  * @property {string} [userId]
  * @property {number} [questionId]
+ * @property {number} [practiceId]
  * @property {number} [questionType]
  * @property {string} [comment]
  */

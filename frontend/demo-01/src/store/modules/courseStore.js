@@ -255,7 +255,7 @@ export const useCourseStore = defineStore("course", () => {
   const fetchCoursePage = async (page = 1, pageSize = 12) => {
     console.log("11111", originalCourses.value);
     loading.value = true;
-    await delay(500);
+    // await delay(500);
     try {
       // 获取用户store实例
       const userStore = useUserStore();
