@@ -36,8 +36,8 @@ public class ModelConfig {
     @Autowired
     private TeachingProperties teachingProperties;
 
-    private static final String SEARCH_ENGINE_API_KEY = "W5XtS94VJzoMPbq5WUm3bK59";
-    private static final String SEARCH_ENGINE_NAME = "baidu";
+    private static final String SEARCH_ENGINE_API_KEY = "YOUR_SEARCH_ENGINE_API_KEY";
+    private static final String SEARCH_ENGINE_NAME = "YOUR_SEARCH_ENGINE_NAME";
 
     @Bean
     public ChatModel chatModel(){
