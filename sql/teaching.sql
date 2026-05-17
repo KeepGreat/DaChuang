@@ -90,6 +90,9 @@ CREATE TABLE `user_call_record` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP 
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+SELECT * FROM `user_call_record`;
+TRUNCATE TABLE `user_call_record`;
+
 #智能体对话记录表，用于记录agent对话记录
 DROP TABLE IF EXISTS `agent_chat_memory`;
 CREATE TABLE `agent_chat_memory` (
@@ -98,7 +101,52 @@ CREATE TABLE `agent_chat_memory` (
   `content` JSON NOT NULL
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+TRUNCATE TABLE `agent_chat_memory`;
 SELECT * FROM `agent_chat_memory`;
+
+#知识图谱，点信息表
+DROP TABLE IF EXISTS `knowledge_graph_node`;
+CREATE TABLE `knowledge_graph_node`(
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `name` VARCHAR(50) NOT NULL COMMENT '知识点名称',
+  `level` TINYINT NOT NULL COMMENT'知识点等级', #越低等级越高
+  `label` VARCHAR(10) COMMENT '知识点标签', #本质是枚举，由前端决定
+  `description` VARCHAR(100) COMMENT '知识点说明', 
+  `cognition` VARCHAR(10) COMMENT '知识点认知维度', #本质是枚举，由前端决定
+  `course_section_id` INT NOT NULL COMMENT '对应的课程系列id'
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+SELECT * FROM `knowledge_graph_node`;
+
+#知识图谱，知识点与教学资料挂载关系
+DROP TABLE IF EXISTS `knowledge_graph_node_index`;
+CREATE TABLE `knowledge_graph_node_index` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `node_id` INT NOT NULL COMMENT'知识点id',
+  `material_id` INT NOT NULL COMMENT '资料id',
+  `course_section_id` INT NOT NULL COMMENT '对应的课程系列id'
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+#知识图谱，边信息表，有向边
+DROP TABLE IF EXISTS `knowledge_graph_edge`;
+CREATE TABLE `knowledge_graph_edge` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `from_node_id` INT NOT NULL COMMENT '起始知识点id',
+  `to_node_id` INT NOT NULL COMMENT '目标知识点id',
+  `relation_type` TINYINT NOT NULL COMMENT '联系类型', #0:父子关系，1：前置关系，2：后置关系，3：关联关系
+  `course_section_id` INT NOT NULL COMMENT '对应的课程系列id'
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+SELECT * FROM `knowledge_graph_edge`;
+
+#提示词信息表
+DROP TABLE IF EXISTS `prompt_info`;
+CREATE TABLE `prompt_info` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL COMMENT 'txt文件名称',
+  `description` VARCHAR(100) COMMENT '描述',
+  `creator_id` VARCHAR(100) NOT NULL COMMENT '创建者id'
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ###以下为测试数据###
 INSERT INTO `course_section`(`name`, `description`, `course_section_type_id`, `teacher_id`)

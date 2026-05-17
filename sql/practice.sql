@@ -81,6 +81,7 @@ CREATE TABLE `user_answer`(
   `content` TEXT NOT NULL COMMENT '用户答案',
   `user_id` VARCHAR(100) NOT NULL COMMENT '用户id',
   `question_id` INT NOT NULL COMMENT '问题id',
+  `practice_id` INT NOT NULL COMMENT '练习id',
   `question_type` TINYINT(1) NOT NULL COMMENT '问题类型', #0：判断，1：选择，2：简答，3：编程, 冗余该字段为了便于查找
   `score` TINYINT NOT NULL DEFAULT '-1' COMMENT '得分', #得分应小于等于问题分值,-1代表未批改
   `comment` VARCHAR(500) COMMENT '答案评价' #记录教师或ai对答案的评价 
