@@ -3,6 +3,8 @@ package com.hbwl.pojo.ai;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class CreateSessionRequest {
     @JsonProperty("session_id")
@@ -11,6 +13,8 @@ public class CreateSessionRequest {
     private Boolean isClearHistory;
     @JsonProperty("max_turns")
     private Integer maxTurns;
+    @JsonProperty("material_id")
+    private List<Integer> materialId;
 }
 
 //class CreateSessionRequest(BaseModel):

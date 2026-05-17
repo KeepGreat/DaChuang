@@ -77,7 +77,6 @@ public class PracticeController {
         practice.setName(name);
         practice.setPracticeTypeId(practiceTypeId);
         List<Practice> list = practiceService.getPractices(practice, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd);
-        if (list.isEmpty()) return Result.error("查询练习失败");
         return Result.success(list, "查询练习成功");
     }
 
@@ -95,7 +94,6 @@ public class PracticeController {
         practice.setName(name);
         practice.setPracticeTypeId(practiceTypeId);
         Page<Practice> practicesPage = practiceService.getPracticesPage(pageNo, pageSize, practice, createdAtStart, createdAtEnd, expiredAtStart, expiredAtEnd);
-        if (practicesPage.getSize() == 0) return Result.error("查询练习失败");
         return Result.success(practicesPage, "查询练习成功");
     }
 
@@ -106,7 +104,6 @@ public class PracticeController {
         practiceIndex.setCourseSectionId(courseSectionId);
         practiceIndex.setCourseId(courseId);
         List<Practice> list = practiceService.getPracticesByIndex(practiceIndex);
-        if (list.isEmpty()) return Result.error("查询练习失败");
         return Result.success(list, "查询练习成功");
     }
 

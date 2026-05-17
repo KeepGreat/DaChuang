@@ -27,7 +27,7 @@ public class FileContentController {
     public Result uploadFile(@RequestPart("fileContent") String fileContentJSON,
                              @RequestPart("file") MultipartFile file,
                              @RequestHeader("role") String role) {
-        if (!(role.equals("teacher") || role.equals("admin"))) Result.error("权限不足");
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileContent fileContent = objectMapper.readValue(fileContentJSON, FileContent.class);
@@ -44,7 +44,7 @@ public class FileContentController {
     @DeleteMapping("/{id}")
     public Result deleteFile(@PathVariable("id") Integer id,
                              @RequestHeader("role") String role){
-        if (!(role.equals("teacher") || role.equals("admin"))) Result.error("权限不足");
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         int row = fileContentService.deleteFileContentById(id);
         if (row == 0) return Result.error("删除文件失败");
         return Result.success("删除文件成功");
@@ -54,7 +54,7 @@ public class FileContentController {
     public Result updateFile(@RequestPart("fileContent") String fileContentJSON,
                              @RequestPart("file") MultipartFile file,
                              @RequestHeader("role") String role) {
-        if (!(role.equals("teacher") || role.equals("admin"))) Result.error("权限不足");
+        if (!(role.equals("teacher") || role.equals("admin"))) return Result.error("权限不足");
         // fileContent nullable + multipartFile
         try {
             ObjectMapper objectMapper = new ObjectMapper();

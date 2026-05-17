@@ -5,11 +5,14 @@ import com.hbwl.ai.service.SmartTeacherService;
 import com.hbwl.codesandbox.pojo.CodeSandboxInput;
 import com.hbwl.service.UserCallService;
 import com.hbwl.teaching.pojo.TeachingInput;
+import dev.langchain4j.invocation.InvocationParameters;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -43,15 +46,16 @@ public class SmartTeacherServiceImpl implements SmartTeacherService {
         callCount = userCallService.recordUserCall(userId);
         log.info("用户ID: {} ; 小时内调用次数: {}", userId, callCount);
         Flux<String> result;
+        InvocationParameters parameters = InvocationParameters.from(Map.of("materialId", teachingInput.getRelativeMaterialIds()));
         if (codeSandboxInput.getInput() == null || codeSandboxInput.getInput().isBlank()){
             System.out.println("========================不带输入的分析===============================");
             result = aiTeacherService.teach(teachingInput.getQuestion(), codeSandboxInput.getCode(),
-                    codeSandboxInput.getCodeLanguage(), userId);
+                    codeSandboxInput.getCodeLanguage(), userId, parameters);
         }
         else{
             System.out.println("========================带输入的分析===============================");
             result = aiTeacherService.teach(teachingInput.getQuestion(), codeSandboxInput.getCode(),
-                    codeSandboxInput.getCodeLanguage(), codeSandboxInput.getInput(), userId);
+                    codeSandboxInput.getCodeLanguage(), codeSandboxInput.getInput(), userId, parameters);
         }
         return result;
     }
@@ -70,6 +74,7 @@ public class SmartTeacherServiceImpl implements SmartTeacherService {
         //记录用户调用
         callCount = userCallService.recordUserCall(userId);
         log.info("用户ID: {} ; 小时内调用次数: {}", userId, callCount);
-        return aiTeacherService.answerQuestion(teachingInput.getQuestion(), userId);
+        InvocationParameters parameters = InvocationParameters.from(Map.of("materialId", teachingInput.getRelativeMaterialIds()));
+        return aiTeacherService.answerQuestion(teachingInput.getQuestion(), userId, parameters);
     }
 }

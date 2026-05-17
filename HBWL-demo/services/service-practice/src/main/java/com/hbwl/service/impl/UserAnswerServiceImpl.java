@@ -71,11 +71,12 @@ public class UserAnswerServiceImpl implements UserAnswerService {
         if (userAnswer == null ||
                 userAnswer.getContent() == null || userAnswer.getContent().trim().isEmpty() ||
                 userAnswer.getUserId() == null || userAnswer.getUserId().trim().isEmpty() ||
-                userAnswer.getQuestionId() == null) return -1;
-        //如果userId+questionId在数据库中已存在则直接update
+                userAnswer.getQuestionId() == null || userAnswer.getPracticeId() == null) return -1;
+        //如果userId+questionId+practiceId在数据库中已存在则直接update
         QueryWrapper<UserAnswer> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userAnswer.getUserId());
         queryWrapper.eq("question_id", userAnswer.getQuestionId());
+        queryWrapper.eq("practice_id", userAnswer.getPracticeId());
         List<UserAnswer> list = userAnswerMapper.selectList(queryWrapper);
         if (!list.isEmpty()) updateUserAnswerById(userAnswer);
         return userAnswerMapper.insert(userAnswer);
@@ -103,6 +104,7 @@ public class UserAnswerServiceImpl implements UserAnswerService {
         if (userAnswer.getContent() != null) updateWrapper.set("content", userAnswer.getContent());
         if (userAnswer.getUserId() != null) updateWrapper.set("user_id", userAnswer.getUserId());
         if (userAnswer.getQuestionId() != null) updateWrapper.set("question_id", userAnswer.getQuestionId());
+        if (userAnswer.getPracticeId() != null) updateWrapper.set("practice_id", userAnswer.getPracticeId());
         if (userAnswer.getScore() != null) updateWrapper.set("score", userAnswer.getScore());
         if (userAnswer.getComment() != null) updateWrapper.set("comment", userAnswer.getComment());
         return userAnswerMapper.update(null, updateWrapper);
@@ -115,6 +117,7 @@ public class UserAnswerServiceImpl implements UserAnswerService {
         if (userAnswer.getId() != null) queryWrapper.eq("id", userAnswer.getId());
         if (userAnswer.getUserId() != null) queryWrapper.eq("user_id", userAnswer.getUserId());
         if (userAnswer.getQuestionId() != null) queryWrapper.eq("question_id", userAnswer.getQuestionId());
+        if (userAnswer.getPracticeId() != null) queryWrapper.eq("practice_id", userAnswer.getPracticeId());
         if (userAnswer.getQuestionType() != null) queryWrapper.eq("question_type", userAnswer.getQuestionType());
         if (userAnswer.getScore() != null) queryWrapper.eq("score", userAnswer.getScore());
         return userAnswerMapper.selectList(queryWrapper);
@@ -127,6 +130,7 @@ public class UserAnswerServiceImpl implements UserAnswerService {
         if (userAnswer.getId() != null) queryWrapper.eq("id", userAnswer.getId());
         if (userAnswer.getUserId() != null) queryWrapper.eq("user_id", userAnswer.getUserId());
         if (userAnswer.getQuestionId() != null) queryWrapper.eq("question_id", userAnswer.getQuestionId());
+        if (userAnswer.getPracticeId() != null) queryWrapper.eq("practice_id", userAnswer.getPracticeId());
         if (userAnswer.getQuestionType() != null) queryWrapper.eq("question_type", userAnswer.getQuestionType());
         if (userAnswer.getScore() != null) queryWrapper.eq("score", userAnswer.getScore());
         return userAnswerMapper.selectPage(page, queryWrapper);

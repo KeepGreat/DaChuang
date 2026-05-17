@@ -12,6 +12,7 @@ public class UserAnswer {
     private String content;
     private String userId;
     private Integer questionId;
+    private Integer practiceId;
     private Integer questionType;
     private Integer score;
     private String comment;

@@ -58,7 +58,6 @@ public class MaterialController {
         material.setType(type);
         material.setCourseId(courseId);
         List<Material> list = materialService.getMaterials(material, createdAtStart, createdAtEnd, updatedAtStart, updatedAtEnd);
-        if (list == null || list.isEmpty()) return Result.error("查询资料信息失败");
         return Result.success(list, "查询资料信息成功");
     }
 
@@ -76,7 +75,6 @@ public class MaterialController {
         material.setType(type);
         material.setCourseId(courseId);
         Page<Material> page = materialService.getMaterialsPage(pageNo, pageSize, material, createdAtStart, createdAtEnd, updatedAtStart, updatedAtEnd);
-        if (page == null || page.getSize() == 0) return Result.error("查询资料信息失败");
         return Result.success(page, "查询资料信息成功");
     }
 }

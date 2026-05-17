@@ -100,7 +100,8 @@ public class FileContentUtil {
 
             @Override
             public Metadata metadata() {
-                return (new Metadata()).put("file_name", fileContent.getName());
+                return (new Metadata()).put("file_name", fileContent.getName())
+                                        .put("material_id", fileContent.getMatId());
             }
         };
         Document document = DocumentLoader.load(documentSource, new ApacheTikaDocumentParser());

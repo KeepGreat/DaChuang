@@ -21,7 +21,6 @@ import java.util.List;
 
 @Service
 @Slf4j
-@EnableScheduling
 public class VideoChunkServiceImpl implements VideoChunkService {
 
     @Autowired

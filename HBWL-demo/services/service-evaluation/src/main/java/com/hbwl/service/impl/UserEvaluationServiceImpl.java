@@ -34,6 +34,10 @@ public class UserEvaluationServiceImpl implements UserEvaluationService {
         QueryWrapper<UserScore> wrapper = new QueryWrapper<>();
         wrapper.eq("user_id", userId);
         UserScore userScore = userScoreMapper.selectOne(wrapper);
+        //如果数据库中没有该用户记录则直接跳过
+        if (userScore == null) {
+            return null;
+        }
         UserEvaluation evaluation = userEvaluationUtil.parseUserEvaluation(userScore.getEachScore());
 
         evaluation.setAccuracyRateScore(evaluateAccuracyRateScore(json, evaluation.getAccuracyRateScore()));
@@ -59,11 +63,15 @@ public class UserEvaluationServiceImpl implements UserEvaluationService {
         QueryWrapper<UserScore> wrapper = new QueryWrapper<>();
         wrapper.eq("user_id", userId);
         UserScore userScore = userScoreMapper.selectOne(wrapper);
+        //如果数据库中没有该用户记录则直接跳过
+        if (userScore == null) {
+            return null;
+        }
         //对json评分数据进行解析
         UserEvaluation evaluation = userEvaluationUtil.parseUserEvaluation(userScore.getEachScore());
         //修改ai依赖评分
         evaluation.setAiDependenceScore(evaluateAiDependenceScore(callCount, evaluation.getAiDependenceScore()));
-        //将UserEvaluation转化为josn格式
+        //将UserEvaluation转化为json格式
         String newUserEvaluation = userEvaluationUtil.generationUserEvaluation(evaluation);
         Float totalScore = userEvaluationUtil.getTotalScore(evaluation);
         userScore.setEachScore(newUserEvaluation);
@@ -84,6 +92,10 @@ public class UserEvaluationServiceImpl implements UserEvaluationService {
         QueryWrapper<UserScore> wrapper = new QueryWrapper<>();
         wrapper.eq("user_id", userId);
         UserScore userScore = userScoreMapper.selectOne(wrapper);
+        //如果数据库中没有该用户记录则直接跳过
+        if (userScore == null) {
+            return null;
+        }
         //对json评分数据进行解析
         UserEvaluation evaluation = userEvaluationUtil.parseUserEvaluation(userScore.getEachScore());
 
@@ -141,5 +153,4 @@ public class UserEvaluationServiceImpl implements UserEvaluationService {
     private Float evaluateExpressionScore(Float expressionScore , Float previousScore) {
         return (expressionScore + previousScore) / 2;
     }
-
 }

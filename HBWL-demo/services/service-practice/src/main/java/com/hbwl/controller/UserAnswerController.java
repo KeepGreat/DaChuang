@@ -61,12 +61,14 @@ public class UserAnswerController {
     public Result getUserAnswers(@RequestParam(required = false) Integer id,
                                  @RequestParam(required = false) String userId,
                                  @RequestParam(required = false) Integer questionId,
+                                 @RequestParam(required = false) Integer practiceId,
                                  @RequestParam(required = false) Integer questionType,
                                  @RequestParam(required = false) Integer score){
         UserAnswer userAnswer = new UserAnswer();
         userAnswer.setId(id);
         userAnswer.setUserId(userId);
         userAnswer.setQuestionId(questionId);
+        userAnswer.setPracticeId(practiceId);
         userAnswer.setQuestionType(questionType);
         userAnswer.setScore(score);
         List<UserAnswer> list = userAnswerService.getUserAnswers(userAnswer);
@@ -79,12 +81,14 @@ public class UserAnswerController {
                                      @RequestParam(required = false) Integer id,
                                      @RequestParam(required = false) String userId,
                                      @RequestParam(required = false) Integer questionId,
+                                     @RequestParam(required = false) Integer practiceId,
                                      @RequestParam(required = false) Integer questionType,
                                      @RequestParam(required = false) Integer score){
         UserAnswer userAnswer = new UserAnswer();
         userAnswer.setId(id);
         userAnswer.setUserId(userId);
         userAnswer.setQuestionId(questionId);
+        userAnswer.setPracticeId(practiceId);
         userAnswer.setQuestionType(questionType);
         userAnswer.setScore(score);
         Page<UserAnswer> page = userAnswerService.getUserAnswersPage(pageNo, pageSize, userAnswer);

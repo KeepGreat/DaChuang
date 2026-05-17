@@ -67,6 +67,8 @@ video:
 #Agent调用频率控制
 agent:
   max-call-per-hour: 100
+  prompt:
+    upload-dir: ./uploads/prompts/
 
 #关闭日志打印
 logging:

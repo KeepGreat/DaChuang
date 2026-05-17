@@ -1,7 +1,6 @@
-package com.hbwl.ai.config;
+package com.hbwl.ai.utils;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.hbwl.mapper.AgentChatMemoryMapper;
 import com.hbwl.pojo.ai.AgentChatMemory;
 import dev.langchain4j.data.message.ChatMessage;

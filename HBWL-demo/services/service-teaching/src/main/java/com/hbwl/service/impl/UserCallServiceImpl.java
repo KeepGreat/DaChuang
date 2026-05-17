@@ -49,6 +49,7 @@ public class UserCallServiceImpl implements UserCallService {
             String countKey = buildCountKey(userId, currentHour);
             String dataKey = buildDataKey(userId, currentHour);
 
+            // 以下操作建议使用lua脚本
             // 使用INCR命令递增计数器（原子操作）
             Long count = stringRedisTemplate.opsForValue().increment(countKey);
 
@@ -209,18 +210,18 @@ public class UserCallServiceImpl implements UserCallService {
                                     map.put("userId", userId);
                                     map.put("hourTimestamp", hourTimestamp);
                                     map.put("callCount", callCount);
+//                                    log.info("定时任务向评估模块发送数据：userId={}. callCount={}", userId, callCount);
                                     evaluationFeignClient.evaluateBaseOnAITeaching(map);
 
                                     // 从Redis删除key
                                     stringRedisTemplate.delete(key);
-
-                                    processedCount++;
-                                    log.debug("处理过期数据: key={}, count={}", key, callCount);
                                 }
                             }
                         }
                     } catch (Exception e) {
                         log.error("处理key失败: {}", key, e);
+                    } finally {
+                        processedCount++;
                     }
                 }
 
