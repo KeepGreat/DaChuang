@@ -357,5 +357,5 @@ flowchart LR
 
 ## 六、相关文档
 
-- [后端详细设计报告](HBWL-demo/report/report.md)
-- [前端详细设计报告](frontend/report.md)
+- [后端详细设计报告](HBWL-demo/README.md)
+- [前端详细设计报告](frontend/demo-01/README.md)
