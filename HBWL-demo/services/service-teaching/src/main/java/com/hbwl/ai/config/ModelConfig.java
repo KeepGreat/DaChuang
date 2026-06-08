@@ -40,22 +40,22 @@ public class ModelConfig {
     private static final String SEARCH_ENGINE_NAME = "YOUR_SEARCH_ENGINE_NAME";
 
     @Bean
-    public ChatModel chatModel(){
+    public ChatModel chatModel(CustomChatModelListener customChatModelListener){
         return OpenAiChatModel.builder()
                 .apiKey(teachingProperties.getApiKey())
                 .baseUrl(teachingProperties.getBaseURL())
                 .modelName(teachingProperties.getModelName())
-                .listeners(List.of(new CustomChatModelListener()))
+                .listeners(List.of(customChatModelListener))
                 .build();
     }
 
     @Bean
-    public StreamingChatModel streamingChatModel(){
+    public StreamingChatModel streamingChatModel(CustomChatModelListener customChatModelListener){
         return OpenAiStreamingChatModel.builder()
                 .apiKey(teachingProperties.getApiKey())
                 .baseUrl(teachingProperties.getStreamBaseURL())
                 .modelName(teachingProperties.getStreamModelName())
-                .listeners(List.of(new CustomChatModelListener()))
+                .listeners(List.of(customChatModelListener))
                 .build();
     }
 
@@ -101,15 +101,15 @@ public class ModelConfig {
     }
 
     //用于给AI提供联网搜索工具
-    @Bean
-    public WebSearchTool webSearchTool(){
-        return WebSearchTool.from(
-                SearchApiWebSearchEngine.builder()
-                        .apiKey(SEARCH_ENGINE_API_KEY)
-                        .engine(SEARCH_ENGINE_NAME)
-                        .build()
-        );
-    }
+   @Bean
+   public WebSearchTool webSearchTool(){
+       return WebSearchTool.from(
+               SearchApiWebSearchEngine.builder()
+                       .apiKey(SEARCH_ENGINE_API_KEY)
+                       .engine(SEARCH_ENGINE_NAME)
+                       .build()
+       );
+   }
 
     //智能助教
     @Bean
@@ -118,8 +118,7 @@ public class ModelConfig {
                                              EmbeddingStoreContentRetriever embeddingStoreContentRetriever,
                                              AITeacherChatMemoryStore aiTeacherChatMemoryStore,
                                              PromptBaseTemplateLoader promptBaseTemplateLoader,
-                                             RuntimePromptManager runtimePromptManager,
-                                             WebSearchTool webSearchTool){
+                                             RuntimePromptManager runtimePromptManager){
         ChatMemoryProvider chatMemoryProvider = memory -> MessageWindowChatMemory.builder()
                 .id(memory)
                 .maxMessages(10)

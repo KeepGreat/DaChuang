@@ -3,6 +3,8 @@ package com.hbwl.ai.service.impl;
 import com.hbwl.ai.AITeacherService;
 import com.hbwl.ai.service.SmartTeacherService;
 import com.hbwl.codesandbox.pojo.CodeSandboxInput;
+import com.hbwl.monitor.MonitorContext;
+import com.hbwl.monitor.MonitorContextHolder;
 import com.hbwl.service.UserCallService;
 import com.hbwl.teaching.pojo.TeachingInput;
 import dev.langchain4j.invocation.InvocationParameters;
@@ -45,6 +47,13 @@ public class SmartTeacherServiceImpl implements SmartTeacherService {
         //记录用户调用
         callCount = userCallService.recordUserCall(userId);
         log.info("用户ID: {} ; 小时内调用次数: {}", userId, callCount);
+        //生成监控上下文
+        MonitorContext monitorContext = MonitorContext.builder()
+                .userId(userId)
+                .appId("smart-teacher-teach")
+                .build();
+        MonitorContextHolder.setContext(monitorContext);
+
         Flux<String> result;
         InvocationParameters parameters = InvocationParameters.from(Map.of("materialId", teachingInput.getRelativeMaterialIds()));
         if (codeSandboxInput.getInput() == null || codeSandboxInput.getInput().isBlank()){
@@ -57,7 +66,10 @@ public class SmartTeacherServiceImpl implements SmartTeacherService {
             result = aiTeacherService.teach(teachingInput.getQuestion(), codeSandboxInput.getCode(),
                     codeSandboxInput.getCodeLanguage(), codeSandboxInput.getInput(), userId, parameters);
         }
-        return result;
+        return result.doFinally(
+                //清空监控上下文，避免内存泄漏
+                signalType -> MonitorContextHolder.clearContext()
+        );
     }
 
     @Override
@@ -74,7 +86,17 @@ public class SmartTeacherServiceImpl implements SmartTeacherService {
         //记录用户调用
         callCount = userCallService.recordUserCall(userId);
         log.info("用户ID: {} ; 小时内调用次数: {}", userId, callCount);
+        //生成监控上下文
+        MonitorContext monitorContext = MonitorContext.builder()
+                .userId(userId)
+                .appId("smart-teacher-teach")
+                .build();
+        MonitorContextHolder.setContext(monitorContext);
         InvocationParameters parameters = InvocationParameters.from(Map.of("materialId", teachingInput.getRelativeMaterialIds()));
-        return aiTeacherService.answerQuestion(teachingInput.getQuestion(), userId, parameters);
+        return aiTeacherService.answerQuestion(teachingInput.getQuestion(), userId, parameters)
+                .doFinally(
+                        //清空监控上下文，避免内存泄漏
+                        signalType -> MonitorContextHolder.clearContext()
+                );
     }
 }

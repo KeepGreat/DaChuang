@@ -231,6 +231,11 @@ public class UserCallServiceImpl implements UserCallService {
             }
         } catch (Exception e) {
             log.error("批量处理过期数据失败", e);
+        } finally {
+            //删除一周前的userCallRecord记录
+            log.info("开始删除一周前的UserCallRecord记录...");
+            deleteUserCallRecord(null, null, LocalDateTime.now().minusWeeks(1), null);
+            log.info("删除完成");
         }
     }
 
